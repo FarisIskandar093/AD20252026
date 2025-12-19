@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<head>
+    <title>TTMS Admin Dashboard & Visualization</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"> 
+    <link rel="stylesheet" href="style.css"> 
+</head>
+<body>
+    <div class="w3-sidebar w3-bar-block w3-card w3-animate-left" style="display:none" id="sideNav">
+        <button onclick="document.getElementById('sideNav').style.display='none'" 
+                class="w3-bar-item w3-button w3-large w3-right-align w3-text-red">
+            Close &times;
+        </button>
+        
+        <!-- Side Navs -->
+        <a @click.prevent="currentView = 'dashboard'; document.getElementById('sideNav').style.display='none'" 
+            class="w3-bar-item w3-button"><i class="fas fa-tachometer-alt"></i> Dashboard </a>
+        
+        <a @click.prevent="currentView = 'timetable_filter'; document.getElementById('sideNav').style.display='none'" 
+            class="w3-bar-item w3-button"><i class="fas fa-search"></i> Courses List </a>
+            
+        <a @click.prevent="currentView = 'master_data'; document.getElementById('sideNav').style.display='none'" 
+            class="w3-bar-item w3-button"><i class="fas fa-database"></i> Sessions </a>
+            
+        <a @click.prevent="currentView = 'profile'; document.getElementById('sideNav').style.display='none'" 
+            class="w3-bar-item w3-button"><i class="fas fa-graduation-cap"></i> Profile </a>
+
+        <a @click.prevent="viewStudentList(); document.getElementById('sideNav').style.display='none'" 
+            class="w3-bar-item w3-button"><i class="fas fa-users"></i> Students </a>
+       
+        <a @click.prevent="currentView='lecturer_list'; document.getElementById('sideNav').style.display='none'"
+          class="w3-bar-item w3-button"><i class="fas fa-chalkboard-teacher"></i> Lecturer List 
+</a>
+
+
+        <a @click.prevent="logout" class="w3-bar-item w3-button w3-text-red w3-margin-top">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
+    </div>
+    <div id="main-app" class="main-container">
+
+    <div class="w3-card w3-white w3-margin-bottom">
+        <div class="app-header w3-bar">
+            <span class="w3-bar-item w3-large w3-text-blue"><i class="fas fa-chart-line"></i> TTMS Admin Console</span>
+
+            <!-- Full window navigations -->
+            <div class="w3-right w3-hide-small">
+                <a @click.prevent="currentView = 'dashboard'" 
+                    :class="['w3-bar-item', 'nav-link', { 'active-view': currentView === 'dashboard' }]">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+                <a @click.prevent="currentView = 'timetable_filter'" 
+                    :class="['w3-bar-item', 'nav-link', { 'active-view': currentView === 'timetable_filter' }]">
+                    <i class="fas fa-search"></i> Courses List
+                </a>
+                <a @click.prevent="currentView = 'master_data'" 
+                    :class="['w3-bar-item', 'nav-link', { 'active-view': currentView === 'master_data' }]">
+                    <i class="fas fa-database"></i> Sessions 
+                </a>
+                <a @click.prevent="currentView = 'profile'" 
+                    :class="['w3-bar-item', 'nav-link', { 'active-view': currentView === 'profile' }]">
+                    <i class="fas fa-graduation-cap"></i> Profile 
+                </a>
+                <a @click.prevent="viewStudentList()" 
+                    :class="['w3-bar-item', 'nav-link', { 'active-view': currentView === 'student_list' }]">
+                    <i class="fas fa-users"></i> Students 
+                </a>
+                <a @click.prevent="currentView='lecturer_list'"
+                    :class="['w3-bar-item', 'nav-link', { 'active-view': currentView === 'lecturer_list' }]">
+                    <i class="fas fa-chalkboard-teacher"></i> Lecturers 
+                </a>
+
+                <a @click.prevent="logout" class="w3-bar-item nav-link w3-text-red">
+                    <i class="fas fa-sign-out-alt"></i> Logout 
+                </a>
+            </div>
+            <a href="javascript:void(0)" class="w3-bar-item w3-button w3-right w3-hide-large w3-hide-medium" onclick="document.getElementById('sideNav').style.display='block'">
+                <i class="fa fa-bars"></i>
+            </a>
+        </div>
+        
+        <div class="user-info-bar">
+            Welcome, {{ userName }}! Your role: <b class="w3-tag w3-blue w3-round">{{ userRole }}</b>
+        </div>
+    </div>
+
+    <div class="w3-card w3-white content-card w3-animate-opacity">
+
+        <div v-if="currentView === 'dashboard'">
+            <h3 class="w3-text-blue"><i class="fas fa-chart-pie"></i> Analytics Dashboard</h3>
+            
+            <div class="w3-row-padding">
+                <div class="w3-half w3-margin-bottom">
+                    <div class="w3-white w3-card w3-padding">
+                        <h4>Venue Utilization (UC3 Proof)</h4>
+                        <p class="w3-small w3-text-grey">Visualization for Scheduled vs. Available Venue Hours.</p>
+                        <div id="chart_div" style="width: 100%; height: 350px;"></div>
+                    </div>
+                </div>
+                <div class="w3-half w3-margin-bottom">
+                    <div class="w3-white w3-card w3-padding">
+                        <h4>Timetable Clash Heatmap (UC6 Placeholder)</h4>
+                        <div style="height: 350px; border: 2px dashed #a0c4ff; background-color: #f7faff; padding: 20px; text-align: center; display: flex; align-items: center; justify-content: center; border-radius: 8px;">
+                            <p class="w3-text-blue">
+                                <i class="fas fa-exclamation-triangle w3-xxlarge w3-margin-bottom"></i><br>
+                                **Heatmap Area:** Data will be computed by the Analytics Controller (Iteration 3) to show clash intensity.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div v-else-if="currentView === 'timetable_filter'">
+            <h3 class="w3-text-blue"><i class="fas fa-book-reader"></i> Course Timetable Lookup 
+                <span class="w3-tag w3-teal w3-round">
+                    {{ currentSesi }}-{{ currentSemester }}
+                </span>
+            </h3>
+            <div class="w3-panel w3-padding w3-round-large w3-margin-bottom filter-panel">
+                <label class="w3-text-secondary">Filter Course List (Code or Name):</label>
+                <input class="w3-input w3-border w3-white" type="text" 
+                    v-model="filterTerm" 
+                    placeholder="Start typing a course code or name to filter this session's courses...">
+            </div>
+            
+            <div v-if="loadingTimetable" class="w3-center w3-padding-32 w3-text-blue">
+                <i class="fa fa-spinner fa-spin-fast w3-xlarge"></i> Loading Timetable Data for {{ currentSesi }}-{{ currentSemester }}...
+            </div>
+            
+            <table class="w3-table-all w3-hoverable" v-else>
+                <thead>
+                    <tr class="w3-blue"><th>Course Name</th><th>Code</th><th>Sections</th><th>Lecturer Count</th></tr>
+                </thead>
+                <tbody>
+                    <tr v-for="entry in courseListFiltered" 
+                        :key="entry.kod_subjek"
+                        @click="viewSections(entry)"
+                        style="cursor: pointer;"
+                        class="w3-hover-light-blue">
+                        <td>{{ entry.nama_subjek }}</td>
+                        <td>{{ entry.kod_subjek }}</td>
+                        <td>{{ entry.bil_seksyen }}</td>
+                        <td>{{ entry.bil_pensyarah }}</td>
+                    </tr>
+                    <tr v-if="courseListFiltered.length === 0 && !loadingTimetable">
+                        <td colspan="4" class="w3-center w3-text-red w3-padding-large">
+                            <i class="fas fa-times-circle"></i> No courses match your filter or no data was returned for {{ currentSesi }}-{{ currentSemester }}.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div v-else-if="currentView === 'master_data'">
+            <h3 class="w3-text-blue"><i class="fas fa-calendar-alt"></i> Master Data View: Session/Semester List</h3>
+            <p class="w3-text-grey">Click a row below to view the full course list for that session (UC5/UC4 integration).</p>
+
+            <div v-if="loadingSession" class="w3-center w3-padding-32 w3-text-blue">
+                <i class="fa fa-spinner fa-spin-fast w3-xlarge"></i> Loading Master Data...
+            </div>
+            <table class="w3-table-all w3-hoverable" v-else>
+                <thead>
+                    <tr class="w3-blue"><th>Session-Semester</th><th>Start Date</th><th>End Date</th></tr>
+                </thead>
+                <tbody>
+                    <tr v-for="x in sessemList" :key="x.sesi + x.semester" 
+                        @click="viewCourses(x.sesi, x.semester)" 
+                        style="cursor: pointer;" 
+                        class="w3-hover-light-blue"> 
+                        <td>{{x.sesi}}-{{x.semester}}</td>
+                        <td>{{x.tarikh_mula}}</td>
+                        <td>{{x.tarikh_tamat}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div v-else-if="currentView === 'section_list'">
+                <h3 class="w3-text-blue"><i class="fas fa-list-alt"></i> Sections for: {{ selectedCourse.kod_subjek }}</h3>
+                <button @click="backToCourseList" class="w3-button w3-dark-grey w3-round w3-margin-bottom">
+                    <i class="fas fa-chevron-left"></i> Back to Courses
+                </button>
+
+                <div v-if="loadingSections || loadingLecturers" class="w3-center w3-padding-32 w3-text-blue">
+                    <i class="fa fa-spinner fa-spin-fast w3-xlarge"></i> Loading Section Details...
+                </div>
+
+                <table class="w3-table-all w3-hoverable" v-else>
+                    <thead>
+                        <tr class="w3-blue">
+                            <th>Section No.</th>
+                            <th>Students</th>
+                            <th>Lecturer(s)</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="section in sectionListWithLecturers" 
+                            :key="section.seksyen" 
+                            @click="viewStudentsInSection(section, selectedCourse)" 
+                            style="cursor: pointer;" 
+                            class="w3-hover-light-blue"> 
+                        
+                            <td>{{ section.seksyen }}</td>
+                            <td>{{ section.bil_pelajar }}</td>
+                            <td>{{ section.lecturerNames }}</td>
+                            <td><button class="w3-button w3-blue w3-small w3-round">View Students</button></td>
+                        </tr>
+                        <tr v-if="sectionListWithLecturers.length === 0 && !loadingSections">
+                            <td colspan="4" class="w3-center w3-text-red w3-padding-large">
+                                <i class="fas fa-exclamation-triangle"></i> No sections found for this course.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        <div v-else-if="currentView === 'student_courses'">
+                    <h3 class="w3-text-blue"><i class="fas fa-graduation-cap"></i> My Registered Courses</h3>
+                    <p class="w3-text-grey">
+                        Displaying courses registered by: <b>{{ userName }}</b> (Matric No: {{ userMatric }})
+                    </p>
+
+                    <div v-if="loadingStudentCourses" class="w3-center w3-padding-32 w3-text-blue">
+                        <i class="fa fa-spinner fa-spin-fast w3-xlarge"></i> Loading My Registered Course List...
+                    </div>
+                    
+                    <table class="w3-table-all w3-hoverable" v-else>
+                        <thead>
+                            <tr class="w3-blue">
+                                <th>Course Code</th>
+                                <th>Course Name</th>
+                                <th>Section</th>
+                                <th>Semester</th>
+                                <th>Session (Sesi)</th>
+                                <th>Year of Study</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="course in studentCourseList"
+                                :key="course.kod_subjek + '-' + course.seksyen"
+                                @click="viewStudentsInSection(course)" 
+                                style="cursor: pointer;" 
+                                class="w3-hover-light-blue">
+                                    <td>{{ course.kod_subjek }}</td>
+                                    <td>{{ course.nama_subjek }}</td>
+                                    <td>{{ course.seksyen }}</td>
+                                    <td>{{ course.semester }}</td> 
+                                    <td>{{ course.sesi }}</td>
+                                    <td>{{ course.tahun_kursus }}</td>
+                            </tr>
+                            <tr v-if="studentCourseList.length === 0 && !loadingStudentCourses">
+                                <td colspan="6" class="w3-center w3-text-red w3-padding-large">
+                                    <i class="fas fa-exclamation-triangle"></i> No courses found registered under your matric number.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+        <div v-else-if="currentView === 'student_list'">
+            <h3 class="w3-text-blue"><i class="fas fa-users"></i> General Student List 
+                <span class="w3-tag w3-teal w3-round">
+                    {{ currentSesi }}-{{ currentSemester }}
+                </span>
+            </h3>
+            <p class="w3-text-grey">
+                Showing {{ studentList.length }} students, offset at {{ studentListOffset }}. (Requires `session_id` authentication).
+            </p>
+
+            <div class="w3-bar w3-margin-bottom">
+                <button @click="fetchStudentList('prev')" :disabled="!hasPreviousPage() || loadingStudentList" 
+                        class="w3-button w3-small w3-teal w3-round-large">
+                    <i class="fas fa-arrow-left"></i> Previous {{ studentListLimit }}
+                </button>
+                <button @click="fetchStudentList('next')" :disabled="!hasNextPage() || loadingStudentList" 
+                        class="w3-button w3-small w3-teal w3-round-large w3-right">
+                    Next {{ studentListLimit }} <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+
+            <div v-if="loadingStudentList" class="w3-center w3-padding-32 w3-text-blue">
+                <i class="fa fa-spinner fa-spin-fast w3-xlarge"></i> Loading Student List...
+            </div>
+            
+            <table class="w3-table-all w3-hoverable" v-else>
+                <thead>
+                    <tr class="w3-blue">
+                        <th>Matric No.</th>
+                        <th>Full Name</th>
+                        <th>Year</th>
+                        <th>Course Code</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="student in studentList" :key="student.no_matrik">
+                        <td>{{ student.no_matrik }}</td>
+                        <td>{{ student.nama_pelajar }}</td>
+                        <td>{{ student.tahun_kursus }}</td>
+                        <td>{{ student.kod_kursus }}</td>
+                        <td>{{ student.status_pelajar }}</td>
+                    </tr>
+                    <tr v-if="studentList.length === 0 && !loadingStudentList">
+                        <td colspan="5" class="w3-center w3-text-red w3-padding-large">
+                            <i class="fas fa-exclamation-triangle"></i> No student records found for the current session/offset.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    <div v-else-if="currentView === 'lecturer_list'">
+        <h3 class="w3-text-blue">
+            <i class="fas fa-chalkboard-teacher"></i> Lecturer List
+        </h3>
+
+        <input class="w3-input w3-border w3-margin-bottom"
+            v-model="lecturerSearch"
+            placeholder="Search lecturer name..." />
+
+        <div v-if="loadingLecturers" class="w3-center w3-padding">
+            <i class="fa fa-spinner fa-spin"></i> Loading lecturers...
+        </div>
+
+        <table class="w3-table-all w3-hoverable" v-else>
+            <thead>
+                <tr class="w3-blue">
+                    <th>Name</th>
+                    <th>Staff ID</th>
+                    <th>Department</th>
+                    <th>Courses</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="l in lecturerListFiltered"
+                    :key="l.nama"
+                    style="cursor: pointer;"
+                    class="w3-hover-light-blue">
+                    <td>{{ l.nama }}</td>
+                    <td>{{ l.id_staf }}</td>
+                    <td>{{ l.jabatan }}</td>
+                    <td>{{ l.subjek }}</td>
+                </tr>
+                <tr v-if="lecturerListFiltered.length === 0">
+                    <td colspan="4" class="w3-center w3-text-red">
+                        No lecturers found
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+        
+    </div>
+    
+    <div v-if="isStudentModalOpen" class="w3-modal" style="display:block;">
+        <div class="w3-modal-content w3-card-4 w3-animate-top" style="max-width: 800px;">
+            <header class="w3-container w3-blue"> 
+                <span @click="closeStudentModal" 
+                      class="w3-button w3-display-topright">&times;</span>
+                <h2>Students in Section {{ selectedSection ? selectedSection.seksyen : '...' }}</h2>
+                <p v-if="selectedCourse">Course: {{ selectedCourse.kod_subjek }} - {{ selectedCourse.nama_subjek }}</p>
+            </header>
+
+            <div class="w3-container w3-padding">
+                <div v-if="loadingSectionStudents" class="w3-center w3-padding-32 w3-text-blue">
+                    <i class="fa fa-spinner fa-spin-fast w3-xlarge"></i> Loading Students...
+                </div>
+
+                <table class="w3-table-all w3-hoverable w3-small" v-else>
+                    <thead>
+                        <tr class="w3-blue-grey">
+                            <th>Matric No.</th>
+                            <th>Name</th>
+                            <th>Programme</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="student in sectionStudentList" :key="student.no_matrik">
+                            <td>{{ student.no_matrik }}</td>
+                            <td>{{ student.nama_pelajar }}</td>
+                            <td>{{ student.kod_kursus }}</td>
+                            <td>{{ student.status_pelajar }}</td>
+                        </tr>
+                        <tr v-if="sectionStudentList.length === 0 && !loadingSectionStudents">
+                            <td colspan="4" class="w3-center w3-text-red w3-padding-large">
+                                <i class="fas fa-exclamation-triangle"></i> No students found in this section.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <footer class="w3-container w3-padding w3-light-grey">
+                <button @click="closeStudentModal" class="w3-button w3-red w3-round">Close</button>
+            </footer>
+        </div>
+    </div>
+    
+</div>
+</body>
+</html>
+
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script src="https://www.gstatic.com/charts/loader.js"></script> 
+<script src="utils.js"></script>
+<script src="app.js"></script>
+<script>
+    console.log(localStorage.getItem("TTMSFC_userSession"));
+</script>

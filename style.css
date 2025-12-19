@@ -1,0 +1,93 @@
+/* --- General Modern Styles --- */
+:root {
+    --primary-color: #1a73e8; /* Standard Blue */
+    --secondary-color: #3c4043;
+    --background-color: #e9eff4; /* Lighter, subtle background */
+    --card-color: #ffffff;
+}
+
+body { 
+    background-color: var(--background-color); 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.main-container { 
+    max-width: 1300px; /* Slightly wider dashboard */
+    margin: auto; 
+    padding: 20px; 
+}
+
+/* --- Navigation & Header --- */
+.app-header {
+    /* Use w3-bar and w3-bar-item classes in HTML for spacing */
+    padding: 10px 20px;
+    background-color: var(--card-color);
+    border-bottom: 3px solid var(--primary-color);
+    border-radius: 8px 8px 0 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.user-info-bar {
+    background-color: #f7f9fa; /* Subtle light background for user strip */
+    padding: 12px 20px;
+    font-size: 0.9em;
+    color: var(--secondary-color);
+    border-bottom: 1px solid #eee;
+}
+
+.nav-link { 
+    padding: 10px 18px; 
+    transition: background-color 0.2s, color 0.2s;
+    cursor: pointer;
+    border-radius: 4px;
+    font-weight: 500;
+}
+.nav-link:hover { 
+    background-color: #f0f0f0; 
+    color: var(--primary-color) !important;
+}
+.active-view { 
+    background-color: var(--primary-color) !important; 
+    color: white !important; 
+}
+
+/* --- Content Area --- */
+.content-card {
+    border-radius: 0 0 8px 8px; /* Match header corners */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    padding: 30px;
+}
+
+h3 {
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+/* Table Styling (RE-INTRODUCED) */
+.w3-table-all thead tr {
+    background-color: var(--primary-color) !important;
+    color: white;
+}
+/* Subtle stripe for better readability */
+.w3-table-all tbody tr:nth-child(even) {
+    background-color: #f8f8f8; 
+}
+/* Ensure hover effect is clear on tables */
+.w3-hover-light-blue:hover {
+    background-color: #9ce0ff !important; /* Lighter blue on hover */
+    box-shadow: 0 0 5px rgba(26, 115, 232, 0.2); 
+}
+
+/* Filter Panel */
+.filter-panel {
+    background-color: #f0f8ff; /* Light blue tint for filter section */
+    border-left: 5px solid var(--primary-color);
+}
+
+/* Loading Spinner */
+.fa-spin-fast {
+    animation: fa-spin 0.5s infinite linear;
+}
