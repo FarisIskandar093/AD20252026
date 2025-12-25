@@ -1,93 +1,272 @@
-/* --- General Modern Styles --- */
+/* ===================================
+   TTMS Enterprise Dashboard Styles
+   Professional Redesign
+   =================================== */
+
 :root {
-    --primary-color: #1a73e8; /* Standard Blue */
-    --secondary-color: #3c4043;
-    --background-color: #e9eff4; /* Lighter, subtle background */
-    --card-color: #ffffff;
+    /* Refined Professional Color Palette */
+    --brand-primary: #2563eb;       /* Modern Action Blue */
+    --brand-secondary: #475569;    /* Cool Slate Grey */
+    --bg-main: #f8fafc;            /* Clean light grey/blue tint */
+    --bg-card: #ffffff;
+    --text-main: #1e293b;          /* High contrast slate */
+    --text-muted: #64748b;         /* Secondary slate */
+    
+    /* Semantic Colors */
+    --color-success: #10b981;
+    --color-danger: #ef4444;
+    --color-warning: #f59e0b;
+    
+    /* UI Elements */
+    --border-subtle: #e2e8f0;
+    --nav-hover: #f1f5f9;
+    --shadow-subtle: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --radius-md: 8px;
+    --radius-lg: 12px;
 }
 
+/* --- Base Typography --- */
 body { 
-    background-color: var(--background-color); 
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-main);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: var(--text-main);
+    -webkit-font-smoothing: antialiased;
+    letter-spacing: -0.01em;
 }
 
+/* --- Container Layout --- */
 .main-container { 
-    max-width: 1300px; /* Slightly wider dashboard */
-    margin: auto; 
-    padding: 20px; 
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 24px;
 }
 
-/* --- Navigation & Header --- */
+/* --- Professional Header --- */
 .app-header {
-    /* Use w3-bar and w3-bar-item classes in HTML for spacing */
-    padding: 10px 20px;
-    background-color: var(--card-color);
-    border-bottom: 3px solid var(--primary-color);
-    border-radius: 8px 8px 0 0;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    background-color: var(--bg-card);
+    padding: 0 24px;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
 }
 
+.app-header .w3-bar-item {
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+/* Welcome Bar */
 .user-info-bar {
-    background-color: #f7f9fa; /* Subtle light background for user strip */
-    padding: 12px 20px;
-    font-size: 0.9em;
-    color: var(--secondary-color);
-    border-bottom: 1px solid #eee;
+    background-color: #ffffff;
+    padding: 12px 24px;
+    border-bottom: 1px solid var(--border-subtle);
+    font-size: 0.875rem;
+    color: var(--text-muted);
 }
 
+/* --- Navigation --- */
 .nav-link { 
-    padding: 10px 18px; 
-    transition: background-color 0.2s, color 0.2s;
-    cursor: pointer;
-    border-radius: 4px;
-    font-weight: 500;
-}
-.nav-link:hover { 
-    background-color: #f0f0f0; 
-    color: var(--primary-color) !important;
-}
-.active-view { 
-    background-color: var(--primary-color) !important; 
-    color: white !important; 
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    padding: 8px 16px;
+    border-radius: var(--radius-md);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* --- Content Area --- */
+.nav-link:hover { 
+    background-color: var(--nav-hover);
+    color: var(--brand-primary) !important;
+}
+
+.nav-link.active-view { 
+    background-color: #eff6ff !important;
+    color: var(--brand-primary) !important;
+}
+
+/* --- Content Cards --- */
 .content-card {
-    border-radius: 0 0 8px 8px; /* Match header corners */
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-    padding: 30px;
+    background-color: var(--bg-card);
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    border: 1px solid var(--border-subtle);
+    border-top: none;
+    padding: 32px;
+    box-shadow: var(--shadow-card);
 }
 
 h3 {
-    border-bottom: 2px solid #eee;
-    padding-bottom: 10px;
-    margin-bottom: 20px;
-    color: var(--primary-color);
-    font-weight: 600;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    border: none;
 }
 
-/* Table Styling (RE-INTRODUCED) */
+h3 i {
+    color: var(--brand-primary);
+    margin-right: 12px;
+}
+
+/* --- Modern Professional Tables --- */
+.w3-table-all {
+    border: 1px solid var(--border-subtle) !important;
+    border-radius: var(--radius-md) !important;
+    overflow: hidden;
+    background-color: white;
+}
+
 .w3-table-all thead tr {
-    background-color: var(--primary-color) !important;
-    color: white;
+    background-color: #f8fafc !important; /* Light slate header instead of solid blue */
+    color: var(--text-muted) !important;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
 }
-/* Subtle stripe for better readability */
-.w3-table-all tbody tr:nth-child(even) {
-    background-color: #f8f8f8; 
+
+.w3-table-all th {
+    padding: 16px !important;
+    border-bottom: 1px solid var(--border-subtle) !important;
 }
-/* Ensure hover effect is clear on tables */
+
+.w3-table-all td {
+    padding: 16px !important;
+    font-size: 0.875rem;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--border-subtle) !important;
+}
+
+.w3-table-all tr:last-child td {
+    border-bottom: none !important;
+}
+
 .w3-hover-light-blue:hover {
-    background-color: #9ce0ff !important; /* Lighter blue on hover */
-    box-shadow: 0 0 5px rgba(26, 115, 232, 0.2); 
+    background-color: #f1f5f9 !important;
+    transform: none; /* Removed scale for a more stable feel */
 }
 
-/* Filter Panel */
+/* --- Specialized Filter Panel --- */
 .filter-panel {
-    background-color: #f0f8ff; /* Light blue tint for filter section */
-    border-left: 5px solid var(--primary-color);
+    background-color: #ffffff;
+    border: 1px solid var(--border-subtle);
+    border-left: 4px solid var(--brand-primary);
+    padding: 24px;
+    border-radius: var(--radius-md);
 }
 
-/* Loading Spinner */
-.fa-spin-fast {
-    animation: fa-spin 0.5s infinite linear;
+/* --- Modern Inputs --- */
+.w3-input, .w3-select {
+    height: 42px;
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    font-size: 0.875rem;
+    padding: 0 12px;
+    background-color: #ffffff;
+}
+
+.w3-input:focus {
+    border-color: var(--brand-primary);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+}
+
+/* --- Buttons --- */
+.w3-button {
+    font-size: 0.875rem;
+    font-weight: 600;
+    padding: 10px 20px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.w3-blue {
+    background-color: var(--brand-primary) !important;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.w3-blue:hover {
+    background-color: #1d4ed8 !important;
+    transform: translateY(-1px);
+}
+
+/* --- Status Tags --- */
+.w3-tag {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 9999px; /* Pill shape */
+}
+
+.w3-tag.w3-blue {
+    background-color: #dbeafe !important;
+    color: #1e40af !important;
+}
+
+/* --- Sidebar Mobile --- */
+.w3-sidebar {
+    border-right: 1px solid var(--border-subtle);
+}
+
+.w3-sidebar .w3-bar-item {
+    font-size: 0.9rem;
+    margin: 4px 8px;
+    border-radius: 6px;
+    border: none !important;
+}
+
+/* --- Loading States --- */
+.fa-spinner {
+    color: var(--brand-primary);
+}
+
+.loading-text {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+/* --- Dashboard Stats (Optional Extension) --- */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+    margin-bottom: 32px;
+}
+
+.stat-card {
+    background: white;
+    padding: 24px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-subtle);
+}
+
+.stat-val {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: var(--brand-primary);
+}
+
+/* --- Scrollbar Refinement --- */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
 }
