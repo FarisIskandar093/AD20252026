@@ -109,7 +109,7 @@
 
                 // *** DEFAULT VIEW: LOAD ANNOUNCEMENT.HTML ***
                 // This executes ONLY after all context variables are set.
-                $('#mainContent').load('Announcement.html');
+                $('#mainContent').load('StudentPart/Announcement.html');
                 
             })
             .catch(error => {
@@ -164,7 +164,6 @@
 
     // Default Page
     $('#announcement-dashboard').click(() => handleMenuClick('announcement-dashboard', 'StudentPart/Announcement.html'));
-
     // TIMETABLE Category
     $('#my-timetable').click(() => handleMenuClick('my-timetable', 'StudentPart/Timetable/MyTimetable.html'));
     $('#room-availability').click(() => handleMenuClick('room-availability', 'StudentPart/RoomAvailability.html'));
