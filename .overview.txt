@@ -1,0 +1,52 @@
+# From Deepseek, just to check for files guidance
+✅ - initially available
+❌ - initially not available OR initially empty
+💛 - moved
+
+/project-root/
+├── Login.html ✅
+├── Main.html (Student) ✅
+├── MainLecturer.html (Lecturer) ✅
+├── Admin.html (NEW) ❌
+├── Styles/ ✅
+|   ├── ...
+|
+├── Logo/ ✅
+|   ├── ...
+|
+├── js/ (NEW - shared utilities) ❌
+|   ├── Authenticate.js 💛
+|   ├── ...
+|
+├── StudentPart/
+│   ├── Announcement.html ✅
+│   ├── CourseList.html ✅
+│   ├── SessionList.html ✅
+│   ├── RoomAvailability.html ❌ (empty)
+|   ├── FinalExamSchedule.html ❌ (empty)
+|   |
+│   ├── Timetable/
+│   │   └── MyTimetable.html ✅
+│   ├── TimetableClash/
+│   │   └── TimetableClashAnalyzer.html ❌ (empty)
+│   └── RoomUsage/
+│       └── RoomUsage.html ✅
+|
+├── LecturerPart/
+│   ├── Announcement.html ❌
+|   ├── RoomAvailability.html ❌
+|   |
+│   ├── Course/
+│   │   └── LectureCourseList.html ✅
+│   ├── Timetable/
+│   │   └── Lecturetimetable.html ❌ (empty)
+│   ├── TimetableClash/
+│   │   └── timetableClashLect.html ❌ (empty)
+│   └── RoomUsage/
+│       └── RoomUsage.html ✅
+|
+└── AdminPart/ (NEW) ❌
+    ├── MasterDataView.html ❌
+    ├── SystemAnalytics.html ❌
+    ├── UserManagement.html ❌
+    └── RoomManagement.html ❌
