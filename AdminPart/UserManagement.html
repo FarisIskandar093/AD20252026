@@ -1,0 +1,167 @@
+<div class="w3-container">
+    <h2 class="w3-text-purple">👥 User Management</h2>
+    <p class="w3-text-grey">Manage user accounts and permissions</p>
+    
+    <div class="w3-row">
+        <div class="w3-col m8">
+            <div class="w3-card w3-padding">
+                <h4>User List</h4>
+                <div class="w3-bar w3-light-grey w3-round w3-margin-bottom">
+                    <button class="w3-bar-item w3-button w3-purple" onclick="filterUsers('all')">All</button>
+                    <button class="w3-bar-item w3-button" onclick="filterUsers('student')">Students</button>
+                    <button class="w3-bar-item w3-button" onclick="filterUsers('lecturer')">Lecturers</button>
+                    <button class="w3-bar-item w3-button" onclick="filterUsers('admin')">Admins</button>
+                </div>
+                
+                <div id="userListLoading" class="w3-center w3-padding">
+                    <div class="loading-spinner"></div>
+                    <p>Loading user data...</p>
+                </div>
+                
+                <div id="userListContainer" style="display:none;">
+                    <table class="w3-table-all w3-hoverable">
+                        <thead>
+                            <tr class="w3-light-grey">
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userListBody">
+                            <!-- User data will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="w3-col m4">
+            <div class="w3-card w3-padding">
+                <h4>🔧 User Actions</h4>
+                
+                <div class="w3-panel w3-blue w3-round">
+                    <p><strong>Note:</strong> User data is read from TTMS. 
+                    Direct modifications should be made in the main TTMS system.</p>
+                </div>
+                
+                <div class="w3-margin-top">
+                    <h5>Admin Access Control</h5>
+                    <div class="w3-panel w3-light-grey w3-round">
+                        <p>Grant admin access to lecturers:</p>
+                        <input type="text" id="lecturerId" class="w3-input w3-border" placeholder="Lecturer ID (e.g., 12085)">
+                        <button class="w3-button w3-purple w3-block w3-margin-top" onclick="grantAdminAccess()">
+                            Grant Admin Access
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="w3-margin-top">
+                    <h5>📊 User Statistics</h5>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <h2 class="stat-value" id="totalUsers">0</h2>
+                            <p class="stat-label">Total Users</p>
+                        </div>
+                        <div class="stat-item">
+                            <h2 class="stat-value" id="activeUsersCount">0</h2>
+                            <p class="stat-label">Active Today</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    loadUserData();
+    
+    function loadUserData() {
+        const adminSessionID = window.parent.adminSessionID;
+        const currentSesi = window.parent.currentSesi;
+        const currentSemester = window.parent.currentSemester;
+        
+        if (!adminSessionID) {
+            $("#userListLoading").html('<div class="w3-panel w3-red">Admin session required</div>');
+            return;
+        }
+        
+        // Fetch students
+        fetch(`http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pelajar&session_id=${adminSessionID}&sesi=${currentSesi}&semester=${currentSemester}&limit=20&offset=0`)
+            .then(res => res.json())
+            .then(students => {
+                if (Array.isArray(students)) {
+                    displayUsers(students, 'student');
+                    $("#totalUsers").text(students.length + "+");
+                }
+                $("#userListLoading").hide();
+                $("#userListContainer").show();
+            })
+            .catch(err => {
+                console.error("Error loading users:", err);
+                $("#userListLoading").html('<div class="w3-panel w3-red">Error loading user data</div>');
+            });
+    }
+    
+    function displayUsers(users, role) {
+        $("#userListBody").empty();
+        
+        users.forEach((user, index) => {
+            const row = `
+                <tr>
+                    <td>${user.no_matrik || user.no_pekerja || 'N/A'}</td>
+                    <td><strong>${user.nama || 'N/A'}</strong></td>
+                    <td>
+                        <span class="w3-tag ${role === 'student' ? 'w3-blue' : 'w3-green'}">
+                            ${role === 'student' ? 'Student' : 'Lecturer'}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="w3-tag w3-light-grey">Active</span>
+                    </td>
+                    <td>
+                        <button class="w3-button w3-small w3-border" onclick="viewUserDetails('${user.no_matrik || user.no_pekerja}')">
+                            View
+                        </button>
+                    </td>
+                </tr>
+            `;
+            $("#userListBody").append(row);
+        });
+    }
+    
+    window.filterUsers = function(role) {
+        // Update active button
+        $('.w3-bar-item.w3-button').removeClass('w3-purple');
+        $(`.w3-bar-item.w3-button:contains('${capitalizeFirst(role)}')`).addClass('w3-purple');
+        
+        // In a real system, you would filter the data
+        // For now, we'll just show a message
+        alert(`Filtering by ${role} - Note: Full filtering would require additional API calls`);
+    };
+    
+    window.grantAdminAccess = function() {
+        const lecturerId = $("#lecturerId").val();
+        if (!lecturerId) {
+            alert("Please enter a lecturer ID");
+            return;
+        }
+        
+        if (confirm(`Grant admin access to lecturer ${lecturerId}?`)) {
+            alert(`Admin access granted to ${lecturerId}\n\nNote: In a real system, this would update backend permissions.`);
+            $("#lecturerId").val('');
+        }
+    };
+    
+    window.viewUserDetails = function(userId) {
+        alert(`View details for user: ${userId}\n\nThis would open a detailed user profile in a real system.`);
+    };
+    
+    function capitalizeFirst(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+});
+</script>

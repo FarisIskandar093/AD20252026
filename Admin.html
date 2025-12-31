@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>TTMS - Admin Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="Styles/dashboardStyle.css">
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+</head>
+<body class="w3-container">
+
+<div class="utm-header w3-deep-purple">
+    <div class="header-title">
+        👑 Admin Dashboard - TTMS Visualization System
+    </div>
+    <div class="user-links">
+        <span class="w3-large w3-hide-small">Admin: <span id="adminName">Loading...</span> |</span>
+        <a href="#" id="logout" class="w3-button w3-red w3-round">Logout</a>
+    </div>
+</div>
+
+<nav class="w3-sidebar w3-bar-block w3-light-grey w3-card" style="width:220px; margin-top:60px;">
+    <h3 class="w3-bar-item w3-purple w3-center">Admin Menu</h3>
+    
+    <a href="#" class="w3-bar-item w3-button w3-hover-light-grey w3-purple" id="admin-dashboard">
+        📊 Dashboard Overview
+    </a>
+    
+    <h5 class="w3-bar-item w3-text-gray"><b>DATA MANAGEMENT</b></h5>
+    <a href="#" class="w3-bar-item w3-button w3-hover-light-grey" id="master-data">
+        📁 Master Data View
+    </a>
+    <a href="#" class="w3-bar-item w3-button w3-hover-light-grey" id="user-management">
+        👥 User Management
+    </a>
+    <a href="#" class="w3-bar-item w3-button w3-hover-light-grey" id="room-management">
+        🏫 Room Management
+    </a>
+    
+    <h5 class="w3-bar-item w3-text-gray"><b>SYSTEM ANALYTICS</b></h5>
+    <a href="#" class="w3-bar-item w3-button w3-hover-light-grey" id="system-analytics">
+        📈 System Analytics
+    </a>
+    <a href="#" class="w3-bar-item w3-button w3-hover-light-grey" id="audit-logs">
+        📋 Audit Logs
+    </a>
+    
+    <h5 class="w3-bar-item w3-text-gray"><b>QUICK ACTIONS</b></h5>
+    <a href="#" class="w3-bar-item w3-button w3-hover-light-grey" id="notifications">
+        🔔 System Notifications
+    </a>
+    <a href="#" class="w3-bar-item w3-button w3-hover-light-grey" id="export-data">
+        📤 Export Data
+    </a>
+</nav>
+
+<div id="mainContent" style="margin-left:220px; margin-top:60px; padding:20px;">
+    <div class="w3-container">
+        <div class="loading-state" id="loadingState">
+            <div class="loading-spinner"></div>
+            <p class="loading-text">Loading admin dashboard...</p>
+        </div>
+        
+        <div id="adminContent" style="display:none;">
+            <!-- Content will be loaded here via AJAX -->
+        </div>
+    </div>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script>
+$(document).ready(function() {
+    // Constants
+    const BASE_URL = "http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=";
+    
+    // Get session data
+    const userSession = JSON.parse(localStorage.getItem("TTMSFC_userSession"));
+    
+    // Check if user is admin
+    if (!userSession || !userSession.is_admin) {
+        alert("❌ Admin access required. Redirecting to admin login...");
+        window.location.href = "AdminLogin.html";
+        return;
+    }
+    
+    // Display admin info
+    $("#adminName").text(userSession.full_name || "Administrator");
+    
+    // Set current session/semester (same as other dashboards)
+    window.currentSesi = userSession.sesi || "2025/2026";
+    window.currentSemester = userSession.semester || 1;
+    window.adminSessionID = userSession.admin_session_id;
+    
+    // Initialize dashboard
+    initAdminDashboard();
+    
+    function initAdminDashboard() {
+        // Load default content (Dashboard Overview)
+        loadAdminContent('AdminPart/DashboardOverview.html');
+        
+        // Update active menu
+        $("#admin-dashboard").addClass('w3-purple');
+        
+        // Hide loading, show content
+        setTimeout(() => {
+            $("#loadingState").hide();
+            $("#adminContent").show();
+        }, 1000);
+    }
+    
+    // Function to load admin content
+    function loadAdminContent(url) {
+        $("#adminContent").load(url, function(response, status, xhr) {
+            if (status === "error") {
+                $("#adminContent").html(`
+                    <div class="w3-panel w3-red">
+                        <h3>Error</h3>
+                        <p>Unable to load ${url}. Please check if the file exists.</p>
+                    </div>
+                `);
+            }
+        });
+    }
+    
+    // Menu click handlers
+    function handleMenuClick(menuId, url) {
+        // Update active menu
+        $('.w3-bar-item.w3-purple').removeClass('w3-purple');
+        $(`#${menuId}`).addClass('w3-purple');
+        
+        // Load content
+        loadAdminContent(url);
+    }
+    
+    // Menu bindings
+    $("#admin-dashboard").click(() => handleMenuClick('admin-dashboard', 'AdminPart/DashboardOverview.html'));
+    $("#master-data").click(() => handleMenuClick('master-data', 'AdminPart/MasterDataView.html'));
+    $("#user-management").click(() => handleMenuClick('user-management', 'AdminPart/UserManagement.html'));
+    $("#room-management").click(() => handleMenuClick('room-management', 'AdminPart/RoomManagement.html'));
+    $("#system-analytics").click(() => handleMenuClick('system-analytics', 'AdminPart/SystemAnalytics.html'));
+    $("#audit-logs").click(() => handleMenuClick('audit-logs', 'AdminPart/AuditLogs.html'));
+    $("#notifications").click(() => handleMenuClick('notifications', 'AdminPart/Notifications.html'));
+    $("#export-data").click(() => handleMenuClick('export-data', 'AdminPart/ExportData.html'));
+    
+    // Logout handler
+    $("#logout").click(function() {
+        localStorage.removeItem("TTMSFC_userSession");
+        localStorage.removeItem("TTMSFC_lecturerSession");
+        alert("Logged out successfully");
+        window.location.href = "Login.html";
+    });
+});
+</script>
+</body>
+</html>

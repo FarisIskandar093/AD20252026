@@ -1,0 +1,213 @@
+<div class="dashboard-container">
+    <div class="welcome-header w3-purple">
+        <h2>👑 Admin Dashboard Overview</h2>
+        <p class="welcome-subtitle" id="adminDateTime">Loading system time...</p>
+    </div>
+
+    <!-- System Stats Grid -->
+    <div class="dashboard-grid">
+        <div class="dashboard-card">
+            <div class="card-header">
+                <span class="card-icon">👥</span>
+                <h3 class="card-title">User Statistics</h3>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <h2 class="stat-value" id="totalStudents">0</h2>
+                    <p class="stat-label">Total Students</p>
+                </div>
+                <div class="stat-item">
+                    <h2 class="stat-value" id="totalLecturers">0</h2>
+                    <p class="stat-label">Lecturers</p>
+                </div>
+                <div class="stat-item">
+                    <h2 class="stat-value" id="activeUsers">0</h2>
+                    <p class="stat-label">Active Today</p>
+                </div>
+                <div class="stat-item">
+                    <h2 class="stat-value" id="adminCount">1</h2>
+                    <p class="stat-label">Admins</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="card-header">
+                <span class="card-icon">📚</span>
+                <h3 class="card-title">Course Statistics</h3>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <h2 class="stat-value" id="totalCourses">0</h2>
+                    <p class="stat-label">Courses</p>
+                </div>
+                <div class="stat-item">
+                    <h2 class="stat-value" id="totalSections">0</h2>
+                    <p class="stat-label">Sections</p>
+                </div>
+                <div class="stat-item">
+                    <h2 class="stat-value" id="roomUtilization">0%</h2>
+                    <p class="stat-label">Room Usage</p>
+                </div>
+                <div class="stat-item">
+                    <h2 class="stat-value" id="clashCount">0</h2>
+                    <p class="stat-label">Clashes</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="card-header">
+                <span class="card-icon">🏫</span>
+                <h3 class="card-title">Room Statistics</h3>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <h2 class="stat-value" id="totalRooms">0</h2>
+                    <p class="stat-label">Total Rooms</p>
+                </div>
+                <div class="stat-item">
+                    <h2 class="stat-value" id="occupiedRooms">0</h2>
+                    <p class="stat-label">Occupied</p>
+                </div>
+                <div class="stat-item">
+                    <h2 class="stat-value" id="availableRooms">0</h2>
+                    <p class="stat-label">Available</p>
+                </div>
+                <div class="stat-item">
+                    <h2 class="stat-value" id="maintenance">0</h2>
+                    <p class="stat-label">Maintenance</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="classes-section">
+        <div class="section-header">
+            <h3 class="section-title">
+                <span>⚡</span>
+                <span>Quick Actions</span>
+            </h3>
+        </div>
+        
+        <div class="w3-row-padding w3-margin-top">
+            <div class="w3-col m3">
+                <div class="w3-card w3-hover-shadow w3-padding w3-center" style="cursor:pointer;" onclick="loadAdminContent('AdminPart/MasterDataView.html')">
+                    <div class="w3-xxlarge">📁</div>
+                    <h4>View Master Data</h4>
+                    <p>Raw TTMS data</p>
+                </div>
+            </div>
+            <div class="w3-col m3">
+                <div class="w3-card w3-hover-shadow w3-padding w3-center" style="cursor:pointer;" onclick="loadAdminContent('AdminPart/UserManagement.html')">
+                    <div class="w3-xxlarge">👥</div>
+                    <h4>Manage Users</h4>
+                    <p>User accounts</p>
+                </div>
+            </div>
+            <div class="w3-col m3">
+                <div class="w3-card w3-hover-shadow w3-padding w3-center" style="cursor:pointer;" onclick="loadAdminContent('AdminPart/RoomManagement.html')">
+                    <div class="w3-xxlarge">🏫</div>
+                    <h4>Room Management</h4>
+                    <p>Allocate rooms</p>
+                </div>
+            </div>
+            <div class="w3-col m3">
+                <div class="w3-card w3-hover-shadow w3-padding w3-center" style="cursor:pointer;" onclick="loadAdminContent('AdminPart/SystemAnalytics.html')">
+                    <div class="w3-xxlarge">📈</div>
+                    <h4>System Analytics</h4>
+                    <p>Performance data</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="classes-section w3-margin-top">
+        <div class="section-header">
+            <h3 class="section-title">
+                <span>📋</span>
+                <span>Recent System Activity</span>
+            </h3>
+        </div>
+        
+        <div id="recentActivity">
+            <div class="class-card">
+                <div class="w3-row">
+                    <div class="w3-col m2 w3-center">
+                        <span class="w3-tag w3-blue">INFO</span>
+                    </div>
+                    <div class="w3-col m8">
+                        <strong>System initialized</strong><br>
+                        <small>Admin dashboard loaded successfully</small>
+                    </div>
+                    <div class="w3-col m2 w3-right-align">
+                        <small>Just now</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    // Update date/time
+    function updateDateTime() {
+        const now = new Date();
+        $("#adminDateTime").text(now.toLocaleString());
+    }
+    updateDateTime();
+    setInterval(updateDateTime, 60000);
+    
+    // Load admin stats
+    loadAdminStats();
+    
+    function loadAdminStats() {
+        const adminSessionID = window.parent.adminSessionID;
+        const currentSesi = window.parent.currentSesi;
+        const currentSemester = window.parent.currentSemester;
+        
+        if (!adminSessionID) {
+            console.warn("Admin session ID not available");
+            return;
+        }
+        
+        // Fetch student count
+        fetch(`http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pelajar&session_id=${adminSessionID}&sesi=${currentSesi}&semester=${currentSemester}&limit=5&offset=0`)
+            .then(res => res.json())
+            .then(students => {
+                if (Array.isArray(students)) {
+                    $("#totalStudents").text(students.length + "+");
+                }
+            })
+            .catch(err => console.error("Error fetching students:", err));
+            
+        // Fetch course count
+        fetch(`http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=subjek&sesi=${currentSesi}&semester=${currentSemester}`)
+            .then(res => res.json())
+            .then(courses => {
+                if (Array.isArray(courses)) {
+                    $("#totalCourses").text(courses.length);
+                    
+                    // Calculate total sections
+                    const totalSections = courses.reduce((sum, course) => sum + (parseInt(course.bil_seksyen) || 0), 0);
+                    $("#totalSections").text(totalSections);
+                }
+            })
+            .catch(err => console.error("Error fetching courses:", err));
+            
+        // Fetch room count
+        fetch(`http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=ruang&kod_fakulti=fsksm`)
+            .then(res => res.json())
+            .then(rooms => {
+                if (Array.isArray(rooms)) {
+                    $("#totalRooms").text(rooms.length);
+                    $("#availableRooms").text(Math.floor(rooms.length * 0.7)); // Placeholder
+                }
+            })
+            .catch(err => console.error("Error fetching rooms:", err));
+    }
+});
+</script>

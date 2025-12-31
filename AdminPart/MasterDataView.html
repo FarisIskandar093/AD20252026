@@ -1,0 +1,202 @@
+<div class="w3-container">
+    <h2 class="w3-text-purple">📁 Master Data View</h2>
+    <p class="w3-text-grey">View and audit raw TTMS data (Read-Only)</p>
+    
+    <div class="w3-bar w3-light-grey w3-round w3-margin-bottom">
+        <button class="w3-bar-item w3-button w3-purple" onclick="loadEntity('pelajar')">Students</button>
+        <button class="w3-bar-item w3-button" onclick="loadEntity('pensyarah')">Lecturers</button>
+        <button class="w3-bar-item w3-button" onclick="loadEntity('subjek')">Courses</button>
+        <button class="w3-bar-item w3-button" onclick="loadEntity('ruang')">Rooms</button>
+        <button class="w3-bar-item w3-button" onclick="loadEntity('sesisemester')">Sessions</button>
+    </div>
+    
+    <div class="w3-row w3-margin-bottom">
+        <div class="w3-col m6">
+            <label>Session:</label>
+            <input type="text" id="dataSesi" class="w3-input w3-border" value="2025/2026">
+        </div>
+        <div class="w3-col m6">
+            <label>Semester:</label>
+            <select id="dataSemester" class="w3-input w3-border">
+                <option value="1">1</option>
+                <option value="2">2</option>
+            </select>
+        </div>
+    </div>
+    
+    <div class="w3-row w3-margin-bottom">
+        <div class="w3-col m4">
+            <label>Limit:</label>
+            <input type="number" id="dataLimit" class="w3-input w3-border" value="50" min="1" max="500">
+        </div>
+        <div class="w3-col m4">
+            <label>Offset:</label>
+            <input type="number" id="dataOffset" class="w3-input w3-border" value="0" min="0">
+        </div>
+        <div class="w3-col m4">
+            <br>
+            <button class="w3-button w3-purple w3-block" onclick="loadCurrentEntity()">
+                🔄 Load Data
+            </button>
+        </div>
+    </div>
+    
+    <div id="dataLoading" class="w3-center w3-padding-24" style="display:none;">
+        <div class="loading-spinner"></div>
+        <p>Loading master data...</p>
+    </div>
+    
+    <div id="dataTableContainer" class="w3-margin-top" style="display:none;">
+        <div class="w3-panel w3-light-blue w3-round">
+            <p>📊 Showing <span id="dataCount">0</span> records of <span id="entityName">data</span></p>
+        </div>
+        
+        <div style="overflow-x:auto;">
+            <table class="w3-table-all w3-hoverable w3-card-4" id="masterDataTable">
+                <thead id="dataTableHeader"></thead>
+                <tbody id="dataTableBody"></tbody>
+            </table>
+        </div>
+        
+        <div class="w3-center w3-padding">
+            <button class="w3-button w3-border" onclick="prevPage()" id="prevBtn">← Previous</button>
+            <span class="w3-padding">Page <span id="currentPage">1</span></span>
+            <button class="w3-button w3-border" onclick="nextPage()" id="nextBtn">Next →</button>
+        </div>
+    </div>
+    
+    <div id="dataError" class="w3-panel w3-red w3-round" style="display:none;">
+        <p>❌ Error loading data. Please check console for details.</p>
+    </div>
+</div>
+
+<script>
+let currentEntity = 'pelajar';
+let currentPage = 1;
+const pageSize = 50;
+
+function loadEntity(entity) {
+    currentEntity = entity;
+    currentPage = 1;
+    
+    // Update active button
+    $('.w3-bar-item.w3-button').removeClass('w3-purple');
+    $(`.w3-bar-item.w3-button:contains('${capitalizeFirst(entity)}')`).addClass('w3-purple');
+    
+    loadCurrentEntity();
+}
+
+function capitalizeFirst(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+function loadCurrentEntity() {
+    const sesi = $("#dataSesi").val();
+    const semester = $("#dataSemester").val();
+    const limit = $("#dataLimit").val();
+    const offset = (currentPage - 1) * pageSize;
+    
+    $("#dataLoading").show();
+    $("#dataTableContainer").hide();
+    $("#dataError").hide();
+    
+    const adminSessionID = window.parent.adminSessionID;
+    let url = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=${currentEntity}`;
+    
+    // Add parameters based on entity
+    if (currentEntity === 'pelajar' || currentEntity === 'pensyarah') {
+        url += `&session_id=${adminSessionID}&sesi=${sesi}&semester=${semester}`;
+    } else if (currentEntity === 'subjek') {
+        url += `&sesi=${sesi}&semester=${semester}`;
+    }
+    
+    url += `&limit=${limit}&offset=${offset}`;
+    
+    fetch(url)
+        .then(res => res.json())
+        .then(data => {
+            $("#dataLoading").hide();
+            
+            if (!Array.isArray(data) || data.length === 0) {
+                $("#dataTableContainer").html('<div class="w3-panel w3-yellow">No data found for the selected entity/filters.</div>');
+                $("#dataTableContainer").show();
+                return;
+            }
+            
+            displayDataTable(data);
+            $("#dataTableContainer").show();
+        })
+        .catch(err => {
+            console.error("Error loading master data:", err);
+            $("#dataLoading").hide();
+            $("#dataError").show();
+        });
+}
+
+function displayDataTable(data) {
+    $("#entityName").text(currentEntity);
+    $("#dataCount").text(data.length);
+    $("#currentPage").text(currentPage);
+    
+    // Clear table
+    $("#dataTableHeader").empty();
+    $("#dataTableBody").empty();
+    
+    // Create headers from first object keys
+    if (data.length > 0) {
+        const headers = Object.keys(data[0]);
+        
+        let headerRow = '<tr class="w3-purple">';
+        headers.forEach(header => {
+            headerRow += `<th>${header.replace('_', ' ').toUpperCase()}</th>`;
+        });
+        headerRow += '</tr>';
+        $("#dataTableHeader").html(headerRow);
+        
+        // Create rows
+        data.forEach((row, index) => {
+            let tableRow = '<tr>';
+            headers.forEach(header => {
+                let cellValue = row[header];
+                
+                // Handle nested objects
+                if (typeof cellValue === 'object' && cellValue !== null) {
+                    cellValue = JSON.stringify(cellValue);
+                }
+                
+                // Truncate long values
+                if (String(cellValue).length > 50) {
+                    cellValue = String(cellValue).substring(0, 47) + '...';
+                }
+                
+                tableRow += `<td title="${row[header]}">${cellValue || '-'}</td>`;
+            });
+            tableRow += '</tr>';
+            $("#dataTableBody").append(tableRow);
+        });
+    }
+    
+    // Update pagination buttons
+    $("#prevBtn").prop('disabled', currentPage === 1);
+    $("#nextBtn").prop('disabled', data.length < pageSize);
+}
+
+function prevPage() {
+    if (currentPage > 1) {
+        currentPage--;
+        loadCurrentEntity();
+    }
+}
+
+function nextPage() {
+    currentPage++;
+    loadCurrentEntity();
+}
+
+// Load initial data
+$(document).ready(function() {
+    setTimeout(() => {
+        loadEntity('pelajar');
+    }, 500);
+});
+</script>

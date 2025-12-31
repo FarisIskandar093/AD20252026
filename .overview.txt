@@ -1,4 +1,6 @@
 # From Deepseek, just to check for files guidance
+# as of 31/12/2025
+
 ✅ - initially available
 ❌ - initially not available OR initially empty
 💛 - moved

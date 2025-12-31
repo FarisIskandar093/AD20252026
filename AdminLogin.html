@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Access - TTMS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="Styles/loginStyle.css">
+</head>
+<body>
+    <div class="welcome-text">TTMS - Admin Access</div>
+    
+    <div class="logo-container">
+        <img id="utm-logo" src="Logo/UTM-LOGO.png" alt="UTM Logo">
+    </div>
+
+    <div class="login-box">
+        <h3 class="w3-text-white w3-center">🔐 Lecturer to Admin Upgrade</h3>
+        
+        <div class="w3-panel w3-light-blue w3-round">
+            <p><strong>Note:</strong> Only lecturers can access admin features. 
+            You must first login as a lecturer, then upgrade to admin.</p>
+        </div>
+        
+        <div class="w3-margin-bottom">
+            <label class="w3-text-white">Lecturer Login:</label>
+            <input type="text" id="lecturerLogin" class="input-field" placeholder="e.g., 12085">
+        </div>
+        
+        <div class="w3-margin-bottom">
+            <label class="w3-text-white">Lecturer Password:</label>
+            <input type="password" id="lecturerPassword" class="input-field" placeholder="Enter password">
+        </div>
+        
+        <button class="login-button" id="btnLoginAsLecturer">Login as Lecturer</button>
+        
+        <div class="w3-margin-top w3-center">
+            <button class="w3-button w3-blue w3-round" id="btnUpgradeToAdmin" style="display:none;">
+                🔼 Upgrade to Admin Access
+            </button>
+        </div>
+        
+        <div class="w3-margin-top w3-center">
+            <a href="Login.html" class="w3-text-light-blue">← Back to Student Login</a>
+        </div>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            const BASE_URL = "http://web.fc.utm.my/ttms/web_man_webservice_json.cgi";
+            
+            // 1. Login as Lecturer
+            $("#btnLoginAsLecturer").click(function() {
+                const loginId = $("#lecturerLogin").val();
+                const password = $("#lecturerPassword").val();
+                
+                if (!loginId || !password) {
+                    alert("Please enter lecturer credentials");
+                    return;
+                }
+                
+                const authUrl = `${BASE_URL}?entity=authentication&login=${loginId}&password=${password}`;
+                
+                fetch(authUrl)
+                    .then(res => res.json())
+                    .then(jsonInst => {
+                        if (!Array.isArray(jsonInst) || jsonInst.length === 0 || !jsonInst[0].session_id) {
+                            throw new Error("Invalid lecturer credentials");
+                        }
+                        
+                        const userData = jsonInst[0];
+                        const description = userData.description || "";
+                        
+                        // Check if user is a lecturer
+                        if (!description.includes("Pensyarah")) {
+                            alert("❌ Only lecturers can access admin features.");
+                            return;
+                        }
+                        
+                        // Store lecturer session
+                        localStorage.setItem("TTMSFC_lecturerSession", JSON.stringify(userData));
+                        alert("✅ Lecturer login successful! You can now upgrade to admin.");
+                        
+                        // Show upgrade button
+                        $("#btnUpgradeToAdmin").show();
+                    })
+                    .catch(err => {
+                        alert("Invalid lecturer credentials or connection error!");
+                        console.error("Login Error:", err);
+                    });
+            });
+            
+            // 2. Upgrade to Admin
+            $("#btnUpgradeToAdmin").click(function() {
+                const lecturerSession = JSON.parse(localStorage.getItem("TTMSFC_lecturerSession"));
+                
+                if (!lecturerSession || !lecturerSession.session_id) {
+                    alert("Please login as lecturer first");
+                    return;
+                }
+                
+                const adminUpgradeUrl = `http://web.fc.utm.my/ttms/auth-admin.php?session_id=${lecturerSession.session_id}`;
+                
+                fetch(adminUpgradeUrl)
+                    .then(res => res.json())
+                    .then(adminData => {
+                        if (!Array.isArray(adminData) || adminData.length === 0 || !adminData[0].session_id) {
+                            throw new Error("Admin upgrade failed");
+                        }
+                        
+                        const adminSession = adminData[0];
+                        
+                        // Combine lecturer and admin data
+                        const combinedData = {
+                            ...lecturerSession,
+                            admin_session_id: adminSession.session_id,
+                            admin_login_name: adminSession.login_name,
+                            admin_description: adminSession.description,
+                            is_admin: true
+                        };
+                        
+                        localStorage.setItem("TTMSFC_userSession", JSON.stringify(combinedData));
+                        alert("✅ Admin access granted! Redirecting to admin dashboard...");
+                        
+                        // Redirect to admin dashboard
+                        window.location.href = "Admin.html";
+                    })
+                    .catch(err => {
+                        alert("❌ Failed to upgrade to admin. Please try again.");
+                        console.error("Admin Upgrade Error:", err);
+                    });
+            });
+        });
+    </script>
+</body>
+</html>

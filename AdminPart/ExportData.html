@@ -1,0 +1,201 @@
+<div class="w3-container">
+    <h2 class="w3-text-purple">📤 Export Data</h2>
+    <p class="w3-text-grey">Export system data for reporting and backup</p>
+    
+    <div class="w3-row">
+        <div class="w3-col m8">
+            <div class="w3-card w3-padding">
+                <h4>Select Data to Export</h4>
+                
+                <div class="w3-row-padding">
+                    <div class="w3-col m6">
+                        <div class="w3-card w3-hover-shadow w3-padding w3-margin-bottom">
+                            <h5><input type="checkbox" id="exportStudents" checked> 👥 Student Data</h5>
+                            <p>Export student lists and registrations</p>
+                        </div>
+                    </div>
+                    
+                    <div class="w3-col m6">
+                        <div class="w3-card w3-hover-shadow w3-padding w3-margin-bottom">
+                            <h5><input type="checkbox" id="exportCourses" checked> 📚 Course Data</h5>
+                            <p>Export course lists and schedules</p>
+                        </div>
+                    </div>
+                    
+                    <div class="w3-col m6">
+                        <div class="w3-card w3-hover-shadow w3-padding w3-margin-bottom">
+                            <h5><input type="checkbox" id="exportRooms"> 🏫 Room Data</h5>
+                            <p>Export room allocations and usage</p>
+                        </div>
+                    </div>
+                    
+                    <div class="w3-col m6">
+                        <div class="w3-card w3-hover-shadow w3-padding w3-margin-bottom">
+                            <h5><input type="checkbox" id="exportTimetable" checked> 📅 Timetable Data</h5>
+                            <p>Export complete timetable</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="w3-margin-top">
+                    <h5>Export Format</h5>
+                    <div class="w3-bar w3-light-grey w3-round">
+                        <button class="w3-bar-item w3-button w3-purple" onclick="selectFormat('csv')">CSV</button>
+                        <button class="w3-bar-item w3-button" onclick="selectFormat('json')">JSON</button>
+                        <button class="w3-bar-item w3-button" onclick="selectFormat('excel')">Excel</button>
+                        <button class="w3-bar-item w3-button" onclick="selectFormat('pdf')">PDF</button>
+                    </div>
+                </div>
+                
+                <div class="w3-row w3-margin-top">
+                    <div class="w3-col m6">
+                        <label>Session/Semester:</label>
+                        <input type="text" id="exportSesi" class="w3-input w3-border" value="2025/2026">
+                    </div>
+                    <div class="w3-col m6">
+                        <label>Semester:</label>
+                        <select id="exportSemester" class="w3-input w3-border">
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="w3-center w3-padding-24">
+                    <button class="w3-button w3-purple w3-large w3-padding-large" onclick="generateExport()">
+                        🚀 Generate Export
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="w3-col m4">
+            <div class="w3-card w3-padding">
+                <h4>📋 Export History</h4>
+                
+                <div class="w3-panel w3-light-blue w3-round">
+                    <p><strong>Last Export:</strong> <span id="lastExport">Never</span></p>
+                    <p><strong>Total Exports:</strong> <span id="exportCount">0</span></p>
+                </div>
+                
+                <div id="exportHistory">
+                    <div class="w3-panel w3-border w3-round w3-small">
+                        <p><strong>No export history yet</strong></p>
+                        <p>Generate your first export to see history here</p>
+                    </div>
+                </div>
+                
+                <div class="w3-margin-top">
+                    <h5>💾 Backup Options</h5>
+                    <button class="w3-button w3-blue w3-block" onclick="createBackup()">
+                        Create System Backup
+                    </button>
+                    <button class="w3-button w3-green w3-block w3-margin-top" onclick="scheduleAutoExport()">
+                        Schedule Auto-Export
+                    </button>
+                </div>
+                
+                <div class="w3-margin-top">
+                    <h5>⚠️ Data Privacy</h5>
+                    <div class="w3-panel w3-yellow w3-round w3-small">
+                        <p>Exported data may contain sensitive information. Ensure proper handling and storage according to UTM policies.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentFormat = 'csv';
+
+function selectFormat(format) {
+    currentFormat = format;
+    
+    // Update UI
+    $('.w3-bar-item.w3-button').removeClass('w3-purple');
+    $(`.w3-bar-item.w3-button:contains('${format.toUpperCase()}')`).addClass('w3-purple');
+}
+
+function generateExport() {
+    // Check what to export
+    const exportStudents = $("#exportStudents").is(":checked");
+    const exportCourses = $("#exportCourses").is(":checked");
+    const exportRooms = $("#exportRooms").is(":checked");
+    const exportTimetable = $("#exportTimetable").is(":checked");
+    
+    const sesi = $("#exportSesi").val();
+    const semester = $("#exportSemester").val();
+    
+    if (!exportStudents && !exportCourses && !exportRooms && !exportTimetable) {
+        alert("Please select at least one data type to export");
+        return;
+    }
+    
+    // Show loading/progress
+    const exportTypes = [];
+    if (exportStudents) exportTypes.push("Students");
+    if (exportCourses) exportTypes.push("Courses");
+    if (exportRooms) exportTypes.push("Rooms");
+    if (exportTimetable) exportTypes.push("Timetable");
+    
+    const exportMessage = `Generating ${currentFormat.toUpperCase()} export with:\n\n• ${exportTypes.join("\n• ")}\n\nSession: ${sesi}-${semester}`;
+    
+    if (confirm(exportMessage)) {
+        // Simulate export process
+        simulateExportProgress();
+    }
+}
+
+function simulateExportProgress() {
+    let progress = 0;
+    const interval = setInterval(() => {
+        progress += 10;
+        
+        if (progress >= 100) {
+            clearInterval(interval);
+            
+            // Update history
+            const now = new Date();
+            $("#lastExport").text(now.toLocaleString());
+            
+            let exportCount = parseInt($("#exportCount").text()) || 0;
+            exportCount++;
+            $("#exportCount").text(exportCount);
+            
+            // Add to history
+            const historyEntry = `
+                <div class="w3-panel w3-border w3-round w3-small w3-margin-bottom">
+                    <p><strong>${now.toLocaleDateString()} ${now.toLocaleTimeString()}</strong></p>
+                    <p>Format: ${currentFormat.toUpperCase()} | Session: ${$("#exportSesi").val()}-${$("#exportSemester").val()}</p>
+                    <p class="w3-text-green">✅ Export completed</p>
+                </div>
+            `;
+            
+            $("#exportHistory").prepend(historyEntry);
+            
+            // Offer download (simulated)
+            alert(`✅ Export completed!\n\nYour ${currentFormat.toUpperCase()} file is ready for download.\n\nIn a real system, the file would download automatically.`);
+        }
+    }, 200);
+}
+
+function createBackup() {
+    if (confirm("Create a complete system backup?\n\nThis may take several minutes.")) {
+        alert("Backup process started...\n\nIn a real system, this would create a database dump and file backup.");
+        
+        setTimeout(() => {
+            alert("✅ Backup completed successfully!\n\nBackup saved to: /backups/ttms_backup_" + new Date().toISOString().split('T')[0] + ".zip");
+        }, 2000);
+    }
+}
+
+function scheduleAutoExport() {
+    alert("Auto-Export Scheduling\n\nIn a real system, this would allow you to schedule regular exports (daily, weekly, monthly).");
+}
+
+$(document).ready(function() {
+    // Initialize
+    selectFormat('csv');
+});
+</script>

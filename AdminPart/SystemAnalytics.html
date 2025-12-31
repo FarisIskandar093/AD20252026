@@ -1,0 +1,175 @@
+<div class="w3-container">
+    <h2 class="w3-text-purple">📈 System Analytics</h2>
+    <p class="w3-text-grey">System performance and usage statistics</p>
+    
+    <div class="w3-row-padding w3-margin-bottom">
+        <div class="w3-col m4">
+            <div class="w3-card w3-padding w3-center">
+                <div class="w3-xxlarge w3-text-purple">📊</div>
+                <h4>Data Volume</h4>
+                <p>Total records in system</p>
+                <h2 id="dataVolume">0</h2>
+            </div>
+        </div>
+        <div class="w3-col m4">
+            <div class="w3-card w3-padding w3-center">
+                <div class="w3-xxlarge w3-text-blue">👥</div>
+                <h4>Active Users</h4>
+                <p>Last 24 hours</p>
+                <h2 id="activeUsers">0</h2>
+            </div>
+        </div>
+        <div class="w3-col m4">
+            <div class="w3-card w3-padding w3-center">
+                <div class="w3-xxlarge w3-text-green">🏫</div>
+                <h4>Room Utilization</h4>
+                <p>Average this week</p>
+                <h2 id="roomUtil">0%</h2>
+            </div>
+        </div>
+    </div>
+    
+    <div class="w3-row">
+        <div class="w3-col m8">
+            <div class="w3-card w3-padding">
+                <h4>📈 Usage Trends</h4>
+                <div id="usageChart" style="width:100%; height:400px;"></div>
+            </div>
+        </div>
+        
+        <div class="w3-col m4">
+            <div class="w3-card w3-padding">
+                <h4>🔔 System Health</h4>
+                
+                <div class="w3-panel w3-green w3-round">
+                    <h5>✅ System Status</h5>
+                    <p>All systems operational</p>
+                </div>
+                
+                <div class="w3-panel w3-blue w3-round">
+                    <h5>📅 Last Updated</h5>
+                    <p id="lastUpdated">Just now</p>
+                </div>
+                
+                <div class="w3-panel w3-yellow w3-round">
+                    <h5>⚠️ Pending Actions</h5>
+                    <p>0 pending approvals</p>
+                </div>
+                
+                <div class="w3-margin-top">
+                    <button class="w3-button w3-purple w3-block" onclick="refreshAnalytics()">
+                        🔄 Refresh Analytics
+                    </button>
+                </div>
+                
+                <div class="w3-margin-top">
+                    <button class="w3-button w3-blue w3-block" onclick="exportAnalytics()">
+                        📤 Export Report
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="w3-card w3-padding w3-margin-top">
+        <h4>📋 Recent System Events</h4>
+        <table class="w3-table-all w3-hoverable">
+            <thead>
+                <tr class="w3-light-grey">
+                    <th>Time</th>
+                    <th>Event</th>
+                    <th>User</th>
+                    <th>Details</th>
+                </tr>
+            </thead>
+            <tbody id="systemEvents">
+                <tr>
+                    <td>Just now</td>
+                    <td><span class="w3-tag w3-blue">INFO</span></td>
+                    <td>System</td>
+                    <td>Analytics dashboard loaded</td>
+                </tr>
+                <tr>
+                    <td>5 min ago</td>
+                    <td><span class="w3-tag w3-green">LOGIN</span></td>
+                    <td>Admin</td>
+                    <td>User logged into admin panel</td>
+                </tr>
+                <tr>
+                    <td>1 hour ago</td>
+                    <td><span class="w3-tag w3-blue">DATA</span></td>
+                    <td>System</td>
+                    <td>Daily data sync completed</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script src="https://www.gstatic.com/charts/loader.js"></script>
+<script>
+google.charts.load('current', {'packages':['line']});
+google.charts.setOnLoadCallback(drawCharts);
+
+function drawCharts() {
+    // Sample data for usage chart
+    var data = new google.visualization.DataTable();
+    data.addColumn('string', 'Day');
+    data.addColumn('number', 'User Logins');
+    data.addColumn('number', 'Data Requests');
+    data.addColumn('number', 'API Calls');
+    
+    data.addRows([
+        ['Mon', 120, 450, 850],
+        ['Tue', 135, 480, 920],
+        ['Wed', 150, 520, 980],
+        ['Thu', 145, 510, 950],
+        ['Fri', 130, 490, 900],
+        ['Sat', 80, 300, 600],
+        ['Sun', 60, 250, 500]
+    ]);
+    
+    var options = {
+        title: 'Weekly System Usage',
+        curveType: 'function',
+        legend: { position: 'bottom' },
+        colors: ['#9c27b0', '#2196f3', '#4caf50']
+    };
+    
+    var chart = new google.visualization.LineChart(document.getElementById('usageChart'));
+    chart.draw(data, options);
+    
+    // Update stats
+    updateAnalyticsStats();
+}
+
+function updateAnalyticsStats() {
+    // Simulate loading data
+    $("#dataVolume").text("15,240");
+    $("#activeUsers").text("42");
+    $("#roomUtil").text("68%");
+    $("#lastUpdated").text(new Date().toLocaleTimeString());
+}
+
+function refreshAnalytics() {
+    $("#dataVolume").text("...");
+    $("#activeUsers").text("...");
+    $("#roomUtil").text("...");
+    
+    setTimeout(() => {
+        updateAnalyticsStats();
+        drawCharts();
+        alert("Analytics refreshed successfully!");
+    }, 1000);
+}
+
+function exportAnalytics() {
+    const date = new Date().toISOString().split('T')[0];
+    alert(`Exporting analytics report for ${date}\n\nReport would be downloaded as CSV/PDF in a real system.`);
+}
+
+$(document).ready(function() {
+    // Load initial data
+    setTimeout(updateAnalyticsStats, 500);
+});
+</script>

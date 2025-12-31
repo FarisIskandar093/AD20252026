@@ -1,0 +1,272 @@
+<div class="w3-container">
+    <h2 class="w3-text-purple">🏫 Room Management</h2>
+    <p class="w3-text-grey">Manage room allocations and availability</p>
+    
+    <div class="w3-row">
+        <div class="w3-col m8">
+            <div class="w3-card w3-padding">
+                <h4>Room Allocation Schedule</h4>
+                
+                <div class="w3-row w3-margin-bottom">
+                    <div class="w3-col m6">
+                        <label>Room:</label>
+                        <select id="roomSelect" class="w3-input w3-border" onchange="loadRoomSchedule()">
+                            <option value="">Select a room...</option>
+                        </select>
+                    </div>
+                    <div class="w3-col m6">
+                        <label>Date:</label>
+                        <input type="date" id="roomDate" class="w3-input w3-border" value="${new Date().toISOString().split('T')[0]}">
+                    </div>
+                </div>
+                
+                <div id="roomScheduleLoading" class="w3-center w3-padding">
+                    <div class="loading-spinner"></div>
+                    <p>Loading room data...</p>
+                </div>
+                
+                <div id="roomScheduleContainer" style="display:none;">
+                    <table class="w3-table-all w3-hoverable">
+                        <thead>
+                            <tr class="w3-light-grey">
+                                <th>Time</th>
+                                <th>Course</th>
+                                <th>Lecturer</th>
+                                <th>Section</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="roomScheduleBody">
+                            <!-- Schedule will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div id="roomInfo" class="w3-panel w3-light-blue w3-round w3-margin-top" style="display:none;">
+                    <h5>Room Information</h5>
+                    <p><strong>Capacity:</strong> <span id="roomCapacity">0</span></p>
+                    <p><strong>Type:</strong> <span id="roomType">Unknown</span></p>
+                    <p><strong>Weekly Usage:</strong> <span id="roomUsage">0</span> hours</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="w3-col m4">
+            <div class="w3-card w3-padding">
+                <h4>🔧 Room Actions</h4>
+                
+                <div class="w3-panel w3-yellow w3-round">
+                    <p><strong>Note:</strong> Room allocations are managed by TTMS. 
+                    This panel provides oversight only.</p>
+                </div>
+                
+                <div class="w3-margin-top">
+                    <h5>Quick Room Search</h5>
+                    <input type="text" id="roomSearch" class="w3-input w3-border" placeholder="Search by room code or name">
+                    <button class="w3-button w3-purple w3-block w3-margin-top" onclick="searchRoom()">
+                        🔍 Search Room
+                    </button>
+                </div>
+                
+                <div class="w3-margin-top">
+                    <h5>Room Status</h5>
+                    <div class="w3-bar w3-margin-bottom">
+                        <div class="w3-bar-item">Available:</div>
+                        <div class="w3-bar-item w3-green">70%</div>
+                    </div>
+                    <div class="w3-bar w3-margin-bottom">
+                        <div class="w3-bar-item">Occupied:</div>
+                        <div class="w3-bar-item w3-blue">25%</div>
+                    </div>
+                    <div class="w3-bar">
+                        <div class="w3-bar-item">Maintenance:</div>
+                        <div class="w3-bar-item w3-red">5%</div>
+                    </div>
+                </div>
+                
+                <div class="w3-margin-top">
+                    <h5>Report Issues</h5>
+                    <textarea id="roomIssue" class="w3-input w3-border" placeholder="Describe room issue..." rows="3"></textarea>
+                    <button class="w3-button w3-red w3-block w3-margin-top" onclick="reportRoomIssue()">
+                        🚨 Report Issue
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    loadRoomList();
+    
+    function loadRoomList() {
+        fetch(`http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=ruang&kod_fakulti=fsksm`)
+            .then(res => res.json())
+            .then(rooms => {
+                if (Array.isArray(rooms)) {
+                    // Filter for N28/N28A rooms
+                    const filteredRooms = rooms.filter(room => 
+                        room.kod_ruang && (room.kod_ruang.startsWith('N28') || room.kod_ruang.startsWith('N28A'))
+                    );
+                    
+                    // Populate dropdown
+                    filteredRooms.forEach(room => {
+                        const option = `<option value="${room.kod_ruang}">${room.kod_ruang} - ${room.nama_ruang_singkatan || room.nama_ruang}</option>`;
+                        $("#roomSelect").append(option);
+                    });
+                    
+                    $("#roomScheduleLoading").hide();
+                    
+                    if (filteredRooms.length > 0) {
+                        $("#roomSelect").val(filteredRooms[0].kod_ruang);
+                        loadRoomSchedule();
+                    }
+                }
+            })
+            .catch(err => {
+                console.error("Error loading rooms:", err);
+                $("#roomScheduleLoading").html('<div class="w3-panel w3-red">Error loading room data</div>');
+            });
+    }
+    
+    window.loadRoomSchedule = function() {
+        const roomCode = $("#roomSelect").val();
+        if (!roomCode) return;
+        
+        $("#roomScheduleLoading").show();
+        $("#roomScheduleContainer").hide();
+        
+        const currentSesi = window.parent.currentSesi;
+        const currentSemester = window.parent.currentSemester;
+        
+        fetch(`http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=jadual_ruang&sesi=${currentSesi}&semester=${currentSemester}&kod_ruang=${roomCode}`)
+            .then(res => res.json())
+            .then(schedule => {
+                $("#roomScheduleLoading").hide();
+                $("#roomScheduleContainer").show();
+                
+                if (!Array.isArray(schedule) || schedule.length === 0) {
+                    $("#roomScheduleBody").html(`
+                        <tr>
+                            <td colspan="5" class="w3-center w3-padding-24">
+                                <div class="w3-text-grey">No schedule found for this room</div>
+                            </td>
+                        </tr>
+                    `);
+                    return;
+                }
+                
+                // Display schedule
+                $("#roomScheduleBody").empty();
+                
+                // Group by day and time
+                const scheduleByDay = {};
+                schedule.forEach(slot => {
+                    if (!scheduleByDay[slot.hari]) {
+                        scheduleByDay[slot.hari] = {};
+                    }
+                    if (!scheduleByDay[slot.hari][slot.masa]) {
+                        scheduleByDay[slot.hari][slot.masa] = [];
+                    }
+                    scheduleByDay[slot.hari][slot.masa].push(slot);
+                });
+                
+                // Map day codes to names
+                const dayNames = {
+                    2: 'Monday',
+                    3: 'Tuesday', 
+                    4: 'Wednesday',
+                    5: 'Thursday',
+                    6: 'Friday'
+                };
+                
+                // Map time codes to readable times
+                const timeSlots = {
+                    1: '8:00-9:00',
+                    2: '9:00-10:00',
+                    3: '10:00-11:00',
+                    4: '11:00-12:00',
+                    5: '12:00-13:00',
+                    7: '14:00-15:00',
+                    8: '15:00-16:00',
+                    9: '16:00-17:00',
+                    10: '17:00-18:00'
+                };
+                
+                // Create table rows
+                Object.keys(scheduleByDay).forEach(dayCode => {
+                    Object.keys(scheduleByDay[dayCode]).forEach(timeCode => {
+                        scheduleByDay[dayCode][timeCode].forEach(slot => {
+                            const course = slot.subjek ? slot.subjek.kod_subjek : 'N/A';
+                            const lecturer = slot.pensyarah ? slot.pensyarah.nama_pensyarah : 'N/A';
+                            
+                            const row = `
+                                <tr>
+                                    <td>${dayNames[dayCode] || 'Unknown'} ${timeSlots[timeCode] || timeCode}</td>
+                                    <td><strong>${course}</strong></td>
+                                    <td>${lecturer}</td>
+                                    <td>${slot.subjek ? slot.subjek.seksyen : 'N/A'}</td>
+                                    <td><span class="w3-tag w3-blue">Scheduled</span></td>
+                                </tr>
+                            `;
+                            $("#roomScheduleBody").append(row);
+                        });
+                    });
+                });
+                
+                // Show room info
+                $("#roomInfo").show();
+                
+                // Fetch additional room info
+                fetch(`http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=ruang&kod_fakulti=fsksm&kod_ruang_like=${roomCode}`)
+                    .then(res => res.json())
+                    .then(roomData => {
+                        if (Array.isArray(roomData) && roomData.length > 0) {
+                            const room = roomData[0];
+                            $("#roomCapacity").text(room.kapasiti || 'Unknown');
+                            $("#roomType").text(room.jenis || 'Unknown');
+                            
+                            // Calculate weekly usage (simplified)
+                            const weeklyHours = schedule.length;
+                            $("#roomUsage").text(weeklyHours);
+                        }
+                    });
+            })
+            .catch(err => {
+                console.error("Error loading room schedule:", err);
+                $("#roomScheduleLoading").html('<div class="w3-panel w3-red">Error loading schedule</div>');
+            });
+    };
+    
+    window.searchRoom = function() {
+        const searchTerm = $("#roomSearch").val();
+        if (!searchTerm) {
+            alert("Please enter a search term");
+            return;
+        }
+        
+        alert(`Searching for rooms containing: "${searchTerm}"\n\nIn a real system, this would filter the room list.`);
+    };
+    
+    window.reportRoomIssue = function() {
+        const issue = $("#roomIssue").val();
+        const roomCode = $("#roomSelect").val();
+        
+        if (!issue) {
+            alert("Please describe the issue");
+            return;
+        }
+        
+        if (!roomCode) {
+            alert("Please select a room first");
+            return;
+        }
+        
+        if (confirm(`Report issue for room ${roomCode}?`)) {
+            alert(`Issue reported for ${roomCode}:\n\n"${issue}"\n\nThank you for your report.`);
+            $("#roomIssue").val('');
+        }
+    };
+});
+</script>
