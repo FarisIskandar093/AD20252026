@@ -1,0 +1,484 @@
+/* Modern Green Timetable Theme - CORRECTED VERSION */
+:root {
+    --primary-green: #10b981;
+    --secondary-green: #34d399;
+    --dark-green: #059669;
+    --light-green: #6ee7b7;
+    --accent-green: #14b8a6;
+    --bg-light: #f0fdf4;
+    --text-dark: #064e3b;
+    --text-light: #6b7280;
+    --white: #ffffff;
+    --shadow: rgba(16, 185, 129, 0.1);
+}
+
+/* Body Background */
+body {
+    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+    position: relative;
+    overflow-x: auto;
+}
+
+/* Decorative Floating Leaves */
+.decorative-leaf {
+    position: fixed;
+    pointer-events: none;
+    opacity: 0.15;
+    z-index: 0;
+}
+
+.leaf-1 {
+    width: 150px;
+    height: 150px;
+    background: radial-gradient(circle, var(--primary-green), transparent);
+    border-radius: 50%;
+    top: 10%;
+    right: 5%;
+    animation: float 8s ease-in-out infinite;
+}
+
+.leaf-2 {
+    width: 100px;
+    height: 100px;
+    background: radial-gradient(circle, var(--secondary-green), transparent);
+    border-radius: 50%;
+    bottom: 20%;
+    left: 10%;
+    animation: float 10s ease-in-out infinite reverse;
+}
+
+.leaf-3 {
+    width: 120px;
+    height: 120px;
+    background: radial-gradient(circle, var(--accent-green), transparent);
+    border-radius: 50%;
+    top: 50%;
+    right: 15%;
+    animation: float 12s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0) rotate(0deg);
+    }
+    50% {
+        transform: translateY(-30px) rotate(5deg);
+    }
+}
+
+/* Page Header */
+.page-header {
+    position: relative;
+    z-index: 1;
+}
+
+.animated-title {
+    color: var(--primary-green);
+    font-size: 2.5rem;
+    font-weight: 800;
+    text-shadow: 2px 2px 4px var(--shadow);
+    animation: slideInDown 0.8s ease;
+    position: relative;
+}
+
+.animated-title::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-green), var(--secondary-green));
+    border-radius: 2px;
+}
+
+@keyframes slideInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Information Box - Card Style */
+.info-box {
+    background: linear-gradient(135deg, var(--white) 0%, var(--bg-light) 100%);
+    padding: 2rem;
+    margin: 2rem 0;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px var(--shadow);
+    border: 2px solid var(--light-green);
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 1;
+    animation: fadeInUp 0.8s ease;
+}
+
+.info-card {
+    flex: 1;
+    min-width: 200px;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--white);
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(16, 185, 129, 0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.info-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.15);
+}
+
+.info-icon {
+    font-size: 2rem;
+    background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    box-shadow: 0 4px 10px var(--shadow);
+}
+
+.info-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.info-content label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-light);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.info-content span {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-dark);
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Loading Animation */
+.loading {
+    text-align: center;
+    padding: 3rem;
+    color: var(--primary-green);
+    font-weight: 600;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid var(--light-green);
+    border-top: 4px solid var(--primary-green);
+    border-radius: 50%;
+    margin: 0 auto 1rem;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+/* Timetable Container */
+.timetable-container {
+    position: relative;
+    z-index: 1;
+    animation: fadeInUp 1s ease;
+    margin: 2rem 0;
+    overflow-x: auto;
+}
+
+/* Timetable Styling */
+.timetable-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: var(--white);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 15px 40px var(--shadow);
+}
+
+.timetable-table thead tr {
+    background: linear-gradient(135deg, var(--primary-green) 0%, var(--secondary-green) 100%);
+}
+
+.timetable-table th {
+    color: var(--white);
+    padding: 1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.9rem;
+    border: none;
+    text-align: center;
+    position: relative;
+}
+
+.timetable-table th::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 10%;
+    width: 80%;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.day-header {
+    background: var(--dark-green) !important;
+    font-size: 1rem !important;
+}
+
+.timetable-table tbody tr {
+    transition: background-color 0.3s ease;
+}
+
+.timetable-table tbody tr:hover {
+    background-color: var(--bg-light);
+}
+
+.timetable-table tbody tr:nth-child(even) {
+    background-color: #f9fafb;
+}
+
+.timetable-table td {
+    padding: 1rem;
+    border: 1px solid #e5e7eb;
+    vertical-align: top;
+    min-height: 80px;
+    position: relative;
+}
+
+.day-column {
+    background: linear-gradient(135deg, var(--light-green) 0%, var(--secondary-green) 100%);
+    color: var(--text-dark);
+    font-weight: 700;
+    font-size: 1rem;
+    text-align: center;
+    position: sticky;
+    left: 0;
+    z-index: 10;
+}
+
+/* BREAK SLOT STYLING - NEW */
+.break-slot {
+    background: #f3f4f6 !important;
+    text-align: center;
+    color: #9ca3af;
+    font-weight: 600;
+    vertical-align: middle;
+}
+
+/* Class Slot Styling - FLIPPED GREEN THEME */
+.slot {
+    background: linear-gradient(135deg, var(--primary-green) 0%, var(--secondary-green) 100%);
+    border-radius: 12px;
+    padding: 0.75rem;
+    margin: 0.25rem;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+    border-left: 4px solid var(--dark-green);
+    color: var(--white);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    animation: slideIn 0.5s ease;
+}
+
+.slot::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent);
+    pointer-events: none;
+}
+
+.slot:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.35);
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.slot-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    font-weight: 800;
+    font-size: 1rem;
+}
+
+.slot-section {
+    background: rgba(255, 255, 255, 0.25);
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.slot-title {
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    line-height: 1.3;
+    opacity: 0.95;
+}
+
+.slot-room {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+    width: fit-content;
+}
+
+.room-icon {
+    font-size: 1rem;
+}
+
+/* Section Header */
+.section-header {
+    position: relative;
+    margin: 3rem 0 2rem;
+}
+
+.section-header h3 {
+    color: var(--primary-green);
+    font-size: 2rem;
+    font-weight: 800;
+    position: relative;
+    display: inline-block;
+}
+
+.section-header h3::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-green), var(--secondary-green));
+    border-radius: 2px;
+}
+
+/* Course List Table */
+.course-table {
+    background: var(--white);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px var(--shadow);
+    animation: fadeInUp 1s ease;
+}
+
+.course-table thead tr {
+    background: linear-gradient(135deg, var(--dark-green) 0%, var(--primary-green) 100%);
+}
+
+.course-table th {
+    color: var(--white);
+    padding: 1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.course-row {
+    transition: all 0.3s ease;
+}
+
+.course-row:hover {
+    background-color: var(--bg-light) !important;
+    transform: scale(1.01);
+}
+
+.course-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.status-badge {
+    padding: 0.5rem 1rem !important;
+    border-radius: 20px !important;
+    font-weight: 700;
+    font-size: 0.8rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .animated-title {
+        font-size: 1.8rem;
+    }
+
+    .info-box {
+        flex-direction: column;
+        padding: 1.5rem;
+    }
+
+    .info-card {
+        min-width: 100%;
+    }
+
+    .timetable-table {
+        font-size: 0.85rem;
+    }
+
+    .timetable-table th,
+    .timetable-table td {
+        padding: 0.5rem;
+    }
+
+    .slot {
+        padding: 0.5rem;
+        font-size: 0.8rem;
+    }
+}
