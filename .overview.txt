@@ -8,6 +8,9 @@
 ├── Main.html (Student) ✅
 ├── MainLecturer.html (Lecturer) ✅
 ├── Admin.html (NEW) ❌
+├── .overview.txt (this file :> tho) ❌
+|
+|
 ├── Styles/ ✅
 |   ├── ...
 |
