@@ -1,0 +1,311 @@
+/* ===================================
+   Room Availability - Enhanced Green Theme
+   =================================== */
+
+/* Base Styles */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 50%, #a5d6a7 100%);
+    min-height: 100vh;
+}
+
+/* Container */
+.container {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 0 15px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(46, 125, 50, 0.2);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(129, 199, 132, 0.3);
+}
+
+/* Header */
+.container h2 {
+    color: #1b5e20;
+    padding: 25px 20px 15px;
+    margin: 0;
+    background: linear-gradient(90deg, #e8f5e9 0%, #c8e6c9 100%);
+    border-radius: 14px 14px 0 0;
+    font-size: 1.8em;
+    text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
+    border-bottom: 3px solid #4caf50;
+}
+
+/* Time Display */
+.time-display {
+    padding: 15px 20px;
+    background: linear-gradient(135deg, #a5d6a7 0%, #81c784 100%);
+    color: #1b5e20;
+    font-size: 1.1em;
+    border-bottom: 2px solid #66bb6a;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.time-icon {
+    font-size: 1.3em;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+/* Loading State */
+.loading {
+    text-align: center;
+    padding: 40px;
+    font-size: 1.2em;
+    color: #2e7d32;
+    animation: loadingPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes loadingPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* Error State */
+.error {
+    color: #c62828;
+    padding: 20px;
+    background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+    border-radius: 8px;
+    margin: 20px;
+    border-left: 4px solid #d32f2f;
+    box-shadow: 0 4px 12px rgba(198, 40, 40, 0.1);
+}
+
+/* Table Styles */
+.w3-responsive {
+    padding: 20px;
+    overflow-x: auto;
+}
+
+.w3-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(46, 125, 50, 0.15);
+}
+
+/* Table Header */
+.w3-table thead tr.w3-green {
+    background: linear-gradient(135deg, #2e7d32 0%, #388e3c 50%, #43a047 100%);
+    color: white;
+}
+
+.w3-table thead th {
+    padding: 16px 12px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.95em;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 3px solid #1b5e20;
+}
+
+/* Table Body */
+.w3-table.w3-bordered,
+.w3-table.w3-striped {
+    border: none;
+}
+
+.w3-table tbody tr {
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.w3-table tbody tr:nth-child(even) {
+    background: #f1f8f4;
+}
+
+.w3-table tbody tr:hover {
+    background: linear-gradient(90deg, #e8f5e9 0%, #c8e6c9 100%);
+    transform: scale(1.01);
+    box-shadow: 0 2px 8px rgba(46, 125, 50, 0.2);
+}
+
+.w3-table tbody td {
+    padding: 14px 12px;
+    border-bottom: 1px solid #e0e0e0;
+    color: #424242;
+}
+
+.w3-table tbody td strong {
+    color: #1b5e20;
+    font-weight: 600;
+}
+
+/* Details Cell */
+.details-cell {
+    font-size: 0.9em;
+    color: #616161;
+}
+
+.details-cell small {
+    display: block;
+    color: #757575;
+    margin-top: 3px;
+}
+
+/* Tags */
+.w3-tag {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.85em;
+    font-weight: 500;
+    display: inline-block;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.w3-tag:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.w3-tag.w3-blue {
+    background: linear-gradient(135deg, #1976d2 0%, #2196f3 100%);
+    color: white;
+}
+
+.w3-tag.w3-purple {
+    background: linear-gradient(135deg, #7b1fa2 0%, #9c27b0 100%);
+    color: white;
+}
+
+/* Status Colors */
+.w3-text-green {
+    color: #2e7d32;
+    font-weight: 600;
+}
+
+.w3-text-red {
+    color: #c62828;
+    font-weight: 600;
+}
+
+/* Footer Info */
+.w3-small {
+    font-size: 0.9em;
+}
+
+.w3-text-gray {
+    color: #616161;
+    padding: 10px 20px 20px;
+}
+
+.fa, .fa-info-circle {
+    margin-right: 5px;
+}
+
+/* Status Badges Enhancement */
+.w3-table tbody td:nth-child(6) {
+    font-weight: bold;
+}
+
+/* Pulse animation for occupied rooms */
+.w3-text-red {
+    animation: statusPulse 2s ease-in-out infinite;
+}
+
+@keyframes statusPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+/* Available rooms get a subtle glow */
+.w3-text-green {
+    text-shadow: 0 0 10px rgba(46, 125, 50, 0.3);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container {
+        margin: 10px;
+        padding: 0 10px;
+        border-radius: 12px;
+    }
+    
+    .container h2 {
+        font-size: 1.4em;
+        padding: 20px 15px 15px;
+    }
+    
+    .time-display {
+        font-size: 0.95em;
+        padding: 12px 15px;
+    }
+    
+    .w3-table thead th,
+    .w3-table tbody td {
+        padding: 10px 8px;
+        font-size: 0.9em;
+    }
+    
+    .w3-responsive {
+        padding: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .container h2 {
+        font-size: 1.2em;
+        padding: 15px 10px 10px;
+    }
+    
+    .time-display {
+        font-size: 0.85em;
+        padding: 10px;
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .w3-table thead th,
+    .w3-table tbody td {
+        padding: 8px 6px;
+        font-size: 0.85em;
+    }
+    
+    .w3-table thead th:nth-child(7),
+    .w3-table tbody td:nth-child(7) {
+        display: none; /* Hide details column on very small screens */
+    }
+}
+
+/* ==== Filter Bar ==== */
+.filter-bar {
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.filter-bar .w3-check {
+    margin-right: 6px;
+}
+
+.filter-bar label {
+    margin-right: 15px;
+    font-size: 0.9em;
+    color: #2e7d32;
+}
+
+.filter-bar label:hover {
+    color: #1b5e20;
+    font-weight: 500;
+}
+
+/* Small screen fix: margin-top only on small screens */
+@media (max-width: 600px) {
+    .w3-margin-top-s {
+        margin-top: 12px !important;
+    }
+}
