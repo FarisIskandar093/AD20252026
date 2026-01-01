@@ -275,8 +275,8 @@ $(document).ready(function() {
     $("#logout").click(function(e) {
         e.preventDefault();
         localStorage.removeItem("TTMSFC_userSession");
+        localStorage.removeItem("TTMSFC_loginTimestamp")
         localStorage.removeItem("TTMSFC_lecturerSession");
-        alert("Logged out successfully");
         window.location.href = "Login.html";
     });
     

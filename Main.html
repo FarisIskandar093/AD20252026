@@ -144,6 +144,7 @@
     // Logout Function 
     $('#logout').click(function() {
         localStorage.removeItem("TTMSFC_userSession");
+        localStorage.removeItem("TTMSFC_loginTimestamp");
         localStorage.removeItem("TTMSFC_sessionList");
         window.location.replace("Login.html");
     });

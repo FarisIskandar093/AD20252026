@@ -121,6 +121,8 @@
                         
                         localStorage.setItem("TTMSFC_userSession", JSON.stringify(combinedData));
                         alert("✅ Admin access granted! Redirecting to admin dashboard...");
+
+                        localStorage.setItem("TTMSFC_loginTimestamp", new Date().getTime().toString());
                         
                         // Redirect to admin dashboard
                         window.location.href = "Admin.html";

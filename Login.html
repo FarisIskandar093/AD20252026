@@ -63,6 +63,7 @@
                 
                 // Save user session data to localStorage
                 localStorage.setItem("TTMSFC_userSession", JSON.stringify(userData));
+                localStorage.setItem("TTMSFC_loginTimestamp", new Date().getTime().toString());
 
                 // 2. Determine Role via secondary API check
                 determineUserRole(userData);

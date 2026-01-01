@@ -146,8 +146,8 @@ $(document).ready(function() {
     // Logout handler
     $("#logout").click(function() {
         localStorage.removeItem("TTMSFC_userSession");
+        localStorage.removeItem("TTMSFC_loginTimestamp");
         localStorage.removeItem("TTMSFC_lecturerSession");
-        alert("Logged out successfully");
         window.location.href = "Login.html";
     });
 });
