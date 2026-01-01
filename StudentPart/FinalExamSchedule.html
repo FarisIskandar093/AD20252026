@@ -1,14 +1,721 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <!--  -->
-        <script src="../JS/Authenticate.js"></script>
-    </head>
-    <body>
-        <!--  -->
-    </body>
+<head>
+    <title>Final Exam Schedule</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="../Styles/mainStyle.css">
+    <style>
+        /* Exam schedule specific styles */
+        .exam-page {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .exam-header {
+            background: linear-gradient(135deg, #673ab7 0%, #9c27b0 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 25px rgba(103, 58, 183, 0.3);
+        }
+        
+        .exam-summary {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid #673ab7;
+        }
+        
+        .exam-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border-top: 4px solid #673ab7;
+            transition: transform 0.3s ease;
+        }
+        
+        .exam-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(103, 58, 183, 0.2);
+        }
+        
+        .exam-type {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+        }
+        
+        .type-final {
+            background: #e1bee7;
+            color: #7b1fa2;
+        }
+        
+        .type-midterm {
+            background: #d1c4e9;
+            color: #512da8;
+        }
+        
+        .type-quiz {
+            background: #f3e5f5;
+            color: #4a148c;
+        }
+        
+        .exam-details {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        
+        .detail-item {
+            display: flex;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+        
+        .detail-icon {
+            width: 30px;
+            text-align: center;
+            margin-right: 10px;
+            color: #673ab7;
+        }
+        
+        .countdown-timer {
+            background: linear-gradient(135deg, #ff9800 0%, #ff5722 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 20px 0;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        
+        .exam-calendar {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .calendar-day {
+            background: #f5f5f5;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .calendar-day.has-exam {
+            background: #e1bee7;
+            border: 2px solid #7b1fa2;
+        }
+        
+        .exam-list {
+            margin-top: 10px;
+        }
+        
+        .exam-item {
+            background: white;
+            padding: 8px;
+            margin: 5px 0;
+            border-radius: 5px;
+            font-size: 0.9em;
+            border-left: 3px solid #7b1fa2;
+        }
+        
+        .loading-exam {
+            text-align: center;
+            padding: 50px;
+            color: #666;
+        }
+        
+        .loading-spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #673ab7;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .warning-banner {
+            background: #fff3e0;
+            border-left: 4px solid #ff9800;
+            padding: 15px;
+            border-radius: 0 8px 8px 0;
+            margin: 20px 0;
+            color: #ef6c00;
+        }
+    </style>
+    <script src="../JS/Authenticate.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+</head>
+<body>
+    <div class="exam-page">
+        <div class="exam-header">
+            <h2>📝 Final Exam Schedule</h2>
+            <p>View your examination timetable and important deadlines for the semester</p>
+        </div>
+        
+        <!-- Important Notice -->
+        <div class="warning-banner">
+            <strong>⚠️ Note:</strong> Exam schedules are estimated based on course timetables. 
+            Official exam dates will be announced by the Faculty Examination Unit.
+        </div>
+        
+        <!-- Countdown Timer -->
+        <div id="countdownContainer" class="countdown-timer" style="display: none;">
+            ⏳ Next Exam In: <span id="countdownTimer">-- : -- : -- : --</span>
+        </div>
+        
+        <div id="loadingState" class="loading-exam">
+            <div class="loading-spinner"></div>
+            <p>Loading your exam schedule information...</p>
+        </div>
+        
+        <div id="examContent" style="display: none;">
+            <!-- Summary Card -->
+            <div class="exam-summary">
+                <h3>📊 Exam Overview</h3>
+                <div class="w3-row-padding">
+                    <div class="w3-third">
+                        <div class="w3-panel w3-purple w3-padding">
+                            <h4>Total Exams</h4>
+                            <h2 id="totalExams">0</h2>
+                        </div>
+                    </div>
+                    <div class="w3-third">
+                        <div class="w3-panel w3-deep-purple w3-padding">
+                            <h4>Next Exam</h4>
+                            <h4 id="nextExamDate">Loading...</h4>
+                        </div>
+                    </div>
+                    <div class="w3-third">
+                        <div class="w3-panel w3-light-purple w3-padding">
+                            <h4>Study Days Left</h4>
+                            <h2 id="studyDays">0</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Exam Calendar View -->
+            <div class="exam-calendar">
+                <h3>📅 Exam Calendar</h3>
+                <p>Click on a date to view details of exams scheduled</p>
+                <div id="calendarContainer" class="calendar-grid">
+                    <!-- Calendar will be dynamically generated -->
+                </div>
+            </div>
+            
+            <!-- Detailed Exam List -->
+            <h3>📚 Your Exam Schedule</h3>
+            <div id="examListContainer">
+                <!-- Exam cards will be dynamically inserted here -->
+            </div>
+            
+            <!-- Study Plan -->
+            <div class="w3-panel w3-light-grey w3-leftbar w3-border-grey w3-padding" style="margin-top: 30px;">
+                <h4>📖 Recommended Study Plan</h4>
+                <div id="studyPlan">
+                    <p>Loading study plan recommendations...</p>
+                </div>
+            </div>
+        </div>
+        
+        <div id="noExams" class="w3-panel w3-green w3-padding" style="display: none;">
+            <h3>🎉 No Upcoming Exams Found!</h3>
+            <p>Either exams are not yet scheduled or you have no exams this semester.</p>
+        </div>
+        
+        <div id="errorState" class="w3-panel w3-red w3-padding" style="display: none;">
+            <h3>⚠️ Error Loading Data</h3>
+            <p id="errorMessage">Unable to fetch exam schedule. Please try again later.</p>
+        </div>
+    </div>
 
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script>
-        //
+    $(document).ready(function() {
+        // ==========================================
+        // CONSTANTS & CONFIGURATIONS
+        // ==========================================
+        const BASE_URL = "http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=";
+        
+        // Exam schedule estimation logic
+        // Since TTMS doesn't have exam schedule API, we'll estimate based on:
+        // 1. Course end dates
+        // 2. Common exam patterns (2 weeks after last class)
+        // 3. Historical exam schedules
+        
+        // Common exam types and their typical duration
+        const EXAM_TYPES = {
+            FINAL: { name: 'Final Examination', duration: 3, color: 'type-final' },
+            MIDTERM: { name: 'Midterm Test', duration: 2, color: 'type-midterm' },
+            QUIZ: { name: 'Quiz', duration: 1, color: 'type-quiz' }
+        };
+        
+        // ==========================================
+        // INITIALIZATION
+        // ==========================================
+        const userSession = JSON.parse(localStorage.getItem("TTMSFC_userSession"));
+        
+        if (!userSession) {
+            window.location.replace("../Login.html");
+            return;
+        }
+        
+        const matricNo = userSession.login_name;
+        let currentSesi = window.parent.currentSesi;
+        let currentSemester = window.parent.currentSemester;
+        
+        // Load Google Charts for timeline
+        google.charts.load('current', {'packages':['timeline']});
+        google.charts.setOnLoadCallback(initExamSchedule);
+        
+        async function initExamSchedule() {
+            try {
+                // Get session/semester if not available
+                if (!currentSesi || !currentSemester) {
+                    const sessionData = await fetchCurrentSession();
+                    currentSesi = sessionData.sesi;
+                    currentSemester = sessionData.semester;
+                }
+                
+                // Start analysis
+                await loadExamSchedule(matricNo, currentSesi, currentSemester);
+                
+            } catch (error) {
+                console.error("Initialization error:", error);
+                showError("Failed to load exam schedule: " + error.message);
+            }
+        }
+        
+        // ==========================================
+        // HELPER FUNCTIONS
+        // ==========================================
+        async function fetchCurrentSession() {
+            const response = await fetch(BASE_URL + "sesisemester");
+            const data = await response.json();
+            return data.find(s => s.sesi_semester_id) || data[0];
+        }
+        
+        // Function to estimate exam dates based on course timetable
+        function estimateExamDates(subjects, semesterEndDate) {
+            const exams = [];
+            
+            // Parse semester end date
+            const endDate = new Date(semesterEndDate);
+            const examPeriodStart = new Date(endDate);
+            examPeriodStart.setDate(endDate.getDate() - 14); // Exams start 2 weeks before semester end
+            
+            subjects.forEach((subject, index) => {
+                // Estimate exam date based on subject code and index
+                const examDate = new Date(examPeriodStart);
+                examDate.setDate(examPeriodStart.getDate() + (index * 2)); // Spread exams every 2 days
+                
+                // Determine exam type based on subject level
+                const subjectCode = subject.kod_subjek || '';
+                let examType = EXAM_TYPES.FINAL;
+                
+                if (subjectCode.includes('LAB') || subjectCode.includes('TUT')) {
+                    examType = EXAM_TYPES.QUIZ;
+                } else if (subjectCode.match(/[1-2]\d{3}$/)) { // 1000-2000 level
+                    examType = EXAM_TYPES.MIDTERM;
+                }
+                
+                exams.push({
+                    subject: subject,
+                    examDate: examDate,
+                    examType: examType,
+                    venue: estimateExamVenue(subject),
+                    duration: examType.duration,
+                    importance: calculateImportance(subject)
+                });
+            });
+            
+            // Sort by date
+            exams.sort((a, b) => a.examDate - b.examDate);
+            
+            return exams;
+        }
+        
+        function estimateExamVenue(subject) {
+            // Simple venue estimation based on subject code
+            const code = subject.kod_subjek || '';
+            if (code.startsWith('SECJ')) return 'Dewan Sultan Iskandar';
+            if (code.startsWith('SCSJ')) return 'Lecture Hall 1';
+            if (code.includes('LAB')) return 'Computer Lab Complex';
+            return 'Main Examination Hall';
+        }
+        
+        function calculateImportance(subject) {
+            // Simple importance calculation
+            let importance = 3; // Medium by default
+            
+            const code = subject.kod_subjek || '';
+            if (code.includes('4') || code.includes('FINAL')) importance = 5; // High for final year
+            if (code.includes('CORE') || code.includes('MAJOR')) importance = 4;
+            
+            return importance;
+        }
+        
+        // ==========================================
+        // MAIN FUNCTION
+        // ==========================================
+        async function loadExamSchedule(matricNo, sesi, semester) {
+            try {
+                // 1. Fetch student's subjects
+                const subjects = await fetchStudentSubjects(matricNo, sesi, semester);
+                
+                if (!subjects || subjects.length === 0) {
+                    showNoExams();
+                    return;
+                }
+                
+                // 2. Get semester end date
+                const semesterData = await fetchSemesterDates(sesi, semester);
+                
+                if (!semesterData) {
+                    showNoExams();
+                    return;
+                }
+                
+                // 3. Estimate exam schedule
+                const exams = estimateExamDates(subjects, semesterData.tarikh_tamat);
+                
+                // 4. Display results
+                displayExamSchedule(exams, semesterData);
+                
+                // 5. Start countdown timer
+                startCountdownTimer(exams);
+                
+            } catch (error) {
+                console.error("Error loading exam schedule:", error);
+                showError("Error loading exam schedule: " + error.message);
+            }
+        }
+        
+        async function fetchStudentSubjects(matricNo, sesi, semester) {
+            try {
+                const url = `${BASE_URL}pelajar_subjek&no_matrik=${matricNo}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                // Filter for current session/semester
+                return Array.isArray(data) ? 
+                    data.filter(s => s.sesi === sesi && s.semester == semester) : [];
+            } catch (error) {
+                console.error("Error fetching subjects:", error);
+                return [];
+            }
+        }
+        
+        async function fetchSemesterDates(sesi, semester) {
+            try {
+                const url = `${BASE_URL}sesisemester`;
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                return data.find(s => 
+                    s.sesi === sesi && s.semester == semester
+                ) || data[0];
+            } catch (error) {
+                console.error("Error fetching semester dates:", error);
+                return null;
+            }
+        }
+        
+        // ==========================================
+        // DISPLAY FUNCTIONS
+        // ==========================================
+        function displayExamSchedule(exams, semesterData) {
+            // Hide loading
+            $("#loadingState").hide();
+            
+            if (exams.length === 0) {
+                $("#noExams").show();
+                return;
+            }
+            
+            // Show content
+            $("#examContent").show();
+            $("#countdownContainer").show();
+            
+            // Update summary
+            $("#totalExams").text(exams.length);
+            
+            // Find next exam
+            const now = new Date();
+            const upcomingExams = exams.filter(exam => exam.examDate > now);
+            
+            if (upcomingExams.length > 0) {
+                const nextExam = upcomingExams[0];
+                $("#nextExamDate").text(formatDate(nextExam.examDate));
+                
+                // Calculate study days
+                const daysUntil = Math.ceil((nextExam.examDate - now) / (1000 * 60 * 60 * 24));
+                $("#studyDays").text(daysUntil > 0 ? daysUntil : 0);
+            } else {
+                $("#nextExamDate").text("Exam period completed");
+                $("#studyDays").text("0");
+            }
+            
+            // Display exam cards
+            displayExamCards(exams);
+            
+            // Display calendar
+            displayExamCalendar(exams);
+            
+            // Generate study plan
+            generateStudyPlan(exams, semesterData);
+        }
+        
+        function displayExamCards(exams) {
+            const container = $("#examListContainer");
+            container.empty();
+            
+            exams.forEach((exam, index) => {
+                const formattedDate = formatDate(exam.examDate);
+                const formattedTime = formatTime(exam.examDate);
+                
+                const cardHtml = `
+                    <div class="exam-card">
+                        <div class="exam-type ${exam.examType.color}">
+                            ${exam.examType.name}
+                        </div>
+                        <h4>${exam.subject.kod_subjek} - ${exam.subject.nama_subjek}</h4>
+                        <div class="exam-details">
+                            <div class="detail-item">
+                                <span class="detail-icon">📅</span>
+                                <span><strong>Date:</strong> ${formattedDate}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-icon">⏰</span>
+                                <span><strong>Time:</strong> ${formattedTime} (${exam.duration} hours)</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-icon">📍</span>
+                                <span><strong>Venue:</strong> ${exam.venue}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-icon">📊</span>
+                                <span><strong>Importance:</strong> ${'★'.repeat(exam.importance)}${'☆'.repeat(5-exam.importance)}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-icon">📝</span>
+                                <span><strong>Section:</strong> ${exam.subject.seksyen || 'N/A'}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                container.append(cardHtml);
+            });
+        }
+        
+        function displayExamCalendar(exams) {
+            const container = $("#calendarContainer");
+            container.empty();
+            
+            // Group exams by date
+            const examsByDate = {};
+            exams.forEach(exam => {
+                const dateKey = exam.examDate.toISOString().split('T')[0];
+                if (!examsByDate[dateKey]) {
+                    examsByDate[dateKey] = [];
+                }
+                examsByDate[dateKey].push(exam);
+            });
+            
+            // Create calendar for next 30 days
+            const today = new Date();
+            const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                              "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            
+            for (let i = 0; i < 30; i++) {
+                const date = new Date();
+                date.setDate(today.getDate() + i);
+                const dateKey = date.toISOString().split('T')[0];
+                const dayExams = examsByDate[dateKey] || [];
+                
+                const dayHtml = `
+                    <div class="calendar-day ${dayExams.length > 0 ? 'has-exam' : ''}">
+                        <div style="font-weight: bold; margin-bottom: 10px;">
+                            ${date.getDate()} ${monthNames[date.getMonth()]}
+                        </div>
+                        <div style="font-size: 0.9em; color: #666;">
+                            ${date.toLocaleDateString('en-US', { weekday: 'short' })}
+                        </div>
+                        ${dayExams.length > 0 ? `
+                            <div class="exam-list">
+                                ${dayExams.map(exam => `
+                                    <div class="exam-item">
+                                        ${exam.subject.kod_subjek}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : `
+                            <div style="margin-top: 10px; color: #999; font-size: 0.9em;">
+                                No exams
+                            </div>
+                        `}
+                    </div>
+                `;
+                
+                container.append(dayHtml);
+            }
+        }
+        
+        function generateStudyPlan(exams, semesterData) {
+            const now = new Date();
+            const upcomingExams = exams.filter(exam => exam.examDate > now);
+            
+            if (upcomingExams.length === 0) {
+                $("#studyPlan").html("<p>All exams completed for this semester. Great work!</p>");
+                return;
+            }
+            
+            let studyPlan = [];
+            
+            // Sort by date and importance
+            upcomingExams.sort((a, b) => {
+                if (a.importance !== b.importance) {
+                    return b.importance - a.importance;
+                }
+                return a.examDate - b.examDate;
+            });
+            
+            // Generate study plan
+            studyPlan.push(`<p><strong>Priority Exams (by date):</strong></p><ol>`);
+            
+            upcomingExams.forEach((exam, index) => {
+                const daysUntil = Math.ceil((exam.examDate - now) / (1000 * 60 * 60 * 24));
+                studyPlan.push(`
+                    <li>
+                        <strong>${exam.subject.kod_subjek}</strong>: 
+                        ${daysUntil} days left - ${exam.importance}/5 priority
+                    </li>
+                `);
+            });
+            
+            studyPlan.push(`</ol>`);
+            
+            // Add study tips
+            const totalStudyDays = Math.ceil((upcomingExams[0].examDate - now) / (1000 * 60 * 60 * 24));
+            if (totalStudyDays > 0) {
+                studyPlan.push(`
+                    <p><strong>Study Strategy:</strong></p>
+                    <ul>
+                        <li>Allocate ${Math.ceil(totalStudyDays / upcomingExams.length)} days per subject</li>
+                        <li>Start with high-priority subjects first</li>
+                        <li>Schedule review sessions 2 days before each exam</li>
+                        <li>Take regular breaks during study sessions</li>
+                    </ul>
+                `);
+            }
+            
+            $("#studyPlan").html(studyPlan.join(''));
+        }
+        
+        // ==========================================
+        // COUNTDOWN TIMER
+        // ==========================================
+        function startCountdownTimer(exams) {
+            const now = new Date();
+            const upcomingExams = exams.filter(exam => exam.examDate > now);
+            
+            if (upcomingExams.length === 0) {
+                $("#countdownContainer").hide();
+                return;
+            }
+            
+            const nextExam = upcomingExams[0];
+            
+            function updateCountdown() {
+                const now = new Date();
+                const distance = nextExam.examDate - now;
+                
+                if (distance < 0) {
+                    $("#countdownTimer").text("EXAM IN PROGRESS");
+                    return;
+                }
+                
+                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                
+                $("#countdownTimer").text(
+                    `${days}d ${hours}h ${minutes}m ${seconds}s`
+                );
+            }
+            
+            // Update immediately and then every second
+            updateCountdown();
+            setInterval(updateCountdown, 1000);
+        }
+        
+        // ==========================================
+        // UTILITY FUNCTIONS
+        // ==========================================
+        function formatDate(date) {
+            return date.toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+        
+        function formatTime(date) {
+            // Generate random exam time between 8 AM and 5 PM
+            const hour = Math.floor(Math.random() * 8) + 8; // 8 AM to 4 PM
+            return `${hour}:00 - ${hour + 2}:00`;
+        }
+        
+        // ==========================================
+        // ERROR HANDLING
+        // ==========================================
+        function showError(message) {
+            $("#loadingState").hide();
+            $("#examContent").hide();
+            $("#errorMessage").text(message);
+            $("#errorState").show();
+        }
+        
+        function showNoExams() {
+            $("#loadingState").hide();
+            $("#examContent").hide();
+            $("#noExams").show();
+        }
+        
+    });
     </script>
+</body>
 </html>

@@ -1,14 +1,676 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <!--  -->
-        <script src="../../JS/Authenticate.js"></script>
-    </head>
-    <body>
-        <!--  -->
-    </body>
+<head>
+    <title>Timetable Clash Analyzer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="../Styles/mainStyle.css">
+    <style>
+        /* Additional styles for clash analyzer */
+        .clash-page {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .clash-header {
+            background: linear-gradient(135deg, #ef5350 0%, #f44336 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 25px rgba(244, 67, 54, 0.3);
+        }
+        
+        .clash-summary-card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid #f44336;
+        }
+        
+        .clash-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .clash-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border-top: 4px solid #f44336;
+            transition: transform 0.3s ease;
+        }
+        
+        .clash-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(244, 67, 54, 0.2);
+        }
+        
+        .clash-severity {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+        }
+        
+        .severity-high {
+            background: #ffcdd2;
+            color: #c62828;
+        }
+        
+        .severity-medium {
+            background: #ffe0b2;
+            color: #ef6c00;
+        }
+        
+        .severity-low {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        .time-slot {
+            background: #f5f5f5;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin: 5px 0;
+            font-family: monospace;
+        }
+        
+        .subject-badge {
+            display: inline-block;
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 4px 10px;
+            border-radius: 15px;
+            margin: 2px;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+        
+        .clash-timeline {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin-top: 30px;
+        }
+        
+        .timeline-day {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .timeline-slot {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 8px;
+            background: #fafafa;
+        }
+        
+        .timeline-time {
+            min-width: 120px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .timeline-subjects {
+            flex: 1;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+        
+        .conflict-indicator {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        
+        .conflict-yes {
+            background: #f44336;
+            animation: pulse 2s infinite;
+        }
+        
+        .conflict-no {
+            background: #4caf50;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .loading-clash {
+            text-align: center;
+            padding: 50px;
+            color: #666;
+        }
+        
+        .loading-spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #f44336;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+    <script src="../../JS/Authenticate.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+</head>
+<body>
+    <div class="clash-page">
+        <div class="clash-header">
+            <h2>🔍 Timetable Clash Analyzer</h2>
+            <p>Detect overlapping classes and scheduling conflicts in your timetable</p>
+        </div>
+        
+        <div id="loadingState" class="loading-clash">
+            <div class="loading-spinner"></div>
+            <p>Analyzing your timetable for potential clashes...</p>
+        </div>
+        
+        <div id="clashContent" style="display: none;">
+            <!-- Summary Card -->
+            <div class="clash-summary-card">
+                <h3>📊 Clash Analysis Summary</h3>
+                <div class="w3-row-padding">
+                    <div class="w3-third">
+                        <div class="w3-panel w3-light-grey w3-padding">
+                            <h4>Total Classes</h4>
+                            <h2 id="totalClasses">0</h2>
+                        </div>
+                    </div>
+                    <div class="w3-third">
+                        <div class="w3-panel w3-pale-red w3-padding">
+                            <h4>Detected Clashes</h4>
+                            <h2 id="totalClashes">0</h2>
+                        </div>
+                    </div>
+                    <div class="w3-third">
+                        <div class="w3-panel w3-pale-green w3-padding">
+                            <h4>Conflict-Free Days</h4>
+                            <h2 id="cleanDays">0</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Clash Heatmap Chart -->
+            <div id="clashHeatmap" style="width: 100%; height: 400px; margin-bottom: 30px;"></div>
+            
+            <!-- Detailed Clash Grid -->
+            <h3>⚡ Detailed Clash Breakdown</h3>
+            <div class="clash-grid" id="clashGrid">
+                <!-- Clash cards will be dynamically inserted here -->
+            </div>
+            
+            <!-- Daily Timeline View -->
+            <div class="clash-timeline">
+                <h3>📅 Daily Schedule Timeline</h3>
+                <div id="timelineContainer">
+                    <!-- Timeline will be dynamically inserted here -->
+                </div>
+            </div>
+            
+            <!-- Recommendations -->
+            <div class="w3-panel w3-blue-grey w3-leftbar w3-border-blue w3-padding">
+                <h4>💡 Recommendations</h4>
+                <p id="recommendations">Loading recommendations...</p>
+            </div>
+        </div>
+        
+        <div id="noClashes" class="w3-panel w3-green w3-padding" style="display: none;">
+            <h3>🎉 No Clashes Detected!</h3>
+            <p>Your timetable is well-organized with no overlapping classes. Excellent schedule planning!</p>
+        </div>
+        
+        <div id="errorState" class="w3-panel w3-red w3-padding" style="display: none;">
+            <h3>⚠️ Error Loading Data</h3>
+            <p id="errorMessage">Unable to fetch timetable data. Please try again later.</p>
+        </div>
+    </div>
 
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script>
-        //
+    $(document).ready(function() {
+        // ==========================================
+        // CONSTANTS & CONFIGURATIONS
+        // ==========================================
+        const BASE_URL = "http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=";
+        const AUTH_URL = "http://web.fc.utm.my/ttms/auth-admin.php?session_id=";
+        
+        // Day and time mappings
+        const DAYS = {
+            2: { name: 'Monday', code: 'MON' },
+            3: { name: 'Tuesday', code: 'TUE' },
+            4: { name: 'Wednesday', code: 'WED' },
+            5: { name: 'Thursday', code: 'THU' },
+            6: { name: 'Friday', code: 'FRI' }
+        };
+        
+        const TIME_SLOTS = {
+            1: { start: "08:00", end: "09:00" },
+            2: { start: "09:00", end: "10:00" },
+            3: { start: "10:00", end: "11:00" },
+            4: { start: "11:00", end: "12:00" },
+            5: { start: "12:00", end: "13:00" },
+            6: { start: "13:00", end: "14:00" },
+            7: { start: "14:00", end: "15:00" },
+            8: { start: "15:00", end: "16:00" },
+            9: { start: "16:00", end: "17:00" },
+            10: { start: "17:00", end: "18:00" }
+        };
+        
+        // ==========================================
+        // INITIALIZATION
+        // ==========================================
+        const userSession = JSON.parse(localStorage.getItem("TTMSFC_userSession"));
+        
+        if (!userSession) {
+            window.location.replace("../Login.html");
+            return;
+        }
+        
+        const matricNo = userSession.login_name;
+        let currentSesi = window.parent.currentSesi;
+        let currentSemester = window.parent.currentSemester;
+        let adminSessionID = window.parent.adminSessionID;
+        
+        // Load Google Charts
+        google.charts.load('current', {'packages':['calendar']});
+        google.charts.setOnLoadCallback(initClashAnalysis);
+        
+        async function initClashAnalysis() {
+            try {
+                // Get admin session if not available
+                if (!adminSessionID) {
+                    adminSessionID = await getAdminSession(userSession.session_id);
+                }
+                
+                // Get session/semester if not available
+                if (!currentSesi || !currentSemester) {
+                    const sessionData = await fetchCurrentSession();
+                    currentSesi = sessionData.sesi;
+                    currentSemester = sessionData.semester;
+                }
+                
+                // Start analysis
+                await analyzeTimetableClashes(matricNo, currentSesi, currentSemester, adminSessionID);
+                
+            } catch (error) {
+                console.error("Initialization error:", error);
+                showError("Failed to initialize clash analyzer. Please refresh the page.");
+            }
+        }
+        
+        // ==========================================
+        // HELPER FUNCTIONS
+        // ==========================================
+        async function getAdminSession(userSessionID) {
+            try {
+                const response = await fetch(AUTH_URL + userSessionID);
+                const data = await response.json();
+                return data[0]?.session_id || null;
+            } catch (error) {
+                console.error("Error getting admin session:", error);
+                return null;
+            }
+        }
+        
+        async function fetchCurrentSession() {
+            const response = await fetch(BASE_URL + "sesisemester");
+            const data = await response.json();
+            return data.find(s => s.sesi_semester_id) || data[0];
+        }
+        
+        // ==========================================
+        // MAIN ANALYSIS FUNCTION
+        // ==========================================
+        async function analyzeTimetableClashes(matricNo, sesi, semester, adminSession) {
+            try {
+                // 1. Fetch student's subjects
+                const subjects = await fetchStudentSubjects(matricNo, sesi, semester);
+                
+                if (!subjects || subjects.length === 0) {
+                    showNoData();
+                    return;
+                }
+                
+                // 2. Fetch timetables for all subjects
+                const allTimetableEntries = [];
+                const timetablePromises = subjects.map(async (subject) => {
+                    const timetable = await fetchSubjectTimetable(subject, sesi, semester);
+                    return timetable.map(entry => ({
+                        ...entry,
+                        subject: subject
+                    }));
+                });
+                
+                const results = await Promise.allSettled(timetablePromises);
+                results.forEach(result => {
+                    if (result.status === 'fulfilled' && result.value) {
+                        allTimetableEntries.push(...result.value);
+                    }
+                });
+                
+                // 3. Analyze for clashes
+                const analysis = analyzeClashes(allTimetableEntries);
+                
+                // 4. Display results
+                displayAnalysisResults(analysis, subjects.length);
+                
+                // 5. Draw heatmap
+                drawClashHeatmap(analysis.dailyClashCount);
+                
+            } catch (error) {
+                console.error("Analysis error:", error);
+                showError("Error analyzing timetable clashes: " + error.message);
+            }
+        }
+        
+        async function fetchStudentSubjects(matricNo, sesi, semester) {
+            try {
+                const url = `${BASE_URL}pelajar_subjek&no_matrik=${matricNo}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                // Filter for current session/semester
+                return Array.isArray(data) ? 
+                    data.filter(s => s.sesi === sesi && s.semester == semester) : [];
+            } catch (error) {
+                console.error("Error fetching subjects:", error);
+                return [];
+            }
+        }
+        
+        async function fetchSubjectTimetable(subject, sesi, semester) {
+            try {
+                const url = `${BASE_URL}jadual_subjek&sesi=${sesi}&semester=${semester}&kod_subjek=${subject.kod_subjek}&seksyen=${subject.seksyen}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                return Array.isArray(data) ? data : [];
+            } catch (error) {
+                console.error(`Error fetching timetable for ${subject.kod_subjek}:`, error);
+                return [];
+            }
+        }
+        
+        // ==========================================
+        // CLASH ANALYSIS LOGIC
+        // ==========================================
+        function analyzeClashes(timetableEntries) {
+            // Group entries by day and time
+            const scheduleGrid = {};
+            const dailyClashCount = {};
+            
+            // Initialize grid
+            Object.keys(DAYS).forEach(day => {
+                scheduleGrid[day] = {};
+                dailyClashCount[DAYS[day].name] = 0;
+                for (let time = 1; time <= 10; time++) {
+                    scheduleGrid[day][time] = [];
+                }
+            });
+            
+            // Populate grid
+            timetableEntries.forEach(entry => {
+                if (entry.hari && entry.masa && scheduleGrid[entry.hari]) {
+                    scheduleGrid[entry.hari][entry.masa].push(entry);
+                }
+            });
+            
+            // Analyze clashes
+            const clashes = [];
+            let totalClashes = 0;
+            
+            Object.keys(scheduleGrid).forEach(day => {
+                Object.keys(scheduleGrid[day]).forEach(time => {
+                    const entries = scheduleGrid[day][time];
+                    if (entries.length > 1) {
+                        // Found a clash
+                        totalClashes++;
+                        dailyClashCount[DAYS[day].name]++;
+                        
+                        clashes.push({
+                            day: parseInt(day),
+                            time: parseInt(time),
+                            entries: entries,
+                            severity: getClashSeverity(entries.length)
+                        });
+                    }
+                });
+            });
+            
+            // Calculate clean days
+            const cleanDays = Object.keys(DAYS).filter(day => 
+                dailyClashCount[DAYS[day].name] === 0
+            ).length;
+            
+            return {
+                clashes: clashes,
+                totalClashes: totalClashes,
+                cleanDays: cleanDays,
+                scheduleGrid: scheduleGrid,
+                dailyClashCount: dailyClashCount
+            };
+        }
+        
+        function getClashSeverity(count) {
+            if (count >= 3) return { level: 'high', label: 'Severe', color: '#f44336' };
+            if (count === 2) return { level: 'medium', label: 'Moderate', color: '#ff9800' };
+            return { level: 'low', label: 'Minor', color: '#4caf50' };
+        }
+        
+        // ==========================================
+        // DISPLAY FUNCTIONS
+        // ==========================================
+        function displayAnalysisResults(analysis, totalSubjects) {
+            // Hide loading
+            $("#loadingState").hide();
+            
+            // Update summary
+            $("#totalClasses").text(totalSubjects);
+            $("#totalClashes").text(analysis.totalClashes);
+            $("#cleanDays").text(analysis.cleanDays);
+            
+            if (analysis.totalClashes === 0) {
+                $("#noClashes").show();
+                $("#clashContent").hide();
+                return;
+            }
+            
+            // Show content
+            $("#clashContent").show();
+            
+            // Display clash cards
+            displayClashCards(analysis.clashes);
+            
+            // Display timeline
+            displayTimeline(analysis.scheduleGrid);
+            
+            // Generate recommendations
+            generateRecommendations(analysis);
+        }
+        
+        function displayClashCards(clashes) {
+            const container = $("#clashGrid");
+            container.empty();
+            
+            clashes.forEach((clash, index) => {
+                const dayName = DAYS[clash.day].name;
+                const timeSlot = TIME_SLOTS[clash.time];
+                
+                const cardHtml = `
+                    <div class="clash-card">
+                        <div class="clash-severity severity-${clash.severity.level}">
+                            ${clash.severity.label} Conflict
+                        </div>
+                        <h4>${dayName}, ${timeSlot.start} - ${timeSlot.end}</h4>
+                        <div class="time-slot">⏰ ${clash.entries.length} overlapping classes</div>
+                        <div style="margin-top: 15px;">
+                            <strong>Conflicting Subjects:</strong>
+                            <div style="margin-top: 10px;">
+                                ${clash.entries.map(entry => `
+                                    <div class="subject-badge">
+                                        ${entry.subject.kod_subjek} (Sec ${entry.subject.seksyen})
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        <div style="margin-top: 15px; font-size: 0.9em; color: #666;">
+                            <strong>Venues:</strong> 
+                            ${clash.entries.map(entry => 
+                                entry.ruang?.nama_ruang_singkatan || 'TBA'
+                            ).join(', ')}
+                        </div>
+                    </div>
+                `;
+                
+                container.append(cardHtml);
+            });
+        }
+        
+        function displayTimeline(scheduleGrid) {
+            const container = $("#timelineContainer");
+            container.empty();
+            
+            Object.keys(DAYS).forEach(day => {
+                const dayName = DAYS[day].name;
+                const dayHtml = `
+                    <div class="timeline-day">
+                        <h4>${dayName}</h4>
+                        ${generateDayTimeline(day, scheduleGrid[day])}
+                    </div>
+                `;
+                container.append(dayHtml);
+            });
+        }
+        
+        function generateDayTimeline(day, daySchedule) {
+            let timelineHtml = '';
+            
+            for (let time = 1; time <= 10; time++) {
+                const entries = daySchedule[time] || [];
+                const timeSlot = TIME_SLOTS[time];
+                const hasConflict = entries.length > 1;
+                
+                timelineHtml += `
+                    <div class="timeline-slot">
+                        <div class="conflict-indicator ${hasConflict ? 'conflict-yes' : 'conflict-no'}"></div>
+                        <div class="timeline-time">${timeSlot.start} - ${timeSlot.end}</div>
+                        <div class="timeline-subjects">
+                            ${entries.length === 0 ? 
+                                '<span style="color: #999; font-style: italic;">No class</span>' :
+                                entries.map(entry => `
+                                    <span class="subject-badge">
+                                        ${entry.subject.kod_subjek}
+                                    </span>
+                                `).join('')
+                            }
+                        </div>
+                    </div>
+                `;
+            }
+            
+            return timelineHtml;
+        }
+        
+        function generateRecommendations(analysis) {
+            let recommendations = [];
+            
+            if (analysis.totalClashes > 0) {
+                recommendations.push("Consider discussing timetable adjustments with your academic advisor.");
+                recommendations.push("Explore alternative sections for conflicting courses if available.");
+            }
+            
+            if (analysis.cleanDays >= 3) {
+                recommendations.push("Great! You have several conflict-free days for focused study.");
+            }
+            
+            const busiestDay = Object.keys(analysis.dailyClashCount).reduce((a, b) => 
+                analysis.dailyClashCount[a] > analysis.dailyClashCount[b] ? a : b
+            );
+            
+            if (analysis.dailyClashCount[busiestDay] > 0) {
+                recommendations.push(`${busiestDay} appears to be your busiest day with the most conflicts.`);
+            }
+            
+            $("#recommendations").html(recommendations.map(rec => `• ${rec}`).join('<br>'));
+        }
+        
+        // ==========================================
+        // HEATMAP CHART
+        // ==========================================
+        function drawClashHeatmap(dailyClashCount) {
+            const data = new google.visualization.DataTable();
+            data.addColumn({ type: 'string', id: 'Day' });
+            data.addColumn({ type: 'number', id: 'Clash Count' });
+            data.addColumn({ type: 'string', role: 'style' });
+            
+            Object.keys(dailyClashCount).forEach(day => {
+                const count = dailyClashCount[day];
+                let color = '#4caf50'; // Green for no clashes
+                if (count >= 3) color = '#f44336'; // Red for high clashes
+                else if (count >= 1) color = '#ff9800'; // Orange for medium clashes
+                
+                data.addRow([day, count, color]);
+            });
+            
+            const options = {
+                title: 'Daily Clash Distribution',
+                height: 400,
+                hAxis: { title: 'Day of Week' },
+                vAxis: { title: 'Number of Clashes', minValue: 0 },
+                colors: ['#4caf50', '#ff9800', '#f44336'],
+                animation: {
+                    startup: true,
+                    duration: 1000,
+                    easing: 'out'
+                }
+            };
+            
+            const chart = new google.visualization.ColumnChart(document.getElementById('clashHeatmap'));
+            chart.draw(data, options);
+        }
+        
+        // ==========================================
+        // ERROR HANDLING
+        // ==========================================
+        function showError(message) {
+            $("#loadingState").hide();
+            $("#clashContent").hide();
+            $("#errorMessage").text(message);
+            $("#errorState").show();
+        }
+        
+        function showNoData() {
+            $("#loadingState").hide();
+            $("#clashContent").hide();
+            $("#noClashes").show();
+        }
+        
+    });
     </script>
+</body>
 </html>
