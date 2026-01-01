@@ -103,6 +103,12 @@
                 window.location.replace("Main.html"); 
             });
         }
+        
+        $("#password").keypress(function(event) {
+            if (event.which === 13) {
+                $("#btnLogin").click();
+            }
+        });
     </script>
 </body>
 </html>
