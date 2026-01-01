@@ -14,7 +14,7 @@
     </div>
 
     <div class="login-box">
-        <h3 class="w3-text-white w3-center">🔐 Lecturer to Admin Upgrade</h3>
+        <h3 class="w3-text-black w3-center">🔐 Lecturer to Admin Upgrade</h3>
         
         <div class="w3-panel w3-light-blue w3-round">
             <p><strong>Note:</strong> Only lecturers can access admin features. 
@@ -22,14 +22,16 @@
         </div>
         
         <div class="w3-margin-bottom">
-            <label class="w3-text-white">Lecturer Login:</label>
-            <input type="text" id="lecturerLogin" class="input-field" placeholder="e.g., 12085">
+            <label class="w3-text-black">Lecturer Login:</label>
+            <input type="text" id="lecturerLogin" class="input-field" placeholder="e.g. 12085">
         </div>
         
         <div class="w3-margin-bottom">
-            <label class="w3-text-white">Lecturer Password:</label>
+            <label class="w3-text-black">Lecturer Password:</label>
             <input type="password" id="lecturerPassword" class="input-field" placeholder="Enter password">
         </div>
+
+        <div class="inputError"></div>
         
         <button class="login-button" id="btnLoginAsLecturer">Login as Lecturer</button>
         
@@ -40,7 +42,7 @@
         </div>
         
         <div class="w3-margin-top w3-center">
-            <a href="Login.html" class="w3-text-light-blue">← Back to Student Login</a>
+            <a href="Login.html" class="w3-text-blue">← Back to Student Login</a>
         </div>
     </div>
 
@@ -53,9 +55,11 @@
             $("#btnLoginAsLecturer").click(function() {
                 const loginId = $("#lecturerLogin").val();
                 const password = $("#lecturerPassword").val();
+
+                $(".inputError").text("");
                 
                 if (!loginId || !password) {
-                    alert("Please enter lecturer credentials");
+                    $(".inputError").text("Please enter lecturer credentials");
                     return;
                 }
                 
@@ -65,7 +69,7 @@
                     .then(res => res.json())
                     .then(jsonInst => {
                         if (!Array.isArray(jsonInst) || jsonInst.length === 0 || !jsonInst[0].session_id) {
-                            throw new Error("Invalid lecturer credentials");
+                            $(".inputError").text("Invalid lecturer credentials");
                         }
                         
                         const userData = jsonInst[0];
@@ -73,7 +77,7 @@
                         
                         // Check if user is a lecturer
                         if (!description.includes("Pensyarah")) {
-                            alert("❌ Only lecturers can access admin features.");
+                            $(".inputError").text("❌ Only lecturers can access admin features.");
                             return;
                         }
                         
@@ -85,7 +89,7 @@
                         $("#btnUpgradeToAdmin").show();
                     })
                     .catch(err => {
-                        alert("Invalid lecturer credentials or connection error!");
+                        $(".inputError").text("Invalid lecturer credentials or connection error!");
                         console.error("Login Error:", err);
                     });
             });
@@ -95,7 +99,7 @@
                 const lecturerSession = JSON.parse(localStorage.getItem("TTMSFC_lecturerSession"));
                 
                 if (!lecturerSession || !lecturerSession.session_id) {
-                    alert("Please login as lecturer first");
+                    $(".inputError").text("Please login as lecturer first");
                     return;
                 }
                 
@@ -128,7 +132,7 @@
                         window.location.href = "Admin.html";
                     })
                     .catch(err => {
-                        alert("❌ Failed to upgrade to admin. Please try again.");
+                        $(".inputError").text("❌ Failed to upgrade to admin. Please try again.");
                         console.error("Admin Upgrade Error:", err);
                     });
             });
