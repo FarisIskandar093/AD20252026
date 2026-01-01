@@ -57,10 +57,3 @@ http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pelajar&session_id=
 limit=10&offset=0 (First 10 students, 1 - 10)
 limit=10&offset=10 (Second 10 students, 11 - 20)
 limit=10&offset=20 (Third 10 students, 21 - 30)
-
-
-
-
-
-
-

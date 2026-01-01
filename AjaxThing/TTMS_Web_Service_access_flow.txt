@@ -122,8 +122,3 @@ venue => MPK3
 venue => MPK3
 
 Final display: SCSJ4383 (Monday, MPK3, 10am-12pm)
-
-
-
-
-

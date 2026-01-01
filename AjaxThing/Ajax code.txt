@@ -1,6 +1,9 @@
+TTMS FC JSON Service Entities
+====
+
 authentication
 
- sesisemester -> entity=sesisemester 
+sesisemester -> entity=sesisemester 
 
 pensyarah -> entity=pensyarah&session_id=???&sesi=yyyy/yyyy&semester=[1|2]
 
