@@ -1,0 +1,290 @@
+<div class="w3-container">
+    <h2 class="w3-text-blue">🏫 Room Availability & Booking</h2>
+    <p class="w3-text-grey">Check room availability and request bookings</p>
+    
+    <div class="w3-row">
+        <div class="w3-col m8">
+            <!-- Room Search -->
+            <div class="w3-card w3-padding w3-margin-bottom">
+                <h4>🔍 Search Available Rooms</h4>
+                
+                <div class="w3-row w3-margin-bottom">
+                    <div class="w3-col m4">
+                        <label>Day:</label>
+                        <select id="searchDay" class="w3-input w3-border">
+                            <option value="2">Monday</option>
+                            <option value="3">Tuesday</option>
+                            <option value="4">Wednesday</option>
+                            <option value="5">Thursday</option>
+                            <option value="6">Friday</option>
+                        </select>
+                    </div>
+                    
+                    <div class="w3-col m4">
+                        <label>Time Slot:</label>
+                        <select id="searchTime" class="w3-input w3-border">
+                            <option value="1">8:00-9:00</option>
+                            <option value="2">9:00-10:00</option>
+                            <option value="3">10:00-11:00</option>
+                            <option value="4">11:00-12:00</option>
+                            <option value="5">12:00-13:00</option>
+                            <option value="7">14:00-15:00</option>
+                            <option value="8">15:00-16:00</option>
+                            <option value="9">16:00-17:00</option>
+                            <option value="10">17:00-18:00</option>
+                        </select>
+                    </div>
+                    
+                    <div class="w3-col m4">
+                        <label>Room Type:</label>
+                        <select id="searchType" class="w3-input w3-border">
+                            <option value="">Any Type</option>
+                            <option value="LECTURE">Lecture Hall</option>
+                            <option value="LAB">Computer Lab</option>
+                            <option value="TUTORIAL">Tutorial Room</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <button class="w3-button w3-blue w3-block" onclick="searchAvailableRooms()">
+                    🔍 Search Available Rooms
+                </button>
+            </div>
+            
+            <!-- Results -->
+            <div class="w3-card w3-padding">
+                <h4>📋 Available Rooms</h4>
+                <div id="roomResults">
+                    <div class="w3-center w3-padding-24">
+                        <p class="w3-text-grey">Search for rooms to see availability</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="w3-col m4">
+            <!-- Booking Form -->
+            <div class="w3-card w3-padding">
+                <h4>📅 Request Booking</h4>
+                
+                <div class="w3-panel w3-light-blue w3-round">
+                    <p><strong>Note:</strong> Room bookings require approval from Academic Office.</p>
+                </div>
+                
+                <div class="w3-margin-bottom">
+                    <label>Course:</label>
+                    <select id="bookingCourse" class="w3-input w3-border">
+                        <option value="">Select Course...</option>
+                        <option value="SECV3104">SECV3104 - Application Development</option>
+                        <option value="SECJ1013">SECJ1013 - Programming Techniques</option>
+                    </select>
+                </div>
+                
+                <div class="w3-margin-bottom">
+                    <label>Purpose:</label>
+                    <select id="bookingPurpose" class="w3-input w3-border">
+                        <option value="LECTURE">Regular Lecture</option>
+                        <option value="TUTORIAL">Tutorial Session</option>
+                        <option value="MEETING">Student Consultation</option>
+                        <option value="MAKEUP">Make-up Class</option>
+                        <option value="OTHER">Other</option>
+                    </select>
+                </div>
+                
+                <div class="w3-margin-bottom">
+                    <label>Date:</label>
+                    <input type="date" id="bookingDate" class="w3-input w3-border" value="${new Date().toISOString().split('T')[0]}">
+                </div>
+                
+                <div class="w3-row">
+                    <div class="w3-col m6">
+                        <label>Start Time:</label>
+                        <input type="time" id="bookingStart" class="w3-input w3-border" value="14:00">
+                    </div>
+                    <div class="w3-col m6">
+                        <label>End Time:</label>
+                        <input type="time" id="bookingEnd" class="w3-input w3-border" value="16:00">
+                    </div>
+                </div>
+                
+                <div class="w3-margin-bottom">
+                    <label>Additional Notes:</label>
+                    <textarea id="bookingNotes" class="w3-input w3-border" rows="3" placeholder="Special requirements, equipment needed, etc."></textarea>
+                </div>
+                
+                <button class="w3-button w3-green w3-block" onclick="submitBookingRequest()">
+                    📨 Submit Booking Request
+                </button>
+            </div>
+            
+            <!-- My Bookings -->
+            <div class="w3-card w3-padding w3-margin-top">
+                <h4>📋 My Bookings</h4>
+                
+                <div id="myBookings">
+                    <div class="w3-panel w3-border w3-round w3-small">
+                        <p><strong>SECV3104 - MPK5</strong></p>
+                        <p>Mon, 10:00-12:00</p>
+                        <p><span class="w3-tag w3-blue">APPROVED</span></p>
+                    </div>
+                    
+                    <div class="w3-panel w3-border w3-round w3-small">
+                        <p><strong>Student Consultation - N28-201</strong></p>
+                        <p>Wed, 14:00-15:00</p>
+                        <p><span class="w3-tag w3-yellow">PENDING</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="../JS/Authenticate.js"></script>
+<script>
+    function searchAvailableRooms() {
+        const day = $("#searchDay").val();
+        const time = $("#searchTime").val();
+        const type = $("#searchType").val();
+        
+        // Show loading
+        $("#roomResults").html(`
+            <div class="w3-center w3-padding-24">
+                <div class="loading-spinner"></div>
+                <p>Searching for available rooms...</p>
+            </div>
+        `);
+        
+        // Simulate API call
+        setTimeout(() => {
+            const sampleRooms = [
+                { code: "MPK5", name: "Makmal Pengaturcaraan 05", type: "LAB", capacity: 40, status: "AVAILABLE" },
+                { code: "BK4", name: "Bilik Kuliah 04", type: "LECTURE", capacity: 80, status: "AVAILABLE" },
+                { code: "N28-201", name: "Meeting Room 201", type: "MEETING", capacity: 20, status: "AVAILABLE" },
+                { code: "MPK3", name: "Makmal Pengaturcaraan 03", type: "LAB", capacity: 40, status: "OCCUPIED" },
+                { code: "BK3", name: "Bilik Kuliah 03", type: "LECTURE", capacity: 60, status: "AVAILABLE" }
+            ];
+            
+            // Filter by type if specified
+            let filteredRooms = sampleRooms;
+            if (type) {
+                filteredRooms = sampleRooms.filter(room => room.type === type);
+            }
+            
+            let resultsHTML = '';
+            
+            if (filteredRooms.length === 0) {
+                resultsHTML = `
+                    <div class="w3-panel w3-yellow">
+                        <p>No rooms found matching your criteria.</p>
+                    </div>
+                `;
+            } else {
+                filteredRooms.forEach(room => {
+                    const statusClass = room.status === "AVAILABLE" ? "w3-green" : "w3-red";
+                    const statusText = room.status === "AVAILABLE" ? "Available" : "Occupied";
+                    
+                    resultsHTML += `
+                        <div class="w3-panel w3-border w3-round-large w3-margin-bottom">
+                            <div class="w3-row">
+                                <div class="w3-col m8">
+                                    <h5><strong>${room.code}</strong> - ${room.name}</h5>
+                                    <p>Type: ${room.type} | Capacity: ${room.capacity} students</p>
+                                </div>
+                                <div class="w3-col m4 w3-right-align">
+                                    <span class="w3-tag ${statusClass}">${statusText}</span><br>
+                                    <button class="w3-button w3-blue w3-small w3-margin-top" onclick="selectRoom('${room.code}')">
+                                        Select
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            
+            $("#roomResults").html(resultsHTML);
+        }, 1000);
+    }
+
+    function selectRoom(roomCode) {
+        // Auto-fill booking form with selected room
+        $("#bookingCourse").focus();
+        alert(`Room ${roomCode} selected. Please complete the booking form.`);
+        
+        // In a real system, you would store the selected room
+        sessionStorage.setItem('selectedRoom', roomCode);
+    }
+
+    function submitBookingRequest() {
+        const course = $("#bookingCourse").val();
+        const purpose = $("#bookingPurpose").val();
+        const date = $("#bookingDate").val();
+        const startTime = $("#bookingStart").val();
+        const endTime = $("#bookingEnd").val();
+        const notes = $("#bookingNotes").val();
+        
+        if (!course) {
+            alert("Please select a course");
+            return;
+        }
+        
+        if (!date || !startTime || !endTime) {
+            alert("Please provide date and time");
+            return;
+        }
+        
+        const bookingDetails = {
+            course,
+            purpose,
+            date,
+            startTime,
+            endTime,
+            notes,
+            timestamp: new Date().toISOString()
+        };
+        
+        // In a real system, send to backend
+        console.log("Booking request:", bookingDetails);
+        
+        alert(`✅ Booking request submitted for ${course} on ${date} (${startTime}-${endTime})\n\nStatus: Pending approval from Academic Office.`);
+        
+        // Clear form
+        $("#bookingCourse").val("");
+        $("#bookingNotes").val("");
+        
+        // Add to "My Bookings"
+        const newBooking = `
+            <div class="w3-panel w3-border w3-round w3-small">
+                <p><strong>${course} - Room TBD</strong></p>
+                <p>${date}, ${startTime}-${endTime}</p>
+                <p><span class="w3-tag w3-yellow">PENDING</span></p>
+            </div>
+        `;
+        
+        $("#myBookings").prepend(newBooking);
+    }
+
+    // Load initial data
+    $(document).ready(function() {
+        // Set default search to current day/time
+        const now = new Date();
+        const currentDay = now.getDay();
+        
+        // Map to TTMS day codes (Monday=2)
+        if (currentDay >= 1 && currentDay <= 5) {
+            $("#searchDay").val(currentDay + 1);
+        }
+        
+        // Set default time to next hour
+        const currentHour = now.getHours();
+        let defaultTimeSlot = 1;
+        
+        if (currentHour >= 8 && currentHour < 17) {
+            defaultTimeSlot = currentHour - 7;
+        }
+        
+        if (defaultTimeSlot >= 1 && defaultTimeSlot <= 10) {
+            $("#searchTime").val(defaultTimeSlot);
+        }
+    });
+</script>

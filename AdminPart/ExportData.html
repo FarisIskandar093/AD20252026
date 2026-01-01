@@ -106,96 +106,97 @@
     </div>
 </div>
 
+<script src="../JS/Authenticate.js"></script>
 <script>
-let currentFormat = 'csv';
+    let currentFormat = 'csv';
 
-function selectFormat(format) {
-    currentFormat = format;
-    
-    // Update UI
-    $('.w3-bar-item.w3-button').removeClass('w3-purple');
-    $(`.w3-bar-item.w3-button:contains('${format.toUpperCase()}')`).addClass('w3-purple');
-}
-
-function generateExport() {
-    // Check what to export
-    const exportStudents = $("#exportStudents").is(":checked");
-    const exportCourses = $("#exportCourses").is(":checked");
-    const exportRooms = $("#exportRooms").is(":checked");
-    const exportTimetable = $("#exportTimetable").is(":checked");
-    
-    const sesi = $("#exportSesi").val();
-    const semester = $("#exportSemester").val();
-    
-    if (!exportStudents && !exportCourses && !exportRooms && !exportTimetable) {
-        alert("Please select at least one data type to export");
-        return;
-    }
-    
-    // Show loading/progress
-    const exportTypes = [];
-    if (exportStudents) exportTypes.push("Students");
-    if (exportCourses) exportTypes.push("Courses");
-    if (exportRooms) exportTypes.push("Rooms");
-    if (exportTimetable) exportTypes.push("Timetable");
-    
-    const exportMessage = `Generating ${currentFormat.toUpperCase()} export with:\n\n• ${exportTypes.join("\n• ")}\n\nSession: ${sesi}-${semester}`;
-    
-    if (confirm(exportMessage)) {
-        // Simulate export process
-        simulateExportProgress();
-    }
-}
-
-function simulateExportProgress() {
-    let progress = 0;
-    const interval = setInterval(() => {
-        progress += 10;
+    function selectFormat(format) {
+        currentFormat = format;
         
-        if (progress >= 100) {
-            clearInterval(interval);
-            
-            // Update history
-            const now = new Date();
-            $("#lastExport").text(now.toLocaleString());
-            
-            let exportCount = parseInt($("#exportCount").text()) || 0;
-            exportCount++;
-            $("#exportCount").text(exportCount);
-            
-            // Add to history
-            const historyEntry = `
-                <div class="w3-panel w3-border w3-round w3-small w3-margin-bottom">
-                    <p><strong>${now.toLocaleDateString()} ${now.toLocaleTimeString()}</strong></p>
-                    <p>Format: ${currentFormat.toUpperCase()} | Session: ${$("#exportSesi").val()}-${$("#exportSemester").val()}</p>
-                    <p class="w3-text-green">✅ Export completed</p>
-                </div>
-            `;
-            
-            $("#exportHistory").prepend(historyEntry);
-            
-            // Offer download (simulated)
-            alert(`✅ Export completed!\n\nYour ${currentFormat.toUpperCase()} file is ready for download.\n\nIn a real system, the file would download automatically.`);
+        // Update UI
+        $('.w3-bar-item.w3-button').removeClass('w3-purple');
+        $(`.w3-bar-item.w3-button:contains('${format.toUpperCase()}')`).addClass('w3-purple');
+    }
+
+    function generateExport() {
+        // Check what to export
+        const exportStudents = $("#exportStudents").is(":checked");
+        const exportCourses = $("#exportCourses").is(":checked");
+        const exportRooms = $("#exportRooms").is(":checked");
+        const exportTimetable = $("#exportTimetable").is(":checked");
+        
+        const sesi = $("#exportSesi").val();
+        const semester = $("#exportSemester").val();
+        
+        if (!exportStudents && !exportCourses && !exportRooms && !exportTimetable) {
+            alert("Please select at least one data type to export");
+            return;
         }
-    }, 200);
-}
-
-function createBackup() {
-    if (confirm("Create a complete system backup?\n\nThis may take several minutes.")) {
-        alert("Backup process started...\n\nIn a real system, this would create a database dump and file backup.");
         
-        setTimeout(() => {
-            alert("✅ Backup completed successfully!\n\nBackup saved to: /backups/ttms_backup_" + new Date().toISOString().split('T')[0] + ".zip");
-        }, 2000);
+        // Show loading/progress
+        const exportTypes = [];
+        if (exportStudents) exportTypes.push("Students");
+        if (exportCourses) exportTypes.push("Courses");
+        if (exportRooms) exportTypes.push("Rooms");
+        if (exportTimetable) exportTypes.push("Timetable");
+        
+        const exportMessage = `Generating ${currentFormat.toUpperCase()} export with:\n\n• ${exportTypes.join("\n• ")}\n\nSession: ${sesi}-${semester}`;
+        
+        if (confirm(exportMessage)) {
+            // Simulate export process
+            simulateExportProgress();
+        }
     }
-}
 
-function scheduleAutoExport() {
-    alert("Auto-Export Scheduling\n\nIn a real system, this would allow you to schedule regular exports (daily, weekly, monthly).");
-}
+    function simulateExportProgress() {
+        let progress = 0;
+        const interval = setInterval(() => {
+            progress += 10;
+            
+            if (progress >= 100) {
+                clearInterval(interval);
+                
+                // Update history
+                const now = new Date();
+                $("#lastExport").text(now.toLocaleString());
+                
+                let exportCount = parseInt($("#exportCount").text()) || 0;
+                exportCount++;
+                $("#exportCount").text(exportCount);
+                
+                // Add to history
+                const historyEntry = `
+                    <div class="w3-panel w3-border w3-round w3-small w3-margin-bottom">
+                        <p><strong>${now.toLocaleDateString()} ${now.toLocaleTimeString()}</strong></p>
+                        <p>Format: ${currentFormat.toUpperCase()} | Session: ${$("#exportSesi").val()}-${$("#exportSemester").val()}</p>
+                        <p class="w3-text-green">✅ Export completed</p>
+                    </div>
+                `;
+                
+                $("#exportHistory").prepend(historyEntry);
+                
+                // Offer download (simulated)
+                alert(`✅ Export completed!\n\nYour ${currentFormat.toUpperCase()} file is ready for download.\n\nIn a real system, the file would download automatically.`);
+            }
+        }, 200);
+    }
 
-$(document).ready(function() {
-    // Initialize
-    selectFormat('csv');
-});
+    function createBackup() {
+        if (confirm("Create a complete system backup?\n\nThis may take several minutes.")) {
+            alert("Backup process started...\n\nIn a real system, this would create a database dump and file backup.");
+            
+            setTimeout(() => {
+                alert("✅ Backup completed successfully!\n\nBackup saved to: /backups/ttms_backup_" + new Date().toISOString().split('T')[0] + ".zip");
+            }, 2000);
+        }
+    }
+
+    function scheduleAutoExport() {
+        alert("Auto-Export Scheduling\n\nIn a real system, this would allow you to schedule regular exports (daily, weekly, monthly).");
+    }
+
+    $(document).ready(function() {
+        // Initialize
+        selectFormat('csv');
+    });
 </script>

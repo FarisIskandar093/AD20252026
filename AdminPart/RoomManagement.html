@@ -96,177 +96,178 @@
     </div>
 </div>
 
+<script src="../JS/Authenticate.js"></script>
 <script>
-$(document).ready(function() {
-    loadRoomList();
-    
-    function loadRoomList() {
-        fetch(`http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=ruang&kod_fakulti=fsksm`)
-            .then(res => res.json())
-            .then(rooms => {
-                if (Array.isArray(rooms)) {
-                    // Filter for N28/N28A rooms
-                    const filteredRooms = rooms.filter(room => 
-                        room.kod_ruang && (room.kod_ruang.startsWith('N28') || room.kod_ruang.startsWith('N28A'))
-                    );
+    $(document).ready(function() {
+        loadRoomList();
+        
+        function loadRoomList() {
+            fetch(`http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=ruang&kod_fakulti=fsksm`)
+                .then(res => res.json())
+                .then(rooms => {
+                    if (Array.isArray(rooms)) {
+                        // Filter for N28/N28A rooms
+                        const filteredRooms = rooms.filter(room => 
+                            room.kod_ruang && (room.kod_ruang.startsWith('N28') || room.kod_ruang.startsWith('N28A'))
+                        );
+                        
+                        // Populate dropdown
+                        filteredRooms.forEach(room => {
+                            const option = `<option value="${room.kod_ruang}">${room.kod_ruang} - ${room.nama_ruang_singkatan || room.nama_ruang}</option>`;
+                            $("#roomSelect").append(option);
+                        });
+                        
+                        $("#roomScheduleLoading").hide();
+                        
+                        if (filteredRooms.length > 0) {
+                            $("#roomSelect").val(filteredRooms[0].kod_ruang);
+                            loadRoomSchedule();
+                        }
+                    }
+                })
+                .catch(err => {
+                    console.error("Error loading rooms:", err);
+                    $("#roomScheduleLoading").html('<div class="w3-panel w3-red">Error loading room data</div>');
+                });
+        }
+        
+        window.loadRoomSchedule = function() {
+            const roomCode = $("#roomSelect").val();
+            if (!roomCode) return;
+            
+            $("#roomScheduleLoading").show();
+            $("#roomScheduleContainer").hide();
+            
+            const currentSesi = window.parent.currentSesi;
+            const currentSemester = window.parent.currentSemester;
+            
+            fetch(`http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=jadual_ruang&sesi=${currentSesi}&semester=${currentSemester}&kod_ruang=${roomCode}`)
+                .then(res => res.json())
+                .then(schedule => {
+                    $("#roomScheduleLoading").hide();
+                    $("#roomScheduleContainer").show();
                     
-                    // Populate dropdown
-                    filteredRooms.forEach(room => {
-                        const option = `<option value="${room.kod_ruang}">${room.kod_ruang} - ${room.nama_ruang_singkatan || room.nama_ruang}</option>`;
-                        $("#roomSelect").append(option);
+                    if (!Array.isArray(schedule) || schedule.length === 0) {
+                        $("#roomScheduleBody").html(`
+                            <tr>
+                                <td colspan="5" class="w3-center w3-padding-24">
+                                    <div class="w3-text-grey">No schedule found for this room</div>
+                                </td>
+                            </tr>
+                        `);
+                        return;
+                    }
+                    
+                    // Display schedule
+                    $("#roomScheduleBody").empty();
+                    
+                    // Group by day and time
+                    const scheduleByDay = {};
+                    schedule.forEach(slot => {
+                        if (!scheduleByDay[slot.hari]) {
+                            scheduleByDay[slot.hari] = {};
+                        }
+                        if (!scheduleByDay[slot.hari][slot.masa]) {
+                            scheduleByDay[slot.hari][slot.masa] = [];
+                        }
+                        scheduleByDay[slot.hari][slot.masa].push(slot);
                     });
                     
-                    $("#roomScheduleLoading").hide();
+                    // Map day codes to names
+                    const dayNames = {
+                        2: 'Monday',
+                        3: 'Tuesday', 
+                        4: 'Wednesday',
+                        5: 'Thursday',
+                        6: 'Friday'
+                    };
                     
-                    if (filteredRooms.length > 0) {
-                        $("#roomSelect").val(filteredRooms[0].kod_ruang);
-                        loadRoomSchedule();
-                    }
-                }
-            })
-            .catch(err => {
-                console.error("Error loading rooms:", err);
-                $("#roomScheduleLoading").html('<div class="w3-panel w3-red">Error loading room data</div>');
-            });
-    }
-    
-    window.loadRoomSchedule = function() {
-        const roomCode = $("#roomSelect").val();
-        if (!roomCode) return;
-        
-        $("#roomScheduleLoading").show();
-        $("#roomScheduleContainer").hide();
-        
-        const currentSesi = window.parent.currentSesi;
-        const currentSemester = window.parent.currentSemester;
-        
-        fetch(`http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=jadual_ruang&sesi=${currentSesi}&semester=${currentSemester}&kod_ruang=${roomCode}`)
-            .then(res => res.json())
-            .then(schedule => {
-                $("#roomScheduleLoading").hide();
-                $("#roomScheduleContainer").show();
-                
-                if (!Array.isArray(schedule) || schedule.length === 0) {
-                    $("#roomScheduleBody").html(`
-                        <tr>
-                            <td colspan="5" class="w3-center w3-padding-24">
-                                <div class="w3-text-grey">No schedule found for this room</div>
-                            </td>
-                        </tr>
-                    `);
-                    return;
-                }
-                
-                // Display schedule
-                $("#roomScheduleBody").empty();
-                
-                // Group by day and time
-                const scheduleByDay = {};
-                schedule.forEach(slot => {
-                    if (!scheduleByDay[slot.hari]) {
-                        scheduleByDay[slot.hari] = {};
-                    }
-                    if (!scheduleByDay[slot.hari][slot.masa]) {
-                        scheduleByDay[slot.hari][slot.masa] = [];
-                    }
-                    scheduleByDay[slot.hari][slot.masa].push(slot);
-                });
-                
-                // Map day codes to names
-                const dayNames = {
-                    2: 'Monday',
-                    3: 'Tuesday', 
-                    4: 'Wednesday',
-                    5: 'Thursday',
-                    6: 'Friday'
-                };
-                
-                // Map time codes to readable times
-                const timeSlots = {
-                    1: '8:00-9:00',
-                    2: '9:00-10:00',
-                    3: '10:00-11:00',
-                    4: '11:00-12:00',
-                    5: '12:00-13:00',
-                    7: '14:00-15:00',
-                    8: '15:00-16:00',
-                    9: '16:00-17:00',
-                    10: '17:00-18:00'
-                };
-                
-                // Create table rows
-                Object.keys(scheduleByDay).forEach(dayCode => {
-                    Object.keys(scheduleByDay[dayCode]).forEach(timeCode => {
-                        scheduleByDay[dayCode][timeCode].forEach(slot => {
-                            const course = slot.subjek ? slot.subjek.kod_subjek : 'N/A';
-                            const lecturer = slot.pensyarah ? slot.pensyarah.nama_pensyarah : 'N/A';
-                            
-                            const row = `
-                                <tr>
-                                    <td>${dayNames[dayCode] || 'Unknown'} ${timeSlots[timeCode] || timeCode}</td>
-                                    <td><strong>${course}</strong></td>
-                                    <td>${lecturer}</td>
-                                    <td>${slot.subjek ? slot.subjek.seksyen : 'N/A'}</td>
-                                    <td><span class="w3-tag w3-blue">Scheduled</span></td>
-                                </tr>
-                            `;
-                            $("#roomScheduleBody").append(row);
+                    // Map time codes to readable times
+                    const timeSlots = {
+                        1: '8:00-9:00',
+                        2: '9:00-10:00',
+                        3: '10:00-11:00',
+                        4: '11:00-12:00',
+                        5: '12:00-13:00',
+                        7: '14:00-15:00',
+                        8: '15:00-16:00',
+                        9: '16:00-17:00',
+                        10: '17:00-18:00'
+                    };
+                    
+                    // Create table rows
+                    Object.keys(scheduleByDay).forEach(dayCode => {
+                        Object.keys(scheduleByDay[dayCode]).forEach(timeCode => {
+                            scheduleByDay[dayCode][timeCode].forEach(slot => {
+                                const course = slot.subjek ? slot.subjek.kod_subjek : 'N/A';
+                                const lecturer = slot.pensyarah ? slot.pensyarah.nama_pensyarah : 'N/A';
+                                
+                                const row = `
+                                    <tr>
+                                        <td>${dayNames[dayCode] || 'Unknown'} ${timeSlots[timeCode] || timeCode}</td>
+                                        <td><strong>${course}</strong></td>
+                                        <td>${lecturer}</td>
+                                        <td>${slot.subjek ? slot.subjek.seksyen : 'N/A'}</td>
+                                        <td><span class="w3-tag w3-blue">Scheduled</span></td>
+                                    </tr>
+                                `;
+                                $("#roomScheduleBody").append(row);
+                            });
                         });
                     });
+                    
+                    // Show room info
+                    $("#roomInfo").show();
+                    
+                    // Fetch additional room info
+                    fetch(`http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=ruang&kod_fakulti=fsksm&kod_ruang_like=${roomCode}`)
+                        .then(res => res.json())
+                        .then(roomData => {
+                            if (Array.isArray(roomData) && roomData.length > 0) {
+                                const room = roomData[0];
+                                $("#roomCapacity").text(room.kapasiti || 'Unknown');
+                                $("#roomType").text(room.jenis || 'Unknown');
+                                
+                                // Calculate weekly usage (simplified)
+                                const weeklyHours = schedule.length;
+                                $("#roomUsage").text(weeklyHours);
+                            }
+                        });
+                })
+                .catch(err => {
+                    console.error("Error loading room schedule:", err);
+                    $("#roomScheduleLoading").html('<div class="w3-panel w3-red">Error loading schedule</div>');
                 });
-                
-                // Show room info
-                $("#roomInfo").show();
-                
-                // Fetch additional room info
-                fetch(`http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=ruang&kod_fakulti=fsksm&kod_ruang_like=${roomCode}`)
-                    .then(res => res.json())
-                    .then(roomData => {
-                        if (Array.isArray(roomData) && roomData.length > 0) {
-                            const room = roomData[0];
-                            $("#roomCapacity").text(room.kapasiti || 'Unknown');
-                            $("#roomType").text(room.jenis || 'Unknown');
-                            
-                            // Calculate weekly usage (simplified)
-                            const weeklyHours = schedule.length;
-                            $("#roomUsage").text(weeklyHours);
-                        }
-                    });
-            })
-            .catch(err => {
-                console.error("Error loading room schedule:", err);
-                $("#roomScheduleLoading").html('<div class="w3-panel w3-red">Error loading schedule</div>');
-            });
-    };
-    
-    window.searchRoom = function() {
-        const searchTerm = $("#roomSearch").val();
-        if (!searchTerm) {
-            alert("Please enter a search term");
-            return;
-        }
+        };
         
-        alert(`Searching for rooms containing: "${searchTerm}"\n\nIn a real system, this would filter the room list.`);
-    };
-    
-    window.reportRoomIssue = function() {
-        const issue = $("#roomIssue").val();
-        const roomCode = $("#roomSelect").val();
+        window.searchRoom = function() {
+            const searchTerm = $("#roomSearch").val();
+            if (!searchTerm) {
+                alert("Please enter a search term");
+                return;
+            }
+            
+            alert(`Searching for rooms containing: "${searchTerm}"\n\nIn a real system, this would filter the room list.`);
+        };
         
-        if (!issue) {
-            alert("Please describe the issue");
-            return;
-        }
-        
-        if (!roomCode) {
-            alert("Please select a room first");
-            return;
-        }
-        
-        if (confirm(`Report issue for room ${roomCode}?`)) {
-            alert(`Issue reported for ${roomCode}:\n\n"${issue}"\n\nThank you for your report.`);
-            $("#roomIssue").val('');
-        }
-    };
-});
+        window.reportRoomIssue = function() {
+            const issue = $("#roomIssue").val();
+            const roomCode = $("#roomSelect").val();
+            
+            if (!issue) {
+                alert("Please describe the issue");
+                return;
+            }
+            
+            if (!roomCode) {
+                alert("Please select a room first");
+                return;
+            }
+            
+            if (confirm(`Report issue for room ${roomCode}?`)) {
+                alert(`Issue reported for ${roomCode}:\n\n"${issue}"\n\nThank you for your report.`);
+                $("#roomIssue").val('');
+            }
+        };
+    });
 </script>

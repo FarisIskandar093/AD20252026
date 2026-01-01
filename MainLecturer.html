@@ -1,170 +1,288 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>TTMS - Visualization Dashboard</title>
+    <title>TTMS - Lecturer Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="Styles/mainStyle.css">
     
-    <link rel="stylesheet" href="Styles/mainStyle.css"> 
+    <style>
+        /* Lecturer-specific theme overrides */
+        .lecturer-theme {
+            --primary-blue: #3f51b5;
+            --secondary-blue: #2196f3;
+            --accent-purple: #673ab7;
+            --light-bg: #f5f7fa;
+        }
+        
+        .w3-lecturer-blue { background-color: #3f51b5 !important; color: white !important; }
+        .w3-lecturer-purple { background-color: #673ab7 !important; color: white !important; }
+        .w3-lecturer-light-blue { background-color: #e3f2fd !important; color: #1565c0 !important; }
+        
+        .lecturer-header {
+            background: linear-gradient(135deg, #3f51b5 0%, #673ab7 100%);
+        }
+        
+        .lecturer-card {
+            border-left: 5px solid #3f51b5;
+            border-radius: 10px;
+            background: white;
+            box-shadow: 0 4px 15px rgba(63, 81, 181, 0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .lecturer-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(63, 81, 181, 0.2);
+        }
+        
+        .workload-badge {
+            background: linear-gradient(135deg, #673ab7, #9c27b0);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            display: inline-block;
+        }
+        
+        .teaching-schedule {
+            border-left: 4px solid #2196f3;
+            background: linear-gradient(135deg, #e3f2fd, #f5f7fa);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        
+        .urgent-alert {
+            border-left: 4px solid #ff5722;
+            background: linear-gradient(135deg, #fff3e0, #fff8e1);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.9; }
+            100% { opacity: 1; }
+        }
+    </style>
+    <script src="JS/Authenticate.js"></script>
 </head>
-<body>
+<body class="lecturer-theme">
 
-<div class="utm-header">
+<!-- Header -->
+<div class="utm-header lecturer-header">
     <div class="header-title">
-        TTMS - Visualization Support System
+        👨‍🏫 Lecturer Dashboard - TTMS Faculty of Computing
     </div>
     <div class="user-links">
         <span class="w3-large w3-hide-small">Welcome, <span id="user">???</span> |</span>
-        <a href="#" id="logout">Logout</a> 
+        <a href="#" id="adminAccess" class="w3-button w3-purple w3-round" style="margin-right:10px;">👑 Admin Access</a>
+        <a href="#" id="logout" class="w3-button w3-red w3-round">Logout</a>
     </div>
 </div>
 
-<nav class="w3-sidebar w3-bar-block w3-light-grey">
-    
-    <a href="#" class="w3-bar-item w3-button w3-hover-light-grey w3-blue-dark" id="announcement-dashboard">📢 Announcements</a>
-    
-    <h5 class="w3-bar-item w3-text-gray w3-border-bottom"><b>TIMETABLE</b></h5>
-    
-    <a href="#" class="w3-bar-item w3-button w3-hover-light-grey" id="my-timetable">📅 My Timetable</a>
-    <a href="#" class="w3-bar-item w3-button w3-hover-light-grey" id="course-list">📝 My CourseList</a>
-    <a href="#" class="w3-bar-item w3-button w3-hover-light-grey" id="room-availability">🏫 Room Availability</a>
-    <hr>
-    <h5 class="w3-bar-item w3-text-gray w3-border-bottom"><b>ANALYSIS</b></h5>
-    
-
-    <a href="#" class="w3-bar-item w3-button w3-hover-light-grey" id="room-usage">📈 Room Usage</a>
-    <a href="#" class="w3-bar-item w3-button w3-hover-light-grey" id="room-clash-analyzer">🏢 Room Clash Analyzer</a>
-    <a href="#" class="w3-bar-item w3-button w3-hover-light-grey" id="lecturer-time">🧑🏻‍🏫 Lecturer and time clash</a>
-
+<!-- Navigation -->
+<nav>
+    <div class="nav-container">
+        <div class="nav-section">
+            <a href="#" class="w3-bar-item w3-button w3-lecturer-blue" id="announcement-dashboard">📢 Announcements</a>
+        </div>
+        
+        <div class="nav-divider"></div>
+        
+        <div class="nav-section">
+            <span class="nav-label">TEACHING</span>
+            <a href="#" class="w3-bar-item w3-button" id="my-timetable">📅 My Timetable</a>
+            <a href="#" class="w3-bar-item w3-button" id="my-courses">📚 My Courses</a>
+            <a href="#" class="w3-bar-item w3-button" id="room-booking">🏫 Room Booking</a>
+        </div>
+        
+        <div class="nav-divider"></div>
+        
+        <div class="nav-section">
+            <span class="nav-label">ANALYTICS</span>
+            <a href="#" class="w3-bar-item w3-button" id="workload-analytics">📊 Workload Analytics</a>
+            <a href="#" class="w3-bar-item w3-button" id="room-usage">📈 Room Usage</a>
+            <a href="#" class="w3-bar-item w3-button" id="time-clash">⚠️ Time Clash Detection</a>
+        </div>
+        
+        <div class="nav-divider"></div>
+        
+        <div class="nav-section">
+            <span class="nav-label">TOOLS</span>
+            <a href="#" class="w3-bar-item w3-button" id="student-list">👥 Student Lists</a>
+            <a href="#" class="w3-bar-item w3-button" id="attendance">✅ Attendance</a>
+            <a href="#" class="w3-bar-item w3-button" id="grades">📝 Grades</a>
+        </div>
+    </div>
 </nav>
 
+<!-- Main Content -->
 <div id="mainContent">
     <div class="w3-container">
-        <h2>System Loading...</h2>
-        <p>Initializing TTMS session and fetching current semester context. Please wait...</p>
+        <div class="loading-state" id="loadingState">
+            <div class="loading-spinner"></div>
+            <p class="loading-text">Loading lecturer dashboard...</p>
+        </div>
+        
+        <div id="dashboardContent" style="display:none;">
+            <!-- Content will be loaded via AJAX -->
+        </div>
     </div>
 </div>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-<script src="PageCtrl.js"></script> 
+<script src="https://www.gstatic.com/charts/loader.js"></script>
 <script>
-    // --- GLOBAL VARIABLES & CONSTANTS ---
+$(document).ready(function() {
+    // --- CONSTANTS ---
     const BASE_URL = "http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=";
-    const AUTH_URL = "http://web.fc.utm.my/ttms/auth-admin.php?session_id=";
     
-    // Global variables must be window-scoped to be accessible by content pages (e.g., MyTimetable.html)
-    window.userSession = JSON.parse(localStorage.getItem("TTMSFC_userSession"));
+    // --- SESSION DATA ---
+    const userSession = JSON.parse(localStorage.getItem("TTMSFC_userSession"));
+    
+    if (!userSession) {
+        window.location.replace("Login.html");
+        return;
+    }
+    
+    // Check if lecturer (should have "Pensyarah" in description)
+    const isLecturer = userSession.description && userSession.description.includes("Pensyarah");
+    
+    if (!isLecturer) {
+        alert("⚠️ Lecturer access required. Redirecting...");
+        window.location.replace("Login.html");
+        return;
+    }
+    
+    // Display user info
+    $("#user").text(userSession.full_name || 'Lecturer');
+    
+    // Set global context (same as other dashboards)
+    window.userSession = userSession;
     window.adminSessionID = null;
     window.currentSesi = null;
     window.currentSemester = null;
-
-    // --- SESSION GUARD & INITIALIZATION ---
-
-    if (!userSession) {
-        // Redirect to login if user session is not found
-        window.location.replace("Login.html");
-    }
-
-    // Display user name
-    $('#user').text(userSession.full_name || 'Admin');
     
-    // Start Initialization Sequence
-    initDashboard();
-
-    /**
-     * Executes sequential AJAX calls to fetch critical context data.
-     * This uses a Promise chain to ensure variables are set before loading the default page.
-     */
-    function initDashboard() {
-        // 1. Get Admin Session ID
-        getAdminSession(userSession.session_id)
-            .then(adminData => {
-                window.adminSessionID = adminData.session_id;
-                console.log("Admin Session ID obtained.");
-                // 2. Get the current active session-semester
-                return getCurrentSessionSemester();
-            })
+    // Initialize dashboard
+    initLecturerDashboard();
+    
+    function initLecturerDashboard() {
+        // 1. Try to get admin session (for lecturer who can be admin)
+        if (userSession.session_id) {
+            fetch(`http://web.fc.utm.my/ttms/auth-admin.php?session_id=${userSession.session_id}`)
+                .then(res => res.json())
+                .then(adminData => {
+                    if (Array.isArray(adminData) && adminData.length > 0) {
+                        window.adminSessionID = adminData[0].session_id;
+                        $("#adminAccess").show();
+                    }
+                })
+                .catch(err => {
+                    console.log("Lecturer is not an admin (normal)");
+                    $("#adminAccess").hide();
+                });
+        }
+        
+        // 2. Get current session-semester
+        fetch(BASE_URL + "sesisemester")
+            .then(res => res.json())
             .then(sesiData => {
-                // Find the active session object
-                const activeSession = Array.isArray(sesiData) ? sesiData.find(s => s.sesi_semester_id) : sesiData;
-
+                const activeSession = Array.isArray(sesiData) ? 
+                    sesiData.find(s => s.sesi_semester_id) : sesiData;
+                
                 if (activeSession) {
                     window.currentSesi = activeSession.sesi;
                     window.currentSemester = activeSession.semester;
-                    console.log(`Current Sesi: ${window.currentSesi}, Semester: ${window.currentSemester}`);
-                } else {
-                    throw new Error("Could not determine current active session/semester.");
+                    console.log(`Current: ${window.currentSesi}, Semester: ${window.currentSemester}`);
                 }
-
-                // *** DEFAULT VIEW: LOAD ANNOUNCEMENT.HTML ***
-                // This executes ONLY after all context variables are set.
-                $('#mainContent').load('Announcement.html');
                 
+                // 3. Load default content
+                setTimeout(() => {
+                    $("#loadingState").hide();
+                    $("#dashboardContent").show();
+                    loadContent('LecturerPart/Announcement.html');
+                }, 1000);
             })
-            .catch(error => {
-                console.error("Initialization failed:", error);
-                // Display error message if critical data fails to load
-                $('#mainContent').html('<div class="w3-panel w3-red w3-margin-top"><p><strong>System Error:</strong> Failed to initialize critical context. Please check network and API access.</p></div>');
+            .catch(err => {
+                console.error("Error fetching session:", err);
+                $("#loadingState").html('<div class="w3-panel w3-red">Error loading session data</div>');
             });
     }
-
-    // --- TTMS WEB SERVICE FETCHERS ---
-
-    function getAdminSession(userSessionID) {
-        // auth-admin.php endpoint
-        return fetch(AUTH_URL + userSessionID)
-            .then(res => res.json())
-            .then(data => data[0] || Promise.reject("Invalid Admin Session response"));
-    }
-
-    function getCurrentSessionSemester() {
-        // sesisemester entity
-        return fetch(BASE_URL + "sesisemester")
-            .then(res => res.json()); 
-    }
     
-    // --- NAVIGATION LOGIC ---
-
-    // Function to handle content loading
+    // --- CONTENT LOADING ---
     function loadContent(url) {
-        $('#mainContent').load(url);
+        $("#dashboardContent").load(url, function(response, status, xhr) {
+            if (status === "error") {
+                $("#dashboardContent").html(`
+                    <div class="w3-panel w3-red">
+                        <h3>⚠️ Page Not Found</h3>
+                        <p>The requested page (${url}) is not available.</p>
+                        <p><a href="#" onclick="loadContent('LecturerPart/Announcement.html')">Return to Dashboard</a></p>
+                    </div>
+                `);
+            }
+        });
     }
-
-    // Logout Function 
-    $('#logout').click(function() {
-        localStorage.removeItem("TTMSFC_userSession");
-        localStorage.removeItem("TTMSFC_sessionList");
-        window.location.replace("Login.html");
-    });
     
-    // --- MENU HANDLERS ---
-    // Change the default active highlight when clicking a menu item
-    function handleMenuClick(targetId, url) {
-        $('.w3-bar-item.w3-blue-dark').removeClass('w3-blue-dark');
+    // --- NAVIGATION HANDLERS ---
+    function handleMenuClick(menuId, url) {
+        // Update active menu
+        $('.w3-bar-item.w3-lecturer-blue').removeClass('w3-lecturer-blue');
+        $(`#${menuId}`).addClass('w3-lecturer-blue');
         
-        let target = $(`#${targetId}`);
-        if (!target.is('a')) {
-             // If it's a submenu link, highlight the parent button
-             target = $(`#${targetId}`).closest('.w3-dropdown-content').prev('button');
-        }
-        target.addClass('w3-blue-dark');
+        // Load content
         loadContent(url);
     }
-
-    // Default Page
-    $('#announcement-dashboard').click(() => handleMenuClick('announcement-dashboard', 'StudentPart/Announcement.html'));
-
-    // TIMETABLE Category
-    $('#my-timetable').click(() => handleMenuClick('my-timetable', 'LecturerPart/Timetable/MyTimetable.html'));
-    $('#course-list').click(() => handleMenuClick('course-list', 'LecturerPart/Course/LectureCourseList.html'));
-    $('#room-availability').click(() => handleMenuClick('room-availability', 'LecturerPart/RoomAvailability.html'));
-
-    // ANALYSIS Category
-    $('#room-usage').click(() => handleMenuClick('room-usage', 'LecturerPart/RoomUsage/RoomUsage.html'));
-    $('#room-clash-analyzer').click(() => handleMenuClick('room-clash-analyzer', 'LecturerPart/CourseList.html')); 
-    $('#lecture-time').click(() => handleMenuClick('lecture-time', 'LecturerPart/TimetableClash/TimetableClashAnalyzer.html')); 
-
+    
+    // Menu bindings
+    $("#announcement-dashboard").click(() => handleMenuClick('announcement-dashboard', 'LecturerPart/Announcement.html'));
+    
+    // Teaching
+    $("#my-timetable").click(() => handleMenuClick('my-timetable', 'LecturerPart/Timetable/Lecturetimetable.html'));
+    $("#my-courses").click(() => handleMenuClick('my-courses', 'LecturerPart/Course/LectureCourseList.html'));
+    $("#room-booking").click(() => handleMenuClick('room-booking', 'LecturerPart/RoomAvailability.html'));
+    
+    // Analytics
+    $("#workload-analytics").click(() => handleMenuClick('workload-analytics', 'LecturerPart/WorkloadAnalytics.html'));
+    $("#room-usage").click(() => handleMenuClick('room-usage', 'LecturerPart/RoomUsage/RoomUsage.html'));
+    $("#time-clash").click(() => handleMenuClick('time-clash', 'LecturerPart/TimetableClash/timetableClashLect.html'));
+    
+    // Tools
+    $("#student-list").click(() => handleMenuClick('student-list', 'LecturerPart/StudentList.html'));
+    $("#attendance").click(() => handleMenuClick('attendance', 'LecturerPart/Attendance.html'));
+    $("#grades").click(() => handleMenuClick('grades', 'LecturerPart/Grades.html'));
+    
+    // --- BUTTON HANDLERS ---
+    $("#adminAccess").click(function(e) {
+        e.preventDefault();
+        if (window.adminSessionID) {
+            // Store as admin session
+            const adminData = {
+                ...userSession,
+                admin_session_id: window.adminSessionID,
+                is_admin: true
+            };
+            localStorage.setItem("TTMSFC_userSession", JSON.stringify(adminData));
+            alert("🔼 Upgraded to Admin Access. Redirecting...");
+            window.location.href = "Admin.html";
+        } else {
+            alert("❌ Admin access not available. Please login via AdminLogin.html");
+        }
+    });
+    
+    $("#logout").click(function(e) {
+        e.preventDefault();
+        localStorage.removeItem("TTMSFC_userSession");
+        localStorage.removeItem("TTMSFC_lecturerSession");
+        alert("Logged out successfully");
+        window.location.href = "Login.html";
+    });
+    
+    // Set default active menu
+    $("#announcement-dashboard").addClass('w3-lecturer-blue');
+});
 </script>
 </body>
 </html>

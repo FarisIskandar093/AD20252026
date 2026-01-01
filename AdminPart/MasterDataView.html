@@ -70,133 +70,134 @@
     </div>
 </div>
 
+<script src="../JS/Authenticate.js"></script>
 <script>
-let currentEntity = 'pelajar';
-let currentPage = 1;
-const pageSize = 50;
+    let currentEntity = 'pelajar';
+    let currentPage = 1;
+    const pageSize = 50;
 
-function loadEntity(entity) {
-    currentEntity = entity;
-    currentPage = 1;
-    
-    // Update active button
-    $('.w3-bar-item.w3-button').removeClass('w3-purple');
-    $(`.w3-bar-item.w3-button:contains('${capitalizeFirst(entity)}')`).addClass('w3-purple');
-    
-    loadCurrentEntity();
-}
-
-function capitalizeFirst(string) {
-    return string.charAt(0).toUpperCase() + string.slice(1);
-}
-
-function loadCurrentEntity() {
-    const sesi = $("#dataSesi").val();
-    const semester = $("#dataSemester").val();
-    const limit = $("#dataLimit").val();
-    const offset = (currentPage - 1) * pageSize;
-    
-    $("#dataLoading").show();
-    $("#dataTableContainer").hide();
-    $("#dataError").hide();
-    
-    const adminSessionID = window.parent.adminSessionID;
-    let url = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=${currentEntity}`;
-    
-    // Add parameters based on entity
-    if (currentEntity === 'pelajar' || currentEntity === 'pensyarah') {
-        url += `&session_id=${adminSessionID}&sesi=${sesi}&semester=${semester}`;
-    } else if (currentEntity === 'subjek') {
-        url += `&sesi=${sesi}&semester=${semester}`;
-    }
-    
-    url += `&limit=${limit}&offset=${offset}`;
-    
-    fetch(url)
-        .then(res => res.json())
-        .then(data => {
-            $("#dataLoading").hide();
-            
-            if (!Array.isArray(data) || data.length === 0) {
-                $("#dataTableContainer").html('<div class="w3-panel w3-yellow">No data found for the selected entity/filters.</div>');
-                $("#dataTableContainer").show();
-                return;
-            }
-            
-            displayDataTable(data);
-            $("#dataTableContainer").show();
-        })
-        .catch(err => {
-            console.error("Error loading master data:", err);
-            $("#dataLoading").hide();
-            $("#dataError").show();
-        });
-}
-
-function displayDataTable(data) {
-    $("#entityName").text(currentEntity);
-    $("#dataCount").text(data.length);
-    $("#currentPage").text(currentPage);
-    
-    // Clear table
-    $("#dataTableHeader").empty();
-    $("#dataTableBody").empty();
-    
-    // Create headers from first object keys
-    if (data.length > 0) {
-        const headers = Object.keys(data[0]);
+    function loadEntity(entity) {
+        currentEntity = entity;
+        currentPage = 1;
         
-        let headerRow = '<tr class="w3-purple">';
-        headers.forEach(header => {
-            headerRow += `<th>${header.replace('_', ' ').toUpperCase()}</th>`;
-        });
-        headerRow += '</tr>';
-        $("#dataTableHeader").html(headerRow);
+        // Update active button
+        $('.w3-bar-item.w3-button').removeClass('w3-purple');
+        $(`.w3-bar-item.w3-button:contains('${capitalizeFirst(entity)}')`).addClass('w3-purple');
         
-        // Create rows
-        data.forEach((row, index) => {
-            let tableRow = '<tr>';
-            headers.forEach(header => {
-                let cellValue = row[header];
-                
-                // Handle nested objects
-                if (typeof cellValue === 'object' && cellValue !== null) {
-                    cellValue = JSON.stringify(cellValue);
-                }
-                
-                // Truncate long values
-                if (String(cellValue).length > 50) {
-                    cellValue = String(cellValue).substring(0, 47) + '...';
-                }
-                
-                tableRow += `<td title="${row[header]}">${cellValue || '-'}</td>`;
-            });
-            tableRow += '</tr>';
-            $("#dataTableBody").append(tableRow);
-        });
-    }
-    
-    // Update pagination buttons
-    $("#prevBtn").prop('disabled', currentPage === 1);
-    $("#nextBtn").prop('disabled', data.length < pageSize);
-}
-
-function prevPage() {
-    if (currentPage > 1) {
-        currentPage--;
         loadCurrentEntity();
     }
-}
 
-function nextPage() {
-    currentPage++;
-    loadCurrentEntity();
-}
+    function capitalizeFirst(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+    }
 
-// Load initial data
-$(document).ready(function() {
-    setTimeout(() => {
-        loadEntity('pelajar');
-    }, 500);
-});
+    function loadCurrentEntity() {
+        const sesi = $("#dataSesi").val();
+        const semester = $("#dataSemester").val();
+        const limit = $("#dataLimit").val();
+        const offset = (currentPage - 1) * pageSize;
+        
+        $("#dataLoading").show();
+        $("#dataTableContainer").hide();
+        $("#dataError").hide();
+        
+        const adminSessionID = window.parent.adminSessionID;
+        let url = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=${currentEntity}`;
+        
+        // Add parameters based on entity
+        if (currentEntity === 'pelajar' || currentEntity === 'pensyarah') {
+            url += `&session_id=${adminSessionID}&sesi=${sesi}&semester=${semester}`;
+        } else if (currentEntity === 'subjek') {
+            url += `&sesi=${sesi}&semester=${semester}`;
+        }
+        
+        url += `&limit=${limit}&offset=${offset}`;
+        
+        fetch(url)
+            .then(res => res.json())
+            .then(data => {
+                $("#dataLoading").hide();
+                
+                if (!Array.isArray(data) || data.length === 0) {
+                    $("#dataTableContainer").html('<div class="w3-panel w3-yellow">No data found for the selected entity/filters.</div>');
+                    $("#dataTableContainer").show();
+                    return;
+                }
+                
+                displayDataTable(data);
+                $("#dataTableContainer").show();
+            })
+            .catch(err => {
+                console.error("Error loading master data:", err);
+                $("#dataLoading").hide();
+                $("#dataError").show();
+            });
+    }
+
+    function displayDataTable(data) {
+        $("#entityName").text(currentEntity);
+        $("#dataCount").text(data.length);
+        $("#currentPage").text(currentPage);
+        
+        // Clear table
+        $("#dataTableHeader").empty();
+        $("#dataTableBody").empty();
+        
+        // Create headers from first object keys
+        if (data.length > 0) {
+            const headers = Object.keys(data[0]);
+            
+            let headerRow = '<tr class="w3-purple">';
+            headers.forEach(header => {
+                headerRow += `<th>${header.replace('_', ' ').toUpperCase()}</th>`;
+            });
+            headerRow += '</tr>';
+            $("#dataTableHeader").html(headerRow);
+            
+            // Create rows
+            data.forEach((row, index) => {
+                let tableRow = '<tr>';
+                headers.forEach(header => {
+                    let cellValue = row[header];
+                    
+                    // Handle nested objects
+                    if (typeof cellValue === 'object' && cellValue !== null) {
+                        cellValue = JSON.stringify(cellValue);
+                    }
+                    
+                    // Truncate long values
+                    if (String(cellValue).length > 50) {
+                        cellValue = String(cellValue).substring(0, 47) + '...';
+                    }
+                    
+                    tableRow += `<td title="${row[header]}">${cellValue || '-'}</td>`;
+                });
+                tableRow += '</tr>';
+                $("#dataTableBody").append(tableRow);
+            });
+        }
+        
+        // Update pagination buttons
+        $("#prevBtn").prop('disabled', currentPage === 1);
+        $("#nextBtn").prop('disabled', data.length < pageSize);
+    }
+
+    function prevPage() {
+        if (currentPage > 1) {
+            currentPage--;
+            loadCurrentEntity();
+        }
+    }
+
+    function nextPage() {
+        currentPage++;
+        loadCurrentEntity();
+    }
+
+    // Load initial data
+    $(document).ready(function() {
+        setTimeout(() => {
+            loadEntity('pelajar');
+        }, 500);
+    });
 </script>

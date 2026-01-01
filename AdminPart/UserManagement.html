@@ -75,93 +75,94 @@
     </div>
 </div>
 
+<script src="../JS/Authenticate.js"></script>
 <script>
-$(document).ready(function() {
-    loadUserData();
-    
-    function loadUserData() {
-        const adminSessionID = window.parent.adminSessionID;
-        const currentSesi = window.parent.currentSesi;
-        const currentSemester = window.parent.currentSemester;
+    $(document).ready(function() {
+        loadUserData();
         
-        if (!adminSessionID) {
-            $("#userListLoading").html('<div class="w3-panel w3-red">Admin session required</div>');
-            return;
+        function loadUserData() {
+            const adminSessionID = window.parent.adminSessionID;
+            const currentSesi = window.parent.currentSesi;
+            const currentSemester = window.parent.currentSemester;
+            
+            if (!adminSessionID) {
+                $("#userListLoading").html('<div class="w3-panel w3-red">Admin session required</div>');
+                return;
+            }
+            
+            // Fetch students
+            fetch(`http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pelajar&session_id=${adminSessionID}&sesi=${currentSesi}&semester=${currentSemester}&limit=20&offset=0`)
+                .then(res => res.json())
+                .then(students => {
+                    if (Array.isArray(students)) {
+                        displayUsers(students, 'student');
+                        $("#totalUsers").text(students.length + "+");
+                    }
+                    $("#userListLoading").hide();
+                    $("#userListContainer").show();
+                })
+                .catch(err => {
+                    console.error("Error loading users:", err);
+                    $("#userListLoading").html('<div class="w3-panel w3-red">Error loading user data</div>');
+                });
         }
         
-        // Fetch students
-        fetch(`http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pelajar&session_id=${adminSessionID}&sesi=${currentSesi}&semester=${currentSemester}&limit=20&offset=0`)
-            .then(res => res.json())
-            .then(students => {
-                if (Array.isArray(students)) {
-                    displayUsers(students, 'student');
-                    $("#totalUsers").text(students.length + "+");
-                }
-                $("#userListLoading").hide();
-                $("#userListContainer").show();
-            })
-            .catch(err => {
-                console.error("Error loading users:", err);
-                $("#userListLoading").html('<div class="w3-panel w3-red">Error loading user data</div>');
+        function displayUsers(users, role) {
+            $("#userListBody").empty();
+            
+            users.forEach((user, index) => {
+                const row = `
+                    <tr>
+                        <td>${user.no_matrik || user.no_pekerja || 'N/A'}</td>
+                        <td><strong>${user.nama || 'N/A'}</strong></td>
+                        <td>
+                            <span class="w3-tag ${role === 'student' ? 'w3-blue' : 'w3-green'}">
+                                ${role === 'student' ? 'Student' : 'Lecturer'}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="w3-tag w3-light-grey">Active</span>
+                        </td>
+                        <td>
+                            <button class="w3-button w3-small w3-border" onclick="viewUserDetails('${user.no_matrik || user.no_pekerja}')">
+                                View
+                            </button>
+                        </td>
+                    </tr>
+                `;
+                $("#userListBody").append(row);
             });
-    }
-    
-    function displayUsers(users, role) {
-        $("#userListBody").empty();
-        
-        users.forEach((user, index) => {
-            const row = `
-                <tr>
-                    <td>${user.no_matrik || user.no_pekerja || 'N/A'}</td>
-                    <td><strong>${user.nama || 'N/A'}</strong></td>
-                    <td>
-                        <span class="w3-tag ${role === 'student' ? 'w3-blue' : 'w3-green'}">
-                            ${role === 'student' ? 'Student' : 'Lecturer'}
-                        </span>
-                    </td>
-                    <td>
-                        <span class="w3-tag w3-light-grey">Active</span>
-                    </td>
-                    <td>
-                        <button class="w3-button w3-small w3-border" onclick="viewUserDetails('${user.no_matrik || user.no_pekerja}')">
-                            View
-                        </button>
-                    </td>
-                </tr>
-            `;
-            $("#userListBody").append(row);
-        });
-    }
-    
-    window.filterUsers = function(role) {
-        // Update active button
-        $('.w3-bar-item.w3-button').removeClass('w3-purple');
-        $(`.w3-bar-item.w3-button:contains('${capitalizeFirst(role)}')`).addClass('w3-purple');
-        
-        // In a real system, you would filter the data
-        // For now, we'll just show a message
-        alert(`Filtering by ${role} - Note: Full filtering would require additional API calls`);
-    };
-    
-    window.grantAdminAccess = function() {
-        const lecturerId = $("#lecturerId").val();
-        if (!lecturerId) {
-            alert("Please enter a lecturer ID");
-            return;
         }
         
-        if (confirm(`Grant admin access to lecturer ${lecturerId}?`)) {
-            alert(`Admin access granted to ${lecturerId}\n\nNote: In a real system, this would update backend permissions.`);
-            $("#lecturerId").val('');
+        window.filterUsers = function(role) {
+            // Update active button
+            $('.w3-bar-item.w3-button').removeClass('w3-purple');
+            $(`.w3-bar-item.w3-button:contains('${capitalizeFirst(role)}')`).addClass('w3-purple');
+            
+            // In a real system, you would filter the data
+            // For now, we'll just show a message
+            alert(`Filtering by ${role} - Note: Full filtering would require additional API calls`);
+        };
+        
+        window.grantAdminAccess = function() {
+            const lecturerId = $("#lecturerId").val();
+            if (!lecturerId) {
+                alert("Please enter a lecturer ID");
+                return;
+            }
+            
+            if (confirm(`Grant admin access to lecturer ${lecturerId}?`)) {
+                alert(`Admin access granted to ${lecturerId}\n\nNote: In a real system, this would update backend permissions.`);
+                $("#lecturerId").val('');
+            }
+        };
+        
+        window.viewUserDetails = function(userId) {
+            alert(`View details for user: ${userId}\n\nThis would open a detailed user profile in a real system.`);
+        };
+        
+        function capitalizeFirst(string) {
+            return string.charAt(0).toUpperCase() + string.slice(1);
         }
-    };
-    
-    window.viewUserDetails = function(userId) {
-        alert(`View details for user: ${userId}\n\nThis would open a detailed user profile in a real system.`);
-    };
-    
-    function capitalizeFirst(string) {
-        return string.charAt(0).toUpperCase() + string.slice(1);
-    }
-});
+    });
 </script>

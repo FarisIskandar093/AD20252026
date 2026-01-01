@@ -1,89 +1,332 @@
+<!DOCTYPE html>
 <html>
 <head>
-  <title>CourseList</title>
-  <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css"> 
-  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-
-  <style>
-    #chart_div {
-      margin: 0 auto; 
-    }
-  </style>
-
+    <title>My Courses - Lecturer</title>
+    <script src="../../JS/Authenticate.js"></script>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="../../Styles/mainStyle.css">
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    
+    <style>
+        .lecturer-course-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+            box-shadow: 0 4px 15px rgba(63, 81, 181, 0.1);
+            border-left: 5px solid #3f51b5;
+            transition: transform 0.3s ease;
+        }
+        
+        .lecturer-course-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(63, 81, 181, 0.2);
+        }
+        
+        .course-stats {
+            display: flex;
+            justify-content: space-around;
+            background: #f5f7fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .stat-item-lecturer {
+            text-align: center;
+            padding: 10px;
+        }
+        
+        .stat-value-lecturer {
+            font-size: 2em;
+            font-weight: bold;
+            color: #3f51b5;
+        }
+        
+        .stat-label-lecturer {
+            font-size: 0.9em;
+            color: #666;
+        }
+        
+        .course-action-btn {
+            background: linear-gradient(135deg, #3f51b5, #673ab7);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            margin: 5px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        
+        .course-action-btn:hover {
+            background: linear-gradient(135deg, #303f9f, #512da8);
+        }
+    </style>
 </head>
-<body>
+<body class="w3-container">
 
-<div id="chart_div" style="width: 900px; height: 500px;"></div>
-<hr>
+<div class="page-header" style="background: linear-gradient(135deg, #3f51b5 0%, #673ab7 100%); color: white; padding: 30px; border-radius: 10px;">
+    <h1 class="w3-center">📚 My Teaching Courses</h1>
+    <p class="w3-center w3-large" id="currentSemester">Loading semester...</p>
+</div>
 
-<table class="w3-table-all w3-hoverable">
-  <tr>
-    <th>Course Name</th>
-    <th>Course Code</th>
-    <th>Sections</th>
-    <th>Lecturers</th>
-    <th>Students</th>
-  </tr>
-
-</table>
-<p></p>
-
-</body>
-</html>
+<div class="w3-row-padding w3-margin-top">
+    <div class="w3-col m8">
+        <!-- Course Statistics -->
+        <div class="course-stats">
+            <div class="stat-item-lecturer">
+                <div class="stat-value-lecturer" id="totalCourses">0</div>
+                <div class="stat-label-lecturer">Courses</div>
+            </div>
+            <div class="stat-item-lecturer">
+                <div class="stat-value-lecturer" id="totalSections">0</div>
+                <div class="stat-label-lecturer">Sections</div>
+            </div>
+            <div class="stat-item-lecturer">
+                <div class="stat-value-lecturer" id="totalStudents">0</div>
+                <div class="stat-label-lecturer">Students</div>
+            </div>
+            <div class="stat-item-lecturer">
+                <div class="stat-value-lecturer" id="weeklyHours">0</div>
+                <div class="stat-label-lecturer">Weekly Hours</div>
+            </div>
+        </div>
+        
+        <!-- Courses List -->
+        <div id="coursesLoading" class="w3-center w3-padding-24">
+            <div class="loading-spinner"></div>
+            <p>Loading your teaching courses...</p>
+        </div>
+        
+        <div id="coursesList" style="display:none;"></div>
+    </div>
+    
+    <div class="w3-col m4">
+        <!-- Quick Actions -->
+        <div class="w3-card w3-padding">
+            <h4>⚡ Quick Actions</h4>
+            
+            <button class="w3-button w3-blue w3-block w3-margin-bottom" onclick="window.parent.loadContent('LecturerPart/Attendance.html')">
+                ✅ Take Attendance
+            </button>
+            
+            <button class="w3-button w3-purple w3-block w3-margin-bottom" onclick="window.parent.loadContent('LecturerPart/Grades.html')">
+                📝 Record Grades
+            </button>
+            
+            <button class="w3-button w3-green w3-block w3-margin-bottom" onclick="window.parent.loadContent('LecturerPart/StudentList.html')">
+                👥 View Student Lists
+            </button>
+            
+            <button class="w3-button w3-orange w3-block" onclick="window.parent.loadContent('LecturerPart/RoomAvailability.html')">
+                🏫 Book Additional Room
+            </button>
+        </div>
+        
+        <!-- Teaching Load Chart -->
+        <div class="w3-card w3-padding w3-margin-top">
+            <h4>📊 Teaching Load</h4>
+            <div id="teachingChart" style="height: 200px;"></div>
+        </div>
+        
+        <!-- Course Filter -->
+        <div class="w3-card w3-padding w3-margin-top">
+            <h4>🔍 Filter Courses</h4>
+            
+            <label>Course Level:</label>
+            <select class="w3-input w3-border w3-margin-bottom" onchange="filterCourses()">
+                <option value="ALL">All Levels</option>
+                <option value="1000">1000 Level</option>
+                <option value="2000">2000 Level</option>
+                <option value="3000">3000 Level</option>
+                <option value="4000">4000 Level</option>
+            </select>
+            
+            <label>Session Type:</label>
+            <select class="w3-input w3-border" onchange="filterCourses()">
+                <option value="ALL">All Types</option>
+                <option value="LECTURE">Lecture</option>
+                <option value="TUTORIAL">Tutorial</option>
+                <option value="LAB">Lab</option>
+            </select>
+        </div>
+    </div>
+</div>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <script>
-var url = "http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=subjek&sesi=2025/2026&semester=1";
-
-alert("Access TTMS-AJAX service");
-fetch(url)
-.then(res => res.json())
-.then(jsonInst => { 
-  
-  for (var i = 0; i < jsonInst.length; i++) {
-    
-    var row = $('<tr></tr>');
-    row.append('<td>' + jsonInst[i].nama_subjek + '</td>');
-    row.append('<td>' + jsonInst[i].kod_subjek + '</td>');
-    row.append('<td>' + jsonInst[i].bil_seksyen + '</td>');
-    row.append('<td>' + jsonInst[i].bil_pensyarah + '</td>');
-    row.append('<td>' + jsonInst[i].bil_pelajar + '</td>');
-    
-    $('table').append(row);
-  }
-  
-  jsonInst.sort((a, b) => +b.bil_pelajar - +a.bil_pelajar);
-  var top10Courses = jsonInst.slice(0, 10);
-  google.charts.load('current', {'packages':['bar']});
-  google.charts.setOnLoadCallback(drawChart);
-
-  function drawChart() {
-
-    var data = new google.visualization.DataTable();
-    data.addColumn('string', 'Course Name');
-    data.addColumn('number', 'Students');
-    
-    var chartData = top10Courses.map(course => 
-      [course.nama_subjek, +course.bil_pelajar]
-    );
-    
-    data.addRows(chartData);
-
-    var options = {
-      title: 'Top 10 Courses',
-      hAxis: {
-          title: 'Total Population',
-          minValue: 0
-      },
-      vAxis: {
-          title: 'Course Name'
-      },
-      bars: 'horizontal'
-    };
-
-    var chart = new google.charts.Bar(document.getElementById('chart_div'));
-    chart.draw(data, google.charts.Bar.convertOptions(options));
-  }
-  
-}).catch(err => console.log(err));
+    $(document).ready(function() {
+        // Set current semester
+        const currentSesi = window.parent.currentSesi;
+        const currentSemester = window.parent.currentSemester;
+        
+        if (currentSesi && currentSemester) {
+            $("#currentSemester").text(`${currentSesi} - Semester ${currentSemester}`);
+        }
+        
+        // Load lecturer courses
+        loadLecturerCourses();
+        
+        function loadLecturerCourses() {
+            const lecturerId = window.parent.userSession.login_name;
+            
+            if (!lecturerId) {
+                $("#coursesLoading").html('<div class="w3-panel w3-red">Lecturer ID not found</div>');
+                return;
+            }
+            
+            // Fetch courses taught by this lecturer
+            fetch(`http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pensyarah_subjek&no_pekerja=${lecturerId}`)
+                .then(res => res.json())
+                .then(courses => {
+                    if (!Array.isArray(courses)) {
+                        $("#coursesLoading").html('<div class="w3-panel w3-yellow">No courses found for current semester</div>');
+                        return;
+                    }
+                    
+                    // Filter for current semester
+                    const currentCourses = courses.filter(course => 
+                        course.sesi === currentSesi && course.semester == currentSemester
+                    );
+                    
+                    displayCourses(currentCourses);
+                    updateStats(currentCourses);
+                    drawTeachingChart(currentCourses);
+                    
+                    $("#coursesLoading").hide();
+                    $("#coursesList").show();
+                })
+                .catch(err => {
+                    console.error("Error loading courses:", err);
+                    $("#coursesLoading").html('<div class="w3-panel w3-red">Error loading course data</div>');
+                });
+        }
+        
+        function displayCourses(courses) {
+            let coursesHTML = '';
+            
+            if (courses.length === 0) {
+                coursesHTML = `
+                    <div class="w3-panel w3-yellow">
+                        <h4>No Courses Assigned</h4>
+                        <p>You have no teaching assignments for the current semester.</p>
+                    </div>
+                `;
+            } else {
+                courses.forEach((course, index) => {
+                    // Calculate color based on course level
+                    const courseCode = course.kod_subjek || '';
+                    const courseLevel = courseCode.match(/\d+/)?.[0]?.charAt(0) || '1';
+                    
+                    let levelColor = '#3f51b5';
+                    if (courseLevel === '2') levelColor = '#2196f3';
+                    if (courseLevel === '3') levelColor = '#673ab7';
+                    if (courseLevel === '4') levelColor = '#9c27b0';
+                    
+                    coursesHTML += `
+                        <div class="lecturer-course-card">
+                            <div class="w3-row">
+                                <div class="w3-col m8">
+                                    <h3 style="color: ${levelColor};">${course.kod_subjek || 'N/A'}</h3>
+                                    <h4>${course.nama_subjek || 'Unnamed Course'}</h4>
+                                    
+                                    <div class="w3-row w3-margin-top">
+                                        <div class="w3-col m6">
+                                            <p><strong>Section:</strong> ${course.seksyen || 'N/A'}</p>
+                                            <p><strong>Students:</strong> ${course.bil_pelajar || '0'}</p>
+                                        </div>
+                                        <div class="w3-col m6">
+                                            <p><strong>Credits:</strong> ${course.kredit || '3'}</p>
+                                            <p><strong>Hours/Week:</strong> ${course.bil_jam || '3'}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="w3-col m4 w3-right-align">
+                                    <div class="w3-margin-bottom">
+                                        <span class="w3-tag w3-blue" style="font-size: 1.2em;">
+                                            ${course.bil_pelajar || '0'} Students
+                                        </span>
+                                    </div>
+                                    
+                                    <button class="course-action-btn" onclick="viewCourseDetails('${course.kod_subjek}', '${course.seksyen}')">
+                                        View Details
+                                    </button>
+                                    
+                                    <button class="course-action-btn" onclick="viewStudentList('${course.kod_subjek}', '${course.seksyen}')">
+                                        Student List
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            
+            $("#coursesList").html(coursesHTML);
+        }
+        
+        function updateStats(courses) {
+            let totalCourses = courses.length;
+            let totalSections = 0;
+            let totalStudents = 0;
+            let totalHours = 0;
+            
+            courses.forEach(course => {
+                totalSections += parseInt(course.bil_seksyen) || 1;
+                totalStudents += parseInt(course.bil_pelajar) || 0;
+                totalHours += parseInt(course.bil_jam) || 3;
+            });
+            
+            $("#totalCourses").text(totalCourses);
+            $("#totalSections").text(totalSections);
+            $("#totalStudents").text(totalStudents);
+            $("#weeklyHours").text(totalHours);
+        }
+        
+        function drawTeachingChart(courses) {
+            // Simple bar chart for teaching load
+            let chartHTML = '<div class="w3-row">';
+            
+            const hoursPerCourse = courses.map(course => ({
+                code: course.kod_subjek,
+                hours: parseInt(course.bil_jam) || 3
+            }));
+            
+            const maxHours = Math.max(...hoursPerCourse.map(c => c.hours), 6);
+            
+            hoursPerCourse.forEach(course => {
+                const barHeight = (course.hours / maxHours) * 150;
+                const barColor = course.hours > 4 ? '#ff5722' : (course.hours > 2 ? '#ff9800' : '#4caf50');
+                
+                chartHTML += `
+                    <div class="w3-col" style="padding: 5px; text-align: center;">
+                        <div style="height: ${barHeight}px; background: ${barColor}; width: 30px; margin: 0 auto; border-radius: 3px 3px 0 0;"></div>
+                        <div style="margin-top: 10px; font-size: 0.8em;">
+                            <strong>${course.code.substring(0, 6)}</strong><br>
+                            ${course.hours}h
+                        </div>
+                    </div>
+                `;
+            });
+            
+            chartHTML += '</div>';
+            $("#teachingChart").html(chartHTML);
+        }
+        
+        window.filterCourses = function() {
+            alert("Filter functionality would be implemented in a full system");
+        };
+        
+        window.viewCourseDetails = function(courseCode, section) {
+            alert(`Viewing details for ${courseCode} Section ${section}\n\nWould show detailed course information, schedule, and resources.`);
+        };
+        
+        window.viewStudentList = function(courseCode, section) {
+            alert(`Loading student list for ${courseCode} Section ${section}\n\nWould show enrolled students with attendance and grade information.`);
+        };
+    });
 </script>
+</body>
+</html>

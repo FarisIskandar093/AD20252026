@@ -1,0 +1,323 @@
+<div class="dashboard-container">
+    <!-- Welcome Header -->
+    <div class="welcome-header" style="background: linear-gradient(135deg, #3f51b5 0%, #673ab7 100%);">
+        <h2>👨‍🏫 Welcome to Your Teaching Dashboard</h2>
+        <p class="welcome-subtitle" id="currentDateTime">Loading...</p>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="dashboard-grid">
+        <!-- Teaching Load Card -->
+        <div class="lecturer-card">
+            <div class="card-header">
+                <span class="card-icon" style="color: #3f51b5;">📚</span>
+                <h3 class="card-title">Teaching Load</h3>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <h2 class="stat-value" id="coursesCount">0</h2>
+                    <p class="stat-label">Courses</p>
+                </div>
+                <div class="stat-item">
+                    <h2 class="stat-value" id="sectionsCount">0</h2>
+                    <p class="stat-label">Sections</p>
+                </div>
+                <div class="stat-item">
+                    <h2 class="stat-value" id="weeklyHours">0</h2>
+                    <p class="stat-label">Weekly Hours</p>
+                </div>
+                <div class="stat-item">
+                    <h2 class="stat-value" id="studentsCount">0</h2>
+                    <p class="stat-label">Students</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upcoming Classes -->
+        <div class="lecturer-card">
+            <div class="card-header">
+                <span class="card-icon" style="color: #2196f3;">⏰</span>
+                <h3 class="card-title">Today's Schedule</h3>
+            </div>
+            <div id="todaysClasses">
+                <div class="loading" style="text-align:center; padding:20px;">
+                    <div class="loading-spinner"></div>
+                    <p>Loading today's schedule...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="lecturer-card">
+            <div class="card-header">
+                <span class="card-icon" style="color: #673ab7;">⚡</span>
+                <h3 class="card-title">Quick Actions</h3>
+            </div>
+            <div class="w3-padding">
+                <button class="w3-button w3-blue w3-block w3-margin-bottom" onclick="loadContent('LecturerPart/Attendance.html')">
+                    ✅ Take Attendance
+                </button>
+                <button class="w3-button w3-purple w3-block w3-margin-bottom" onclick="loadContent('LecturerPart/Grades.html')">
+                    📝 Record Grades
+                </button>
+                <button class="w3-button w3-green w3-block w3-margin-bottom" onclick="loadContent('LecturerPart/RoomAvailability.html')">
+                    🏫 Book Room
+                </button>
+                <button class="w3-button w3-orange w3-block" onclick="loadContent('LecturerPart/TimetableClash/timetableClashLect.html')">
+                    ⚠️ Check Clashes
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notifications Section -->
+    <div class="classes-section">
+        <div class="section-header" style="background: linear-gradient(135deg, #2196f3 0%, #03a9f4 100%);">
+            <h3 class="section-title">
+                <span>🔔</span>
+                <span>Recent Notifications</span>
+            </h3>
+        </div>
+        
+        <div id="notificationsList">
+            <div class="class-card urgent-alert">
+                <div class="w3-row">
+                    <div class="w3-col m1 w3-center">
+                        <span class="w3-tag w3-red">URGENT</span>
+                    </div>
+                    <div class="w3-col m9">
+                        <strong>Timetable Change: SECV3104 Section 01</strong><br>
+                        <small>Room changed from MPK3 to MPK5 for Monday sessions</small>
+                    </div>
+                    <div class="w3-col m2 w3-right-align">
+                        <small>2 hours ago</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="class-card">
+                <div class="w3-row">
+                    <div class="w3-col m1 w3-center">
+                        <span class="w3-tag w3-blue">INFO</span>
+                    </div>
+                    <div class="w3-col m9">
+                        <strong>New Student Added to SECJ1013</strong><br>
+                        <small>A24CS0123 - Ahmad Bin Ali added to Section 02</small>
+                    </div>
+                    <div class="w3-col m2 w3-right-align">
+                        <small>Yesterday</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="class-card">
+                <div class="w3-row">
+                    <div class="w3-col m1 w3-center">
+                        <span class="w3-tag w3-green">REMINDER</span>
+                    </div>
+                    <div class="w3-col m9">
+                        <strong>Grade Submission Deadline</strong><br>
+                        <small>Final grades for SECV3104 due by Friday, 5:00 PM</small>
+                    </div>
+                    <div class="w3-col m2 w3-right-align">
+                        <small>3 days ago</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Workload Overview Chart -->
+    <div class="classes-section w3-margin-top">
+        <div class="section-header" style="background: linear-gradient(135deg, #673ab7 0%, #9c27b0 100%);">
+            <h3 class="section-title">
+                <span>📊</span>
+                <span>Weekly Workload Distribution</span>
+            </h3>
+        </div>
+        
+        <div id="workloadChart" style="width:100%; height:300px; padding:20px;">
+            <div class="w3-center w3-padding-24">
+                <div class="loading-spinner"></div>
+                <p>Loading workload visualization...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="../JS/Authenticate.js"></script>
+<script>
+    $(document).ready(function() {
+        // Update date/time
+        function updateDateTime() {
+            const now = new Date();
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            };
+            $("#currentDateTime").text(now.toLocaleDateString('en-US', options));
+        }
+        updateDateTime();
+        setInterval(updateDateTime, 60000);
+        
+        // Load lecturer data
+        loadLecturerData();
+        
+        function loadLecturerData() {
+            const lecturerId = window.parent.userSession.login_name;
+            
+            if (!lecturerId) {
+                console.error("Lecturer ID not found");
+                return;
+            }
+            
+            // Fetch courses taught by lecturer
+            fetch(`http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pensyarah_subjek&no_pekerja=${lecturerId}`)
+                .then(res => res.json())
+                .then(courses => {
+                    if (Array.isArray(courses)) {
+                        // Filter current semester courses
+                        const currentSesi = window.parent.currentSesi;
+                        const currentSemester = window.parent.currentSemester;
+                        
+                        const currentCourses = courses.filter(course => 
+                            course.sesi === currentSesi && course.semester == currentSemester
+                        );
+                        
+                        updateTeachingStats(currentCourses);
+                        loadTodaysSchedule(currentCourses);
+                        drawWorkloadChart(currentCourses);
+                    }
+                })
+                .catch(err => {
+                    console.error("Error loading lecturer data:", err);
+                    $("#todaysClasses").html('<div class="w3-panel w3-yellow">Error loading teaching data</div>');
+                });
+        }
+        
+        function updateTeachingStats(courses) {
+            $("#coursesCount").text(courses.length);
+            
+            // Calculate total sections and estimate students
+            let totalSections = 0;
+            let totalStudents = 0;
+            let totalHours = 0;
+            
+            courses.forEach(course => {
+                totalSections += parseInt(course.bil_seksyen) || 1;
+                totalStudents += parseInt(course.bil_pelajar) || 0;
+                totalHours += parseInt(course.bil_jam) || 3; // Assume 3 hours per course
+            });
+            
+            $("#sectionsCount").text(totalSections);
+            $("#studentsCount").text(totalStudents);
+            $("#weeklyHours").text(totalHours);
+        }
+        
+        function loadTodaysSchedule(courses) {
+            const now = new Date();
+            const currentDay = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
+            
+            // Map JavaScript day to TTMS day codes (2=Monday, 6=Friday)
+            const dayMap = {
+                1: 2, // Monday
+                2: 3, // Tuesday
+                3: 4, // Wednesday
+                4: 5, // Thursday
+                5: 6  // Friday
+            };
+            
+            const todayCode = dayMap[currentDay];
+            
+            if (!todayCode) {
+                $("#todaysClasses").html(`
+                    <div class="w3-center w3-padding-24">
+                        <div class="w3-xxlarge">🎉</div>
+                        <h4>No Classes Today</h4>
+                        <p>Enjoy your day off!</p>
+                    </div>
+                `);
+                return;
+            }
+            
+            // For demo, show sample schedule
+            const sampleSchedule = [
+                { time: "10:00 - 12:00", course: "SECV3104", section: "01", room: "MPK5", title: "Application Development" },
+                { time: "14:00 - 16:00", course: "SECJ1013", section: "02", room: "BK4", title: "Programming Techniques" }
+            ];
+            
+            let scheduleHTML = '';
+            
+            if (sampleSchedule.length === 0) {
+                scheduleHTML = `
+                    <div class="w3-center w3-padding-16">
+                        <p class="w3-text-grey">No classes scheduled for today</p>
+                    </div>
+                `;
+            } else {
+                sampleSchedule.forEach(cls => {
+                    scheduleHTML += `
+                        <div class="teaching-schedule">
+                            <div class="w3-row">
+                                <div class="w3-col m3">
+                                    <strong>${cls.time}</strong>
+                                </div>
+                                <div class="w3-col m6">
+                                    <strong>${cls.course}</strong> - ${cls.title}<br>
+                                    <small>Section ${cls.section}</small>
+                                </div>
+                                <div class="w3-col m3 w3-right-align">
+                                    <span class="workload-badge">${cls.room}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            
+            $("#todaysClasses").html(scheduleHTML);
+        }
+        
+        function drawWorkloadChart(courses) {
+            // Use Google Charts or simple HTML chart
+            const chartData = [
+                ['Day', 'Teaching Hours'],
+                ['Monday', 4],
+                ['Tuesday', 6],
+                ['Wednesday', 3],
+                ['Thursday', 5],
+                ['Friday', 2]
+            ];
+            
+            let chartHTML = `
+                <div class="w3-row w3-center">
+            `;
+            
+            chartData.forEach((day, index) => {
+                if (index === 0) return; // Skip header
+                
+                const hours = day[1];
+                const height = hours * 30;
+                const color = hours > 4 ? '#ff5722' : (hours > 2 ? '#ff9800' : '#4caf50');
+                
+                chartHTML += `
+                    <div class="w3-col" style="padding:10px;">
+                        <div style="height:${height}px; background:${color}; width:60px; margin:0 auto; border-radius:5px 5px 0 0;"></div>
+                        <div style="margin-top:10px;">
+                            <strong>${day[0].substring(0,3)}</strong><br>
+                            <small>${hours} hrs</small>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            chartHTML += `</div>`;
+            
+            $("#workloadChart").html(chartHTML);
+        }
+    });
+</script>

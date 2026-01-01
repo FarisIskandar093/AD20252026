@@ -106,70 +106,71 @@
     </div>
 </div>
 
+<script src="../JS/Authenticate.js"></script>
 <script src="https://www.gstatic.com/charts/loader.js"></script>
 <script>
-google.charts.load('current', {'packages':['line']});
-google.charts.setOnLoadCallback(drawCharts);
+    google.charts.load('current', {'packages':['line']});
+    google.charts.setOnLoadCallback(drawCharts);
 
-function drawCharts() {
-    // Sample data for usage chart
-    var data = new google.visualization.DataTable();
-    data.addColumn('string', 'Day');
-    data.addColumn('number', 'User Logins');
-    data.addColumn('number', 'Data Requests');
-    data.addColumn('number', 'API Calls');
-    
-    data.addRows([
-        ['Mon', 120, 450, 850],
-        ['Tue', 135, 480, 920],
-        ['Wed', 150, 520, 980],
-        ['Thu', 145, 510, 950],
-        ['Fri', 130, 490, 900],
-        ['Sat', 80, 300, 600],
-        ['Sun', 60, 250, 500]
-    ]);
-    
-    var options = {
-        title: 'Weekly System Usage',
-        curveType: 'function',
-        legend: { position: 'bottom' },
-        colors: ['#9c27b0', '#2196f3', '#4caf50']
-    };
-    
-    var chart = new google.visualization.LineChart(document.getElementById('usageChart'));
-    chart.draw(data, options);
-    
-    // Update stats
-    updateAnalyticsStats();
-}
-
-function updateAnalyticsStats() {
-    // Simulate loading data
-    $("#dataVolume").text("15,240");
-    $("#activeUsers").text("42");
-    $("#roomUtil").text("68%");
-    $("#lastUpdated").text(new Date().toLocaleTimeString());
-}
-
-function refreshAnalytics() {
-    $("#dataVolume").text("...");
-    $("#activeUsers").text("...");
-    $("#roomUtil").text("...");
-    
-    setTimeout(() => {
+    function drawCharts() {
+        // Sample data for usage chart
+        var data = new google.visualization.DataTable();
+        data.addColumn('string', 'Day');
+        data.addColumn('number', 'User Logins');
+        data.addColumn('number', 'Data Requests');
+        data.addColumn('number', 'API Calls');
+        
+        data.addRows([
+            ['Mon', 120, 450, 850],
+            ['Tue', 135, 480, 920],
+            ['Wed', 150, 520, 980],
+            ['Thu', 145, 510, 950],
+            ['Fri', 130, 490, 900],
+            ['Sat', 80, 300, 600],
+            ['Sun', 60, 250, 500]
+        ]);
+        
+        var options = {
+            title: 'Weekly System Usage',
+            curveType: 'function',
+            legend: { position: 'bottom' },
+            colors: ['#9c27b0', '#2196f3', '#4caf50']
+        };
+        
+        var chart = new google.visualization.LineChart(document.getElementById('usageChart'));
+        chart.draw(data, options);
+        
+        // Update stats
         updateAnalyticsStats();
-        drawCharts();
-        alert("Analytics refreshed successfully!");
-    }, 1000);
-}
+    }
 
-function exportAnalytics() {
-    const date = new Date().toISOString().split('T')[0];
-    alert(`Exporting analytics report for ${date}\n\nReport would be downloaded as CSV/PDF in a real system.`);
-}
+    function updateAnalyticsStats() {
+        // Simulate loading data
+        $("#dataVolume").text("15,240");
+        $("#activeUsers").text("42");
+        $("#roomUtil").text("68%");
+        $("#lastUpdated").text(new Date().toLocaleTimeString());
+    }
 
-$(document).ready(function() {
-    // Load initial data
-    setTimeout(updateAnalyticsStats, 500);
-});
+    function refreshAnalytics() {
+        $("#dataVolume").text("...");
+        $("#activeUsers").text("...");
+        $("#roomUtil").text("...");
+        
+        setTimeout(() => {
+            updateAnalyticsStats();
+            drawCharts();
+            alert("Analytics refreshed successfully!");
+        }, 1000);
+    }
+
+    function exportAnalytics() {
+        const date = new Date().toISOString().split('T')[0];
+        alert(`Exporting analytics report for ${date}\n\nReport would be downloaded as CSV/PDF in a real system.`);
+    }
+
+    $(document).ready(function() {
+        // Load initial data
+        setTimeout(updateAnalyticsStats, 500);
+    });
 </script>
