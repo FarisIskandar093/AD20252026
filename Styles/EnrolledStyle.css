@@ -65,7 +65,7 @@
   50% { transform: translateY(-15px); }
 }
 
-.header-title {
+.header-titles {
   font-size: 36px;
   color: var(--dark-teal);
   font-weight: 800;
