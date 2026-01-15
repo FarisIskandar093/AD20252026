@@ -97,17 +97,22 @@ function drawChart() {
   var options = {
     title: 'Top 10 Courses by Student Enrollment',
     titleTextStyle: { fontSize: 20, bold: true, color: '#2e7d32' },
-    pieHole: 0.4,
-    colors: ['#2e7d32', '#388e3c', '#43a047', '#4caf50', '#66bb6a', 
-             '#81c784', '#a5d6a7', '#c8e6c9', '#e8f5e9', '#f1f8e9'],
-    legend: { position: 'right', textStyle: { fontSize: 12 } },
-    chartArea: { width: '90%', height: '85%' },
-    pieSliceText: 'percentage',
-    pieSliceTextStyle: { color: 'black', fontSize: 16, bold: true },
-    tooltip: { text: 'both', showColorCode: true }
+    hAxis: {
+      title: 'Number of Students',
+      minValue: 0,
+      textStyle: { fontSize: 12 }
+    },
+    vAxis: {
+      title: 'Course',
+      textStyle: { fontSize: 12 }
+    },
+    colors: ['#4caf50'],
+    chartArea: { left: '20%', top: '10%', width: '70%', height: '80%' },
+    backgroundColor: '#f9f9f9',
+    legend: { position: 'none' }
   };
 
-  var chart = new google.visualization.PieChart(document.getElementById('chart_div'));
+  var chart = new google.visualization.BarChart(document.getElementById('chart_div'));
   chart.draw(data, options);
 }
 
@@ -233,7 +238,7 @@ async function fetchCourseData() {
     const courses = await res.json();
     if (!Array.isArray(courses)) throw new Error('Invalid course data');
 
-    // Map directly from API fields (like first example)
+    // Map directly from API fields
     allCourseData = courses.map(course => ({
       kod_subjek: course.kod_subjek || 'N/A',
       nama_subjek: course.nama_subjek || 'N/A',
@@ -254,8 +259,6 @@ async function fetchCourseData() {
     courseData = withStudents.slice(0, 10);
     if (google.visualization) drawChart();
 
-    // Note: Lecturer modal will still work if totalLecturers > 0,
-    // but actual lecturer details depend on separate endpoint (unchanged).
   } catch (err) {
     console.error('Fetch error:', err);
     $('#courseTableBody').html('<tr><td colspan="5" style="text-align:center; color:#d32f2f;">Error loading course data.</td></tr>');
