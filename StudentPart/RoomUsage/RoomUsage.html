@@ -1,341 +1,444 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Detailed Room Usage Analysis - FSKSM N28/N28A</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    
-    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-    <link rel="stylesheet" href="Styles/RoomStyle.css">
-    
-    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-    <script src="../../JS/Authenticate.js"></script>
-</head>
+<!-- SubjectSection.html - Content to be loaded inside Main.html -->
+<link rel="stylesheet" href="Styles/SubjectStyle.css">
 
-<body class="w3-container">
+<div class="subject-sections-container">
+  <!-- Page Header -->
+  <div class="page-header">
+    <h3>
+      <span class="header-icon">📚</span>
+      Subject Sections – With Class Schedule
+    </h3>
+    <p class="subtitle">Explore all available course sections and their schedules</p>
+  </div>
 
-<div class="page-header">
-    <h2>🏢 Detailed Room Usage Analysis (FSKSM N28/N28A)</h2>
+  <!-- Filters -->
+  <div class="filters">
+    <div class="filter-group">
+      <label for="sessionSelect">🗓️ Session</label>
+      <select id="sessionSelect">
+        <option value="">Loading...</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label for="semesterSelect">📅 Semester</label>
+      <select id="semesterSelect">
+        <option value="">Select session first</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Search -->
+  <div class="search-container">
+    <input type="text" id="searchInput" placeholder="🔍 Search by course code or subject name..." />
+  </div>
+
+  <!-- Room Usage Analytics -->
+  <div class="analytics-section" id="analyticsSection" style="display: none;">
+    <div class="analytics-header">
+      <span class="analytics-icon">📊</span>
+      <h4>Top 10 Most Used Rooms This Week</h4>
+    </div>
+    <div class="chart-container">
+      <canvas id="roomUsageChart"></canvas>
+    </div>
+    <div class="room-legend" id="roomLegend"></div>
+  </div>
+
+  <!-- Content -->
+  <div id="sectionsContent">
+    <div class="loading">Loading enrolled sessions and subject sections</div>
+  </div>
 </div>
 
-<div class="info-panel">
-    <p>
-        <strong>📅 Session/Semester:</strong> <span id="sessionSem">Loading...</span> 
-        <span class="w3-right room-count-badge" id="roomCount">0 Rooms Loaded</span>
-    </p>
-</div>
-
-<div class="loading w3-margin-top" id="loadingMsg">
-    🔄 Fetching FSKSM rooms...
-</div>
-
-<div id="chart_div" style="width: 100%; height: 500px;"></div>
-<hr>
-
-<div style="overflow-x: auto;">
-    <table class="w3-table-all w3-hoverable w3-card-4" id="roomListTable" style="display:none; min-width: 900px;">
-        <thead>
-            <tr class="w3-blue-grey">
-                <th>No.</th>
-                <th>Room Code</th>
-                <th>Room Name</th>
-                <th>Abbreviated Name</th>
-                <th>Faculty</th>
-                <th>Type</th>
-                <th>Capacity</th>
-                <th colspan="2" class="w3-center">Usage</th>
-            </tr>
-            <tr class="w3-light-grey w3-small">
-                <th></th>
-                <th></th>
-                <th></th>
-                <th></th>
-                <th></th>
-                <th></th>
-                <th></th>
-                <th>Time/Week (Hrs)</th>
-                <th>Number of Subject</th>
-            </tr>
-        </thead>
-        <tbody id="roomListBody">
-        </tbody>
-    </table>
-</div>
-
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
-    $(document).ready(function() {
+(function() {
+  // Get user from parent window's global variable
+  const userSession = window.userSession;
+  
+  if (!userSession || !userSession.login) {
+    document.getElementById('sectionsContent').innerHTML = 
+      '<div class="empty-message">Session error. Please refresh the page.</div>';
+    return;
+  }
 
-        // --- CONSTANTS ---
-        const BASE_API_URL = "http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=";
-        const ROOM_LIST_API_URL_FSKSM = BASE_API_URL + "ruang&kod_fakulti=fsksm";
-        const JADUAL_RUANG_ENTITY = "jadual_ruang";
+  const matricNo = userSession.login;
+
+  const hariMap = { 2: "Mon", 3: "Tue", 4: "Wed", 5: "Thu", 6: "Fri", 7: "Sat", 8: "Sun" };
+  const masaMap = {
+    2: "08:00–09:00", 3: "09:00–10:00", 4: "10:00–11:00", 5: "11:00–12:00",
+    6: "12:00–13:00", 7: "13:00–14:00", 8: "14:00–15:00", 9: "15:00–16:00", 10: "16:00–17:00"
+  };
+
+  const ITEMS_PER_PAGE = 10;
+  let currentPage = 1;
+  let allEnrichedData = [];
+  let currentSesi = '';
+  let currentSemester = '';
+  let totalPages = 0;
+  let roomUsageChart = null;
+
+  // Green color palette for the chart
+  const greenColors = [
+    '#059669', '#10b981', '#34d399', '#6ee7b7', '#a7f3d0',
+    '#047857', '#065f46', '#14532d', '#15803d', '#166534'
+  ];
+
+  document.getElementById("searchInput").addEventListener("input", filterAndRender);
+  document.getElementById("sessionSelect").addEventListener("change", handleSessionChange);
+  document.getElementById("semesterSelect").addEventListener("change", handleSemesterChange);
+
+  initAndLoad();
+
+  async function initAndLoad() {
+    const contentEl = document.getElementById("sectionsContent");
+    const sessionSelect = document.getElementById("sessionSelect");
+    const semesterSelect = document.getElementById("semesterSelect");
+
+    try {
+      const url = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pelajar_subjek&no_matrik=${encodeURIComponent(matricNo)}`;
+      const res = await fetch(url);
+      const data = await res.json();
+
+      if (!Array.isArray(data) || data.length === 0) {
+        contentEl.innerHTML = `<div class="empty-message">No enrolled subjects found.</div>`;
+        return;
+      }
+
+      const sessions = {};
+      data.forEach(item => {
+        const sesi = item.sesi || 'Unknown';
+        const sem = item.semester || 'N/A';
+        if (!sessions[sesi]) sessions[sesi] = new Set();
+        sessions[sesi].add(sem);
+      });
+
+      const sortedSessions = Object.keys(sessions).sort((a, b) => {
+        const [y1] = a.split('/');
+        const [y2] = b.split('/');
+        return parseInt(y2) - parseInt(y1);
+      });
+
+      let sessionOptions = '<option value="">-- Select Session --</option>';
+      sortedSessions.forEach(s => {
+        sessionOptions += `<option value="${s}">${s}</option>`;
+      });
+      sessionSelect.innerHTML = sessionOptions;
+
+      if (sortedSessions.length > 0) {
+        const latestSesi = sortedSessions[0];
+        sessionSelect.value = latestSesi;
+        const latestSem = Array.from(sessions[latestSesi]).sort((a, b) => b - a)[0];
+        semesterSelect.innerHTML = Array.from(sessions[latestSesi]).sort((a, b) => b - a)
+          .map(sem => `<option value="${sem}" ${sem == latestSem ? 'selected' : ''}>Semester ${sem}</option>`)
+          .join('');
         
-        // --- SESSION CONTEXT ---
-        let currentSesi = null;
-        let currentSemester = null;
-        
-        // Attempt to get context from parent window (for embedded mode)
-        try {
-            currentSesi = window.parent.currentSesi;
-            currentSemester = window.parent.currentSemester;
-        } catch (e) {
-            console.warn("Could not access parent window variables. Assuming default context.");
+        currentSesi = latestSesi;
+        currentSemester = latestSem;
+        await loadAllSections();
+      } else {
+        contentEl.innerHTML = `<div class="empty-message">No sessions available.</div>`;
+      }
+    } catch (err) {
+      contentEl.innerHTML = `<div class="empty-message">Failed to load sessions.</div>`;
+      console.error(err);
+    }
+  }
+
+  function handleSessionChange() {
+    const sesi = document.getElementById("sessionSelect").value;
+    const semesterSelect = document.getElementById("semesterSelect");
+    if (!sesi) {
+      semesterSelect.innerHTML = '<option>Select session first</option>';
+      return;
+    }
+    fetch(`http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pelajar_subjek&no_matrik=${encodeURIComponent(matricNo)}`)
+      .then(r => r.json())
+      .then(data => {
+        const sessions = {};
+        data.forEach(item => {
+          const s = item.sesi || 'Unknown';
+          const sem = item.semester || 'N/A';
+          if (!sessions[s]) sessions[s] = new Set();
+          sessions[s].add(sem);
+        });
+        if (sessions[sesi]) {
+          semesterSelect.innerHTML = Array.from(sessions[sesi]).sort((a, b) => b - a)
+            .map(sem => `<option value="${sem}">Semester ${sem}</option>`)
+            .join('');
+          currentSesi = sesi;
+          currentSemester = semesterSelect.value;
+          loadAllSections();
         }
-        
-        // Provide default values to prevent the 'Critical context is missing' error
-        if (!currentSesi || !currentSemester) {
-            currentSesi = "2025/2026"; 
-            currentSemester = "1";
-            console.warn(`[DIAGNOSTICS] Using default Session: ${currentSesi} and Semester: ${currentSemester} for standalone execution.`);
-            $("#sessionSem").text(`${currentSesi} - Semester ${currentSemester} (Default Context Used)`);
-        } else {
-            $("#sessionSem").text(`${currentSesi} - Semester ${currentSemester}`);
-        }
-        
-        // Exit if essential context is still truly missing/invalid
-        if (!currentSesi || !currentSemester) {
-            $("#loadingMsg").html("❌ Critical Session/Semester context is missing.");
-            return;
-        }
-        
-        // FIX APPLIED HERE: Load the chart package and wrap the entire execution inside the callback.
-        // This ensures Google Charts is fully ready before execution proceeds, resolving the fatal error.
-        google.charts.load('current', {'packages':['bar']});
-        google.charts.setOnLoadCallback(fetchAndAnalyzeRooms);
-        
-        
-        // =================================================================
-        // MASTER CONTROL FUNCTION (CALLED BY CHART LOADER)
-        // =================================================================
+      });
+  }
 
-        function fetchAndAnalyzeRooms() {
-            // 1. Fetch FSKSM rooms
-            fetch(ROOM_LIST_API_URL_FSKSM)
-                .then(res => res.json())
-                .then(rooms => {
-                    if (!Array.isArray(rooms) || rooms.length === 0) {
-                        $("#loadingMsg").html("⚠️ API returned no room data for FSKSM.");
-                        return;
-                    }
-                    
-                    // 2. Client-side Filter for N28/N28A blocks
-                    const filteredRooms = rooms.filter(room => {
-                        const code = room.kod_ruang;
-                        return code && (code.startsWith('N28') || code.startsWith('N28A'));
-                    });
+  function handleSemesterChange() {
+    currentSemester = document.getElementById("semesterSelect").value;
+    if (currentSesi && currentSemester) {
+      loadAllSections();
+    }
+  }
 
-                    if (filteredRooms.length === 0) {
-                        $("#loadingMsg").html(`⚠️ Found ${rooms.length} FSKSM rooms, but 0 matched N28/N28A prefix.`);
-                        return;
-                    }
+  async function loadAllSections() {
+    const contentEl = document.getElementById("sectionsContent");
+    if (!currentSesi || !currentSemester) return;
 
-                    $("#loadingMsg").text(`⏳ Found ${filteredRooms.length} N28/N28A rooms. Calculating usage...`);
-                    $("#roomCount").text(`${filteredRooms.length} Rooms Found`);
-                    
-                    // 3. Fetch usage for the filtered rooms concurrently
-                    return analyzeRoomUsage(filteredRooms);
-                })
-                .then(analyzedRooms => {
-                    // 4. Display the final table
-                    displayRoomList(analyzedRooms);
-                    
-                    // 5. Draw the usage chart (Chart library is now guaranteed to be loaded)
-                    drawRoomUsageChart(analyzedRooms);
+    contentEl.innerHTML = "<div class='loading'>Loading all valid subject sections</div>";
 
-                    $("#loadingMsg").hide();
-                    $("#roomListTable").show();
-                    $("#roomCount").text(`${analyzedRooms.length} N28/N28A Rooms Displayed`);
-                })
-                .catch(err => {
-                    console.error("❌ Fatal Error during analysis:", err);
-                    $("#loadingMsg").html(`❌ Fatal Error: ${err.message}. Check browser console for details.`);
-                });
-        }
+    try {
+      const resSec = await fetch(`http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=subjek_seksyen&sesi=${encodeURIComponent(currentSesi)}&semester=${encodeURIComponent(currentSemester)}`);
+      const allSubjects = await resSec.json();
 
-        // =================================================================
-        // USAGE CALCULATION LOGIC (RETAINED CORRECT LOGIC)
-        // =================================================================
+      const validSubjects = allSubjects
+        .filter(subj => subj.seksyen_list && Array.isArray(subj.seksyen_list))
+        .map(subj => {
+          const validSections = subj.seksyen_list.filter(sec => (sec.pensyarah || '').trim() && (sec.bil_pelajar || 0) > 0);
+          return validSections.length > 0 ? { ...subj, seksyen_list: validSections } : null;
+        })
+        .filter(Boolean);
 
-        function fetchRoomSchedule(room) {
-            const url = `${BASE_API_URL}${JADUAL_RUANG_ENTITY}&sesi=${currentSesi}&semester=${currentSemester}&kod_ruang=${room.kod_ruang}`;
+      const fetchPromises = [];
+      const roomUsageMap = {};
 
-            return fetch(url)
-                .then(res => res.json())
-                .then(schedule => {
-                    if (!Array.isArray(schedule)) {
-                        return calculateUsage(room, []); 
-                    }
-                    return calculateUsage(room, schedule);
-                })
-                .catch(error => {
-                    console.error(`❌ SCHEDULE FETCH ERROR for ${room.kod_ruang}:`, error);
-                    return { 
-                        ...room, 
-                        usageHours: 0, 
-                        subjectCount: 0 
-                    };
-                });
-        }
+      validSubjects.forEach(subj => {
+        subj.seksyen_list.forEach(sec => {
+          fetchPromises.push((async () => {
+            try {
+              const kod = subj.kod_subjek;
+              const nama = subj.nama_subjek;
+              const seksyen = sec.seksyen;
+              const lecturer = sec.pensyarah;
+              const enrolled = sec.bil_pelajar;
 
-        function calculateUsage(room, schedule) {
-            const uniqueWeeklySlots = new Set();
-            const uniqueSubjects = new Set();
-            
-            schedule.forEach(slot => {
-                // Safer way to access nested properties: slot.subjek.kod_subjek
-                const kodSubjek = slot.subjek && slot.subjek.kod_subjek;
-                const sekyen = (slot.subjek && slot.subjek.seksyen) || '0';
-                const hari = slot.hari;
-                const masa = slot.masa;
-                
-                // 1. COUNT UNIQUE SUBJECTS (Number of Subject: kod_subjek only)
-                if (kodSubjek) {
-                    // Counts only unique subject codes (e.g., SECI1013)
-                    uniqueSubjects.add(kodSubjek); 
+              const res = await fetch(`http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=jadual_subjek&sesi=${encodeURIComponent(currentSesi)}&semester=${encodeURIComponent(currentSemester)}&kod_subjek=${encodeURIComponent(kod)}&seksyen=${encodeURIComponent(seksyen)}`);
+              const rawJadual = await res.json();
+
+              const sorted = (Array.isArray(rawJadual) ? rawJadual : [])
+                .filter(e => e.hari && e.masa)
+                .sort((a, b) => a.hari - b.hari || a.masa - b.masa);
+
+              // Track room usage
+              sorted.forEach(entry => {
+                const roomName = entry.ruang?.nama_ruang_singkatan || entry.ruang?.kod_ruang;
+                if (roomName && roomName !== '—') {
+                  roomUsageMap[roomName] = (roomUsageMap[roomName] || 0) + 1;
+                }
+              });
+
+              const mergedEntries = [];
+              for (let i = 0; i < sorted.length; i++) {
+                let startSlot = sorted[i].masa;
+                let endSlot = sorted[i].masa;
+                const day = sorted[i].hari;
+                const roomName = sorted[i].ruang?.nama_ruang_singkatan || sorted[i].ruang?.kod_ruang || '—';
+
+                while (i + 1 < sorted.length && 
+                       sorted[i+1].hari === day && 
+                       sorted[i+1].masa === endSlot + 1 && 
+                       (sorted[i+1].ruang?.nama_ruang_singkatan || sorted[i+1].ruang?.kod_ruang || '—') === roomName) {
+                  endSlot = sorted[i+1].masa;
+                  i++;
                 }
 
-                // 2. COUNT USAGE HOURS (Time/Week: unique weekly slots)
-                if (hari && masa && room.kod_ruang) {
-                    let uniqueSlotKey;
-                    
-                    // Key combines Subject, Section, Day, and Time for unique weekly slot count (e.g., 42, 31, 28)
-                    if (kodSubjek) {
-                        uniqueSlotKey = `${kodSubjek}-${sekyen}-${hari}-${masa}`;
-                    } else {
-                        // Key for non-subject bookings
-                        uniqueSlotKey = `NON_SUB_BOOKING-${room.kod_ruang}-${hari}-${masa}`;
-                    }
-                    
-                    uniqueWeeklySlots.add(uniqueSlotKey);
-                }
-            });
-            
-            // The usageHours is the size of the set of unique weekly time slots.
-            const usageHours = uniqueWeeklySlots.size; 
-            const subjectCount = uniqueSubjects.size;
+                const startTime = masaMap[startSlot]?.split('–')[0] || '—';
+                const endTime = masaMap[endSlot]?.split('–')[1] || '—';
+                mergedEntries.push({
+                  day: hariMap[day] || '—',
+                  time: `${startTime}–${endTime}`,
+                  room: roomName
+                });
+              }
 
-            if (usageHours > 0) {
-                console.log(`[SUCCESS] Room: ${room.kod_ruang} calculated usage: ${usageHours} Hrs / ${subjectCount} Subjects.`);
+              return { 
+                kod, 
+                nama, 
+                seksyen, 
+                lecturer, 
+                enrolled, 
+                scheduleEntries: mergedEntries,
+                searchable: `${kod} ${nama} ${lecturer}`.toLowerCase()
+              };
+            } catch (err) {
+              console.error("Error loading section:", err);
+              return null;
             }
+          })());
+        });
+      });
 
-            return {
-                ...room,
-                usageHours: usageHours, 
-                subjectCount: subjectCount
-            };
-        }
+      allEnrichedData = (await Promise.all(fetchPromises)).filter(Boolean);
+      
+      // Update room usage analytics
+      updateRoomUsageChart(roomUsageMap);
+      
+      totalPages = Math.ceil(allEnrichedData.length / ITEMS_PER_PAGE);
+      currentPage = 1;
+      filterAndRender();
+    } catch (err) {
+      contentEl.innerHTML = `<div class="empty-message">Error loading sections: ${err.message}</div>`;
+      console.error(err);
+    }
+  }
 
-        function analyzeRoomUsage(rooms) {
-            const promises = rooms.map(room => fetchRoomSchedule(room));
-            return Promise.allSettled(promises)
-                .then(results => {
-                    return results
-                        .filter(result => result.status === 'fulfilled')
-                        .map(result => result.value);
-                });
-        }
+  function updateRoomUsageChart(roomUsageMap) {
+    const sortedRooms = Object.entries(roomUsageMap)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10);
 
-        // =================================================================
-        // CHARTING LOGIC
-        // =================================================================
+    if (sortedRooms.length === 0) {
+      document.getElementById('analyticsSection').style.display = 'none';
+      return;
+    }
 
-        function drawRoomUsageChart(rooms) {
-            // 1. Sort and select Top 10 by usageHours
-            const top10Rooms = rooms
-                .filter(room => room.usageHours > 0) // Only chart rooms with usage
-                .sort((a, b) => b.usageHours - a.usageHours)
-                .slice(0, 10);
-                
-            if (top10Rooms.length < 2) {
-                $("#chart_div").html('<div class="w3-panel w3-yellow w3-padding">Not enough usage data found to plot a meaningful chart (need at least 2 rooms).</div>');
-                return;
+    document.getElementById('analyticsSection').style.display = 'block';
+
+    const labels = sortedRooms.map(([room]) => room);
+    const data = sortedRooms.map(([, count]) => count);
+
+    // Destroy previous chart if exists
+    if (roomUsageChart) {
+      roomUsageChart.destroy();
+    }
+
+    const ctx = document.getElementById('roomUsageChart').getContext('2d');
+    roomUsageChart = new Chart(ctx, {
+      type: 'pie',
+      data: {
+        labels: labels,
+        datasets: [{
+          data: data,
+          backgroundColor: greenColors,
+          borderColor: '#ffffff',
+          borderWidth: 3,
+          hoverOffset: 15
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            backgroundColor: 'rgba(5, 150, 105, 0.95)',
+            titleFont: {
+              size: 16,
+              weight: 'bold'
+            },
+            bodyFont: {
+              size: 14
+            },
+            padding: 12,
+            cornerRadius: 8,
+            callbacks: {
+              label: function(context) {
+                const label = context.label || '';
+                const value = context.parsed || 0;
+                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                const percentage = ((value / total) * 100).toFixed(1);
+                return `${label}: ${value} hours (${percentage}%)`;
+              }
             }
-
-            // 2. Prepare Google Chart DataTable
-            var data = new google.visualization.DataTable();
-            data.addColumn('string', 'Room');
-            data.addColumn('number', 'Time/Week (Hrs)');
-            
-            // Map the room data to the required array format for the chart
-            var chartData = top10Rooms.map(room => {
-                const roomLabel = room.nama_ruang_singkatan || room.kod_ruang;
-                return [roomLabel, room.usageHours];
-            });
-            
-            data.addRows(chartData);
-
-            // 3. Define Chart Options with green theme
-            var options = {
-                title: `Top ${top10Rooms.length} N28/N28A Room Usage: Time/Week (Hrs)`,
-                hAxis: {
-                    title: 'Time/Week (Hours)',
-                    minValue: 0
-                },
-                vAxis: {
-                    title: 'Room Code / Abbreviated Name'
-                },
-                bars: 'horizontal',
-                colors: ['#43a047'],
-                chartArea: { width: '60%' } 
-            };
-
-            // 4. Draw the Chart
-            var chart = new google.charts.Bar(document.getElementById('chart_div'));
-            chart.draw(data, google.charts.Bar.convertOptions(options));
+          }
+        },
+        animation: {
+          animateRotate: true,
+          animateScale: true,
+          duration: 1500,
+          easing: 'easeInOutQuart'
         }
-
-        // =================================================================
-        // DISPLAY LOGIC
-        // =================================================================
-
-        function displayRoomList(rooms) {
-            const body = $("#roomListBody");
-            body.empty();
-            
-            // Sort in descending order of usage hours
-            rooms.sort((a, b) => b.usageHours - a.usageHours);
-
-            rooms.forEach((room, index) => {
-                // Dynamic tag coloring based on usage levels
-                let usageTagClass = 'usage-tag-none';
-                if (room.usageHours > 30) {
-                    usageTagClass = 'usage-tag-high';
-                } else if (room.usageHours > 15) {
-                    usageTagClass = 'usage-tag-medium';
-                } else if (room.usageHours > 0) {
-                    usageTagClass = 'usage-tag-low';
-                }
-                
-                let subjectTagClass = 'usage-tag-none';
-                if (room.subjectCount > 10) {
-                    subjectTagClass = 'usage-tag-high';
-                } else if (room.subjectCount > 5) {
-                    subjectTagClass = 'usage-tag-medium';
-                } else if (room.subjectCount > 0) {
-                    subjectTagClass = 'usage-tag-low';
-                }
-                
-                const row = `
-                    <tr>
-                        <td>${index + 1}</td>
-                        <td><strong>${room.kod_ruang || 'N/A'}</strong></td>
-                        <td>${room.nama_ruang || 'N/A'}</td>
-                        <td>${room.nama_ruang_singkatan || 'N/A'}</td>
-                        <td>${room.kod_fakulti || 'N/A'}</td>
-                        <td>${room.jenis || 'N/A'}</td> 
-                        <td class="w3-center">${room.kapasiti || 'N/A'}</td> 
-                        <td class="w3-center">
-                            <span class="${usageTagClass}">${room.usageHours}</span>
-                        </td>
-                        <td class="w3-center">
-                            <span class="${subjectTagClass}">${room.subjectCount}</span>
-                        </td>
-                    </tr>
-                `;
-                body.append(row);
-            });
-        }
+      }
     });
+
+    // Update legend
+    const legendHTML = sortedRooms.map(([room, count], index) => {
+      const total = data.reduce((a, b) => a + b, 0);
+      const percentage = ((count / total) * 100).toFixed(1);
+      return `
+        <div class="legend-item">
+          <div class="legend-color" style="background-color: ${greenColors[index]}"></div>
+          <span class="legend-text">${room}</span>
+          <span class="legend-count">${count}h (${percentage}%)</span>
+        </div>
+      `;
+    }).join('');
+
+    document.getElementById('roomLegend').innerHTML = legendHTML;
+  }
+
+  function filterAndRender() {
+    const query = document.getElementById("searchInput").value.toLowerCase();
+    let filteredData = allEnrichedData;
+
+    if (query) {
+      filteredData = allEnrichedData.filter(item => item.searchable.includes(query));
+    }
+
+    totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const pageData = filteredData.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+    renderSections(pageData, filteredData.length);
+  }
+
+  function renderSections(pageData, totalItems) {
+    const contentEl = document.getElementById("sectionsContent");
+    const grouped = {};
+
+    pageData.forEach(item => {
+      if (!grouped[item.kod]) {
+        grouped[item.kod] = { kod: item.kod, nama: item.nama, sections: [] };
+      }
+      grouped[item.kod].sections.push(item);
+    });
+
+    let html = `<div class="summary">📊 Showing ${pageData.length} of ${totalItems} sections | Page ${currentPage} of ${totalPages}</div>`;
+
+    if (totalItems === 0) {
+      html += `<div class="empty-message">🔍 No sections match your search.</div>`;
+    } else {
+      Object.values(grouped).forEach(group => {
+        html += `
+          <div class="subject-card">
+            <header><h5>📚 ${group.kod} – ${group.nama}</h5></header>
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Section</th>
+                    <th>👨‍🏫 Lecturer</th>
+                    <th>👥 Enrolled</th>
+                    <th>📅 Schedule (Day – Time – Room)</th>
+                  </tr>
+                </thead>
+                <tbody>`;
+        group.sections.forEach(sec => {
+          const scheduleHtml = sec.scheduleEntries.length > 0
+            ? sec.scheduleEntries.map(e => `<div class="schedule-entry"><strong>${e.day}</strong> | ${e.time} | ${e.room}</div>`).join('')
+            : '<span style="color:#999;">No schedule</span>';
+          html += `<tr><td><strong>${sec.seksyen}</strong></td><td>${sec.lecturer}</td><td>${sec.enrolled}</td><td>${scheduleHtml}</td></tr>`;
+        });
+        html += `</tbody></table></div></div>`;
+      });
+
+      html += `
+        <div class="pagination">
+          <button ${currentPage <= 1 ? 'disabled' : ''} onclick="changeSubjectSectionPage(${currentPage - 1})">◀ Prev</button>
+          <span class="page-info">Page ${currentPage} of ${totalPages}</span>
+          <button ${currentPage >= totalPages ? 'disabled' : ''} onclick="changeSubjectSectionPage(${currentPage + 1})">Next ▶</button>
+        </div>`;
+    }
+
+    contentEl.innerHTML = html;
+  }
+
+  window.changeSubjectSectionPage = function(page) {
+    if (page < 1 || page > totalPages) return;
+    currentPage = page;
+    filterAndRender();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+})();
 </script>
-</body>
-</html>

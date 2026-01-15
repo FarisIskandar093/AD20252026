@@ -6,7 +6,6 @@
     
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <link rel="stylesheet" href="Styles/dashboardStyle.css">
-    <script src="../JS/Authenticate.js"></script>
 </head>
 <body class="w3-container">
 
@@ -168,8 +167,15 @@ $(document).ready(function() {
 
     const matric = userSession.login_name;
     const fullName = userSession.full_name;
+    const sessionId = userSession.session_id; // ✅ Get session_id from new login
+    
     let currentSesi = window.parent.currentSesi;
     let currentSemester = window.parent.currentSemester;
+
+    console.log("📋 User Session Info:");
+    console.log("  - Matric:", matric);
+    console.log("  - Name:", fullName);
+    console.log("  - Session ID:", sessionId);
 
     // ==========================================
     // UPDATE CURRENT DATE/TIME
@@ -263,7 +269,7 @@ $(document).ready(function() {
                 // Fetch timetable for all subjects
                 let allTimetableSlots = [];
                 let promises = currentSubjects.map(subj => 
-                    fetchSubjectTimetable(subj).then(slots => {
+                    fetchSubjectTimetableWithLecturer(subj).then(slots => {
                         allTimetableSlots = allTimetableSlots.concat(slots.map(slot => ({
                             ...slot,
                             subject: subj
@@ -290,12 +296,72 @@ $(document).ready(function() {
 
         return fetch(url)
             .then(res => res.json())
-            .then(times => Array.isArray(times) ? times : [])
+            .then(times => {
+                console.log(`📚 Timetable for ${subject.kod_subjek}:`, times);
+                return Array.isArray(times) ? times : [];
+            })
             .catch(err => {
                 console.error(`Error fetching timetable for ${subject.kod_subjek}:`, err);
                 return [];
             });
     }
+
+    // ==========================================
+    // FETCH SUBJECT LECTURER INFO
+    // ==========================================
+    async function fetchSubjectLecturer(kodSubjek, sesi, semester, seksyen) {
+        try {
+            let url = `${BASE_URL}subjek_pensyarah&kod_subjek=${kodSubjek}`;
+            
+            // Add optional parameters if available
+            if (sesi && semester && seksyen) {
+                url += `&sesi=${sesi}&semester=${semester}&seksyen=${seksyen}`;
+            }
+            
+            console.log(`👨‍🏫 Fetching lecturer for ${kodSubjek}:`, url);
+            
+            const response = await fetch(url);
+            const data = await response.json();
+            
+            console.log(`   Lecturer data:`, data);
+            
+            if (Array.isArray(data) && data.length > 0) {
+                // Return the lecturer info from the first result
+                const lecturerInfo = data[0];
+                return {
+                    kod_pekerja: lecturerInfo.no_pekerja || lecturerInfo.kod_pekerja,
+                    nama: lecturerInfo.nama_pensyarah || lecturerInfo.nama || null
+                };
+            }
+        } catch (err) {
+            console.error(`Error fetching lecturer for ${kodSubjek}:`, err);
+        }
+        return null;
+    }
+
+    // ==========================================
+    // FETCH TIMETABLE WITH LECTURER INFO
+    // ==========================================
+    async function fetchSubjectTimetableWithLecturer(subject) {
+        // First get the timetable slots
+        const slots = await fetchSubjectTimetable(subject);
+        
+        // Then fetch the lecturer info for this subject
+        const lecturerInfo = await fetchSubjectLecturer(
+            subject.kod_subjek, 
+            subject.sesi, 
+            subject.semester, 
+            subject.seksyen
+        );
+        
+        // Attach lecturer info to each slot
+        return slots.map(slot => ({
+            ...slot,
+            lecturerInfo: lecturerInfo
+        }));
+    }
+
+
 
     // ==========================================
     // PROCESS TIMETABLE DATA FOR STATS
@@ -317,9 +383,46 @@ $(document).ready(function() {
     }
 
     // ==========================================
+    // GET LECTURER NAME FROM SLOT
+    // ==========================================
+    function getLecturerName(classSlot) {
+        // First check if we have lecturerInfo attached from our fetch
+        if (classSlot.lecturerInfo && classSlot.lecturerInfo.nama) {
+            console.log('  ✅ Using lecturerInfo.nama:', classSlot.lecturerInfo.nama);
+            return classSlot.lecturerInfo.nama;
+        }
+        
+        // Fallback: Try pensyarah object (in case it exists)
+        if (classSlot.pensyarah) {
+            if (classSlot.pensyarah.nama_pensyarah) {
+                return classSlot.pensyarah.nama_pensyarah;
+            }
+            if (classSlot.pensyarah.nama) {
+                return classSlot.pensyarah.nama;
+            }
+        }
+        
+        // Try direct field
+        if (classSlot.nama_pensyarah) {
+            return classSlot.nama_pensyarah;
+        }
+        
+        // Return code if available
+        if (classSlot.lecturerInfo && classSlot.lecturerInfo.kod_pekerja) {
+            return classSlot.lecturerInfo.kod_pekerja;
+        }
+        
+        if (classSlot.kod_pensyarah) {
+            return classSlot.kod_pensyarah;
+        }
+        
+        return 'TBA';
+    }
+
+    // ==========================================
     // DISPLAY TODAY'S CLASSES
     // ==========================================
-    function displayTodaysClasses(allSlots) {
+    async function displayTodaysClasses(allSlots) {
         const now = new Date();
         const currentDay = now.getDay();
         const currentHour = now.getHours();
@@ -355,7 +458,7 @@ $(document).ready(function() {
         console.log("🔍 All slots:", allSlots.length);
         console.log("🔍 Today's classes found:", todaysClasses.length);
         todaysClasses.forEach(c => {
-            console.log(`  - ${c.subject.kod_subjek} at masa=${c.masa}, hari=${c.hari}`);
+            console.log(`  - ${c.subject.kod_subjek} at masa=${c.masa}, hari=${c.hari}`, c);
         });
         
         if (todaysClasses.length === 0) {
@@ -375,14 +478,13 @@ $(document).ready(function() {
         // Sort classes by time
         todaysClasses.sort((a, b) => a.masa - b.masa);
 
-        // ✅ FIX: Count unique classes (by subject code and section)
+        // Count unique classes and slots
         const uniqueClasses = new Set();
         todaysClasses.forEach(c => {
             const classKey = `${c.subject.kod_subjek}-${c.subject.seksyen}`;
             uniqueClasses.add(classKey);
         });
 
-        // ✅ FIX: Count unique time slots (hours)
         const uniqueClassSlots = new Set(todaysClasses.map(c => c.masa));
         
         $("#totalClassesToday").text(uniqueClasses.size);
@@ -412,9 +514,11 @@ $(document).ready(function() {
         // Update next class info
         if (nextClass) {
             const nextTimeSlot = TIME_SLOTS[nextClass.masa];
+            const lecturerName = getLecturerName(nextClass);
             $("#nextClassTime").text(nextTimeSlot.start);
             $("#nextClassDetail").html(`
-                <strong>${nextClass.subject.kod_subjek}</strong> at 
+                <strong>${nextClass.subject.kod_subjek}</strong> with 
+                <strong>${lecturerName}</strong> at 
                 <strong>${nextTimeSlot.start}</strong> in 
                 <strong>${nextClass.ruang.nama_ruang_singkatan || nextClass.ruang.kod_ruang || 'TBA'}</strong>
             `);
@@ -425,10 +529,10 @@ $(document).ready(function() {
             $("#nextClassTime").text("Done");
         }
 
-        // ✅ FIX: Render class cards - Group consecutive slots of same class
+        // Render class cards - Group consecutive slots of same class
         let classesHTML = '';
         let processedClasses = new Set();
-        
+
         todaysClasses.forEach((classSlot) => {
             const classKey = `${classSlot.subject.kod_subjek}-${classSlot.subject.seksyen}`;
             
@@ -454,8 +558,7 @@ $(document).ready(function() {
             if (!startTime || !endTime) return;
 
             const room = classSlot.ruang.nama_ruang_singkatan || classSlot.ruang.kod_ruang || 'TBA';
-            const lecturer = classSlot.pensyarah ? 
-                (classSlot.pensyarah.nama_pensyarah || 'TBA') : 'TBA';
+            const lecturer = getLecturerName(classSlot);
 
             // Determine if this is current or next class
             let cardClass = 'class-card';
