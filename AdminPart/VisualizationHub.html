@@ -2,147 +2,403 @@
     <h2 class="w3-text-purple">📊 Visualization Hub</h2>
     <p class="w3-text-grey">Interactive data visualizations for TTMS analytics</p>
     
+    <!-- Dashboard Tabs -->
     <div class="w3-bar w3-light-grey w3-round w3-margin-bottom">
-        <button class="w3-bar-item w3-button w3-purple" onclick="showVizTab('overview')">Overview</button>
-        <button class="w3-bar-item w3-button" onclick="showVizTab('temporal')">Temporal Analysis</button>
-        <button class="w3-bar-item w3-button" onclick="showVizTab('spatial')">Spatial Analysis</button>
-        <button class="w3-bar-item w3-button" onclick="showVizTab('predictive')">Predictive Insights</button>
+        <button class="w3-bar-item w3-button w3-purple w3-padding" onclick="showTab('overview')">
+            <i class="w3-large">📈</i> Overview
+        </button>
+        <button class="w3-bar-item w3-button w3-padding" onclick="showTab('temporal')">
+            <i class="w3-large">⏰</i> Temporal Analysis
+        </button>
+        <button class="w3-bar-item w3-button w3-padding" onclick="showTab('comparative')">
+            <i class="w3-large">⚖️</i> Comparative
+        </button>
+        <button class="w3-bar-item w3-button w3-padding" onclick="showTab('predictive')">
+            <i class="w3-large">🔮</i> Predictive
+        </button>
     </div>
     
-    <div id="vizTabContent">
-        <!-- Content loaded dynamically -->
+    <!-- Tab Content -->
+    <div id="tabContent" class="w3-animate-opacity">
+        <!-- Content will be loaded here -->
     </div>
     
+    <!-- Visualization Controls -->
     <div class="w3-panel w3-light-blue w3-round w3-margin-top">
-        <h5>💡 Visualization Tips</h5>
-        <p>• Hover over charts for detailed information</p>
-        <p>• Click and drag to zoom in on specific areas</p>
-        <p>• Use filters to customize the data view</p>
-        <p>• Export any visualization using the menu button</p>
+        <h5>🎨 Visualization Controls</h5>
+        <div class="w3-row">
+            <div class="w3-col m4">
+                <label>Color Theme:</label>
+                <select class="w3-select w3-border w3-round" id="colorTheme" onchange="changeTheme()">
+                    <option value="purple">Purple Theme</option>
+                    <option value="blue">Blue Theme</option>
+                    <option value="green">Green Theme</option>
+                    <option value="rainbow">Rainbow</option>
+                </select>
+            </div>
+            <div class="w3-col m4">
+                <label>Animation Speed:</label>
+                <select class="w3-select w3-border w3-round" id="animationSpeed" onchange="changeAnimation()">
+                    <option value="fast">Fast</option>
+                    <option value="normal" selected>Normal</option>
+                    <option value="slow">Slow</option>
+                    <option value="none">None</option>
+                </select>
+            </div>
+            <div class="w3-col m4">
+                <br>
+                <button class="w3-button w3-purple w3-block w3-round" onclick="exportVisualizations()">
+                    📤 Export All Visualizations
+                </button>
+            </div>
+        </div>
     </div>
 </div>
 
+<script src="AdminPart/VisualizationHelper.js"></script>
 <script>
+let currentTab = 'overview';
+let charts = {};
+
 $(document).ready(function() {
-    showVizTab('overview');
-    
-    function showVizTab(tab) {
-        // Update active button
-        $('.w3-bar-item.w3-button').removeClass('w3-purple');
-        $(`.w3-bar-item.w3-button:contains('${tab.charAt(0).toUpperCase() + tab.slice(1)}')`).addClass('w3-purple');
-        
-        let content = '';
-        
-        switch(tab) {
-            case 'overview':
-                content = `
-                    <div class="w3-row-padding">
-                        <div class="w3-col m6">
-                            <div class="w3-card w3-padding">
-                                <h4>System Health Dashboard</h4>
-                                <div id="healthDashboard" style="width:100%; height:300px;"></div>
-                            </div>
-                        </div>
-                        <div class="w3-col m6">
-                            <div class="w3-card w3-padding">
-                                <h4>Resource Allocation</h4>
-                                <div id="resourceAllocation" style="width:100%; height:300px;"></div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                break;
-                
-            case 'temporal':
-                content = `
-                    <div class="w3-card w3-padding">
-                        <h4>Temporal Analysis</h4>
-                        <p>Analyze patterns over time</p>
-                        <div id="temporalChart" style="width:100%; height:400px;"></div>
-                    </div>
-                `;
-                break;
-                
-            case 'spatial':
-                content = `
-                    <div class="w3-card w3-padding">
-                        <h4>Spatial Analysis</h4>
-                        <p>Room and building utilization</p>
-                        <div id="spatialChart" style="width:100%; height:400px;"></div>
-                    </div>
-                `;
-                break;
-                
-            case 'predictive':
-                content = `
-                    <div class="w3-card w3-padding">
-                        <h4>Predictive Insights</h4>
-                        <p>Forecasting and trend analysis</p>
-                        <div id="predictiveChart" style="width:100%; height:400px;"></div>
-                    </div>
-                `;
-                break;
-        }
-        
-        $("#vizTabContent").html(content);
-        
-        // Load appropriate visualizations
-        setTimeout(() => {
-            if (tab === 'overview') loadOverviewCharts();
-            else if (tab === 'temporal') loadTemporalAnalysis();
-            else if (tab === 'spatial') loadSpatialAnalysis();
-            else if (tab === 'predictive') loadPredictiveInsights();
-        }, 100);
-    }
-    
-    window.showVizTab = showVizTab;
-    
-    function loadOverviewCharts() {
-        // Load health dashboard
-        const healthData = new google.visualization.DataTable();
-        healthData.addColumn('string', 'Metric');
-        healthData.addColumn('number', 'Value');
-        healthData.addColumn({type: 'string', role: 'style'});
-        
-        healthData.addRows([
-            ['Data Integrity', 95, 'color: #4caf50'],
-            ['System Uptime', 99, 'color: #2196f3'],
-            ['API Response', 98, 'color: #9c27b0'],
-            ['User Satisfaction', 92, 'color: #ff9800']
-        ]);
-        
-        const healthOptions = {
-            title: 'System Health Metrics',
-            legend: { position: 'none' },
-            vAxis: { minValue: 0, maxValue: 100, format: '#\'%\'' }
-        };
-        
-        const healthChart = new google.visualization.ColumnChart(document.getElementById('healthDashboard'));
-        healthChart.draw(healthData, healthOptions);
-        
-        // Load resource allocation
-        const resourceData = new google.visualization.DataTable();
-        resourceData.addColumn('string', 'Resource');
-        resourceData.addColumn('number', 'Usage');
-        
-        resourceData.addRows([
-            ['Classrooms', 75],
-            ['Laboratories', 60],
-            ['Study Spaces', 40],
-            ['Common Areas', 30]
-        ]);
-        
-        const resourceOptions = {
-            title: 'Resource Allocation & Usage',
-            is3D: true,
-            colors: ['#2196f3', '#4caf50', '#ff9800', '#9c27b0']
-        };
-        
-        const resourceChart = new google.visualization.PieChart(document.getElementById('resourceAllocation'));
-        resourceChart.draw(resourceData, resourceOptions);
-    }
+    showTab('overview');
 });
 
-// Load Google Charts
-google.charts.load('current', {'packages':['corechart']});
+function showTab(tab) {
+    currentTab = tab;
+    
+    // Update active tab
+    $('.w3-bar .w3-button').removeClass('w3-purple');
+    $(`.w3-bar .w3-button:contains('${tab.charAt(0).toUpperCase() + tab.slice(1)}')`).parent().addClass('w3-purple');
+    
+    let content = '';
+    
+    switch(tab) {
+        case 'overview':
+            content = overviewTab();
+            break;
+        case 'temporal':
+            content = temporalTab();
+            break;
+        case 'comparative':
+            content = comparativeTab();
+            break;
+        case 'predictive':
+            content = predictiveTab();
+            break;
+    }
+    
+    $('#tabContent').html(content);
+    
+    // Load charts after content is rendered
+    setTimeout(() => {
+        loadTabCharts(tab);
+    }, 100);
+}
+
+function overviewTab() {
+    return `
+        <div class="w3-row-padding">
+            <div class="w3-col m8">
+                <div class="w3-card w3-padding chart-card">
+                    <h4>📊 System Performance Overview</h4>
+                    <div class="chart-container">
+                        <canvas id="overviewRadar"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="w3-col m4">
+                <div class="w3-card w3-padding chart-card">
+                    <h4>⚡ Quick Stats</h4>
+                    <div class="w3-padding" id="quickStats">
+                        <div class="stat-circle-small w3-purple">
+                            <div class="stat-value-small">95%</div>
+                            <div class="stat-label-small">Performance</div>
+                        </div>
+                        <div class="stat-circle-small w3-blue">
+                            <div class="stat-value-small">88%</div>
+                            <div class="stat-label-small">Efficiency</div>
+                        </div>
+                        <div class="stat-circle-small w3-green">
+                            <div class="stat-value-small">99.8%</div>
+                            <div class="stat-label-small">Uptime</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="w3-row-padding w3-margin-top">
+            <div class="w3-col m6">
+                <div class="w3-card w3-padding chart-card">
+                    <h4>📈 Activity Trends</h4>
+                    <div class="chart-container">
+                        <canvas id="activityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="w3-col m6">
+                <div class="w3-card w3-padding chart-card">
+                    <h4>🎯 Goal Progress</h4>
+                    <div class="chart-container">
+                        <canvas id="progressChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function temporalTab() {
+    return `
+        <div class="w3-card w3-padding chart-card">
+            <h4>📅 Timeline Analysis</h4>
+            <div class="w3-bar w3-light-grey w3-round w3-margin-bottom">
+                <button class="w3-bar-item w3-button w3-purple" onclick="loadTemporalData('daily')">Daily</button>
+                <button class="w3-bar-item w3-button" onclick="loadTemporalData('weekly')">Weekly</button>
+                <button class="w3-bar-item w3-button" onclick="loadTemporalData('monthly')">Monthly</button>
+            </div>
+            <div class="chart-container">
+                <canvas id="temporalChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="w3-row-padding w3-margin-top">
+            <div class="w3-col m6">
+                <div class="w3-card w3-padding chart-card">
+                    <h4>📊 Seasonal Patterns</h4>
+                    <div class="chart-container">
+                        <canvas id="seasonalChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="w3-col m6">
+                <div class="w3-card w3-padding chart-card">
+                    <h4>⏰ Time Distribution</h4>
+                    <div class="chart-container">
+                        <canvas id="timePatternChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function comparativeTab() {
+    return `
+        <div class="w3-card w3-padding chart-card">
+            <h4>📊 Comparative Analysis</h4>
+            <div class="w3-row">
+                <div class="w3-col m8">
+                    <div class="chart-container">
+                        <canvas id="comparativeChart"></canvas>
+                    </div>
+                </div>
+                <div class="w3-col m4">
+                    <div class="w3-padding">
+                        <h5>Comparison Metrics</h5>
+                        <div class="w3-panel w3-light-grey w3-round">
+                            <p><strong>Current vs Previous:</strong></p>
+                            <div id="comparisonMetrics">
+                                <!-- Will be populated -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function predictiveTab() {
+    return `
+        <div class="w3-card w3-padding chart-card">
+            <h4>🔮 Predictive Analytics</h4>
+            <div class="w3-row">
+                <div class="w3-col m8">
+                    <div class="chart-container">
+                        <canvas id="predictiveChart"></canvas>
+                    </div>
+                </div>
+                <div class="w3-col m4">
+                    <div class="w3-padding">
+                        <h5>Forecast Insights</h5>
+                        <div class="w3-panel w3-light-green w3-round">
+                            <p><strong>Next 30 Days:</strong></p>
+                            <p>📈 Expected growth: 12%</p>
+                            <p>🎯 Target achievement: 85%</p>
+                            <p>⚠️ Risk level: Low</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="w3-row-padding w3-margin-top">
+            <div class="w3-col m6">
+                <div class="w3-card w3-padding chart-card">
+                    <h4>📈 Trend Projection</h4>
+                    <div class="chart-container">
+                        <canvas id="trendChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="w3-col m6">
+                <div class="w3-card w3-padding chart-card">
+                    <h4>🎯 Forecast Accuracy</h4>
+                    <div class="chart-container">
+                        <canvas id="accuracyChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function loadTabCharts(tab) {
+    // Destroy existing charts
+    Object.values(charts).forEach(chart => {
+        if (chart && typeof chart.destroy === 'function') {
+            chart.destroy();
+        }
+    });
+    charts = {};
+    
+    switch(tab) {
+        case 'overview':
+            loadOverviewCharts();
+            break;
+        case 'temporal':
+            loadTemporalCharts();
+            break;
+        case 'comparative':
+            loadComparativeCharts();
+            break;
+        case 'predictive':
+            loadPredictiveCharts();
+            break;
+    }
+}
+
+function loadOverviewCharts() {
+    // Radar Chart
+    charts.overviewRadar = VisualizationHelper.createRadarChart('overviewRadar', 
+        ['Performance', 'Efficiency', 'Utilization', 'Satisfaction', 'Growth', 'Stability'],
+        [85, 92, 78, 88, 75, 90],
+        'System Performance Metrics'
+    );
+    
+    // Activity Chart
+    const activityData = [45, 78, 92, 85, 65, 42, 88, 95, 76, 82, 90, 88];
+    charts.activityChart = VisualizationHelper.createLineChart('activityChart', 
+        ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+        [{
+            label: 'Monthly Activity',
+            data: activityData,
+            borderColor: '#9c27b0',
+            backgroundColor: 'rgba(156, 39, 176, 0.1)',
+            fill: true
+        }],
+        'Annual Activity Trends'
+    );
+    
+    // Progress Chart
+    charts.progressChart = VisualizationHelper.createChart('progressChart', {
+        type: 'doughnut',
+        data: {
+            labels: ['Completed', 'In Progress', 'Pending', 'Delayed'],
+            datasets: [{
+                data: [65, 20, 10, 5],
+                backgroundColor: ['#4caf50', '#2196f3', '#ff9800', '#f44336'],
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            cutout: '70%',
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Goal Progress Distribution',
+                    font: { size: 16, weight: 'bold' }
+                }
+            }
+        }
+    });
+}
+
+function loadTemporalCharts() {
+    loadTemporalData('daily');
+}
+
+function loadTemporalData(period) {
+    let labels, data;
+    
+    switch(period) {
+        case 'daily':
+            labels = ['8AM', '10AM', '12PM', '2PM', '4PM', '6PM'];
+            data = [45, 78, 92, 85, 65, 42];
+            break;
+        case 'weekly':
+            labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+            data = [320, 340, 310, 350, 280, 120, 80];
+            break;
+        case 'monthly':
+            labels = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
+            data = [1250, 1380, 1420, 1350];
+            break;
+    }
+    
+    if (charts.temporalChart) charts.temporalChart.destroy();
+    
+    charts.temporalChart = VisualizationHelper.createLineChart('temporalChart', labels, [{
+        label: `${period.charAt(0).toUpperCase() + period.slice(1)} Activity`,
+        data: data,
+        borderColor: '#2196f3',
+        backgroundColor: 'rgba(33, 150, 243, 0.1)',
+        fill: true
+    }], `${period.charAt(0).toUpperCase() + period.slice(1)} Activity Pattern`);
+}
+
+function changeTheme() {
+    const theme = $('#colorTheme').val();
+    alert(`Theme changed to ${theme}. In a real implementation, this would update all chart colors.`);
+}
+
+function changeAnimation() {
+    const speed = $('#animationSpeed').val();
+    alert(`Animation speed set to ${speed}.`);
+}
+
+function exportVisualizations() {
+    alert('All visualizations exported!\n\nIn a real system, this would:\n• Generate a PDF report\n• Create PNG images\n• Export raw data as CSV\n• Email the report to selected recipients');
+}
+
+// Add CSS for visualization hub
+const style = document.createElement('style');
+style.textContent = `
+.stat-circle-small {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 10px auto;
+    color: white;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.stat-value-small {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.stat-label-small {
+    font-size: 12px;
+    opacity: 0.9;
+}
+`;
+document.head.appendChild(style);
 </script>

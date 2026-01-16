@@ -481,6 +481,221 @@
     animation: spin 1s linear infinite;
     margin-bottom: 10px;
 }
+/* Enhanced Chart Styles */
+.chart-container {
+    position: relative;
+    width: 100%;
+    height: 300px;
+    margin: 20px 0;
+}
+
+.chart-toolbar {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 15px;
+    border-radius: 10px 10px 0 0;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.chart-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.chart-actions button {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.chart-actions button:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+.chart-card {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    padding: 20px;
+    margin-bottom: 30px;
+    transition: all 0.3s ease;
+    border: 1px solid #e0e0e0;
+}
+
+.chart-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 50px rgba(0,0,0,0.15);
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.chart-header h4 {
+    margin: 0;
+    color: #333;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+/* Loading animation */
+.chart-loading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    border-radius: 10px;
+}
+
+.loading-pulse {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(0.8);
+        opacity: 0.7;
+    }
+    50% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(0.8);
+        opacity: 0.7;
+    }
+}
+
+/* Tooltip styles */
+.chartjs-tooltip {
+    background: rgba(0, 0, 0, 0.9) !important;
+    border-radius: 10px !important;
+    padding: 15px !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3) !important;
+    border: none !important;
+}
+
+/* Legend styles */
+.chartjs-legend {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 15px;
+    background: #f8f9fa;
+    border-radius: 20px;
+    font-size: 14px;
+}
+
+.legend-color {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+}
+
+/* Responsive charts */
+@media (max-width: 768px) {
+    .chart-container {
+        height: 250px;
+    }
+    
+    .chart-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+}
+
+/* Animated stats */
+.stat-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 25px;
+    border-radius: 15px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4);
+}
+
+.stat-card .stat-value {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin: 10px 0;
+    animation: countUp 1s ease-out;
+}
+
+@keyframes countUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Grid layout for charts */
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 25px;
+    margin: 30px 0;
+}
+
+/* Custom scrollbar for chart containers */
+.chart-scroll {
+    overflow-x: auto;
+    padding-bottom: 10px;
+}
+
+.chart-scroll::-webkit-scrollbar {
+    height: 8px;
+}
+
+.chart-scroll::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.chart-scroll::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 4px;
+}
 
 @keyframes spin {
     0% { transform: rotate(0deg); }

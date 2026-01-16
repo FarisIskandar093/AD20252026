@@ -1,380 +1,444 @@
+<!-- Replace the entire SystemAnalytics.html -->
 <div class="w3-container">
     <h2 class="w3-text-purple">📈 System Analytics</h2>
-    <p class="w3-text-grey">System performance and usage statistics</p>
+    <p class="w3-text-grey">Comprehensive analytics and performance metrics</p>
     
-    <div class="w3-row-padding w3-margin-bottom">
-        <div class="w3-col m4">
-            <div class="w3-card w3-padding w3-center">
-                <div class="w3-xxlarge w3-text-purple">📊</div>
-                <h4>Data Volume</h4>
-                <p>Total records in system</p>
-                <h2 id="dataVolume">0</h2>
-            </div>
-        </div>
-        <div class="w3-col m4">
-            <div class="w3-card w3-padding w3-center">
-                <div class="w3-xxlarge w3-text-blue">👥</div>
-                <h4>Active Users</h4>
-                <p>Last 24 hours</p>
-                <h2 id="activeUsers">0</h2>
-            </div>
-        </div>
-        <div class="w3-col m4">
-            <div class="w3-card w3-padding w3-center">
-                <div class="w3-xxlarge w3-text-green">🏫</div>
-                <h4>Room Utilization</h4>
-                <p>Average this week</p>
-                <h2 id="roomUtil">0%</h2>
+    <!-- Analytics Dashboard -->
+    <div class="w3-row-padding">
+        <!-- Performance Metrics -->
+        <div class="w3-col m12">
+            <div class="w3-card w3-padding" style="border-radius: 10px;">
+                <h4>📊 Performance Dashboard</h4>
+                <div class="w3-row" id="performanceMetrics">
+                    <!-- Will be populated by JavaScript -->
+                </div>
             </div>
         </div>
     </div>
     
-    <div class="w3-row">
+    <div class="w3-row-padding w3-margin-top">
+        <!-- Real-time Usage -->
         <div class="w3-col m8">
-            <div class="w3-card w3-padding">
-                <h4>📈 Usage Trends</h4>
-                <div id="usageChart" style="width:100%; height:400px;"></div>
+            <div class="w3-card w3-padding chart-card">
+                <div class="chart-header">
+                    <h4>📈 Real-time System Usage</h4>
+                    <div class="w3-bar">
+                        <button class="w3-button w3-purple w3-round w3-small" onclick="toggleUsageChart('day')">Day</button>
+                        <button class="w3-button w3-light-grey w3-round w3-small" onclick="toggleUsageChart('week')">Week</button>
+                        <button class="w3-button w3-light-grey w3-round w3-small" onclick="toggleUsageChart('month')">Month</button>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="usageChart"></canvas>
+                </div>
             </div>
         </div>
         
+        <!-- System Health -->
         <div class="w3-col m4">
-            <div class="w3-card w3-padding">
-                <h4>🔔 System Health</h4>
-                
-                <div class="w3-panel w3-green w3-round">
-                    <h5>✅ System Status</h5>
-                    <p>All systems operational</p>
+            <div class="w3-card w3-padding" style="height: 100%;">
+                <h4>❤️ System Health</h4>
+                <div class="w3-padding w3-center">
+                    <div id="healthGauge" style="height: 200px;"></div>
                 </div>
-                
-                <div class="w3-panel w3-blue w3-round">
-                    <h5>📅 Last Updated</h5>
-                    <p id="lastUpdated">Just now</p>
-                </div>
-                
-                <div class="w3-panel w3-yellow w3-round">
-                    <h5>⚠️ Pending Actions</h5>
-                    <p>0 pending approvals</p>
-                </div>
-                
-                <div class="w3-margin-top">
-                    <button class="w3-button w3-purple w3-block" onclick="refreshAnalytics()">
-                        🔄 Refresh Analytics
-                    </button>
-                </div>
-                
-                <div class="w3-margin-top">
-                    <button class="w3-button w3-blue w3-block" onclick="exportAnalytics()">
-                        📤 Export Report
-                    </button>
+                <div class="w3-panel w3-light-green w3-round">
+                    <p><strong>Status:</strong> <span id="systemStatus">All systems operational</span></p>
+                    <p><strong>Uptime:</strong> <span id="uptimeStatus">99.8%</span></p>
                 </div>
             </div>
         </div>
     </div>
-
+    
     <div class="w3-row-padding w3-margin-top">
-    <div class="w3-col m6">
-        <div class="w3-card w3-padding">
-            <h4>📚 Course Complexity Analysis</h4>
-            <div id="courseComplexityChart" style="width:100%; height:300px;"></div>
+        <!-- Resource Distribution -->
+        <div class="w3-col m6">
+            <div class="w3-card w3-padding chart-card">
+                <div class="chart-header">
+                    <h4>⚖️ Resource Distribution</h4>
+                </div>
+                <div class="chart-container">
+                    <canvas id="resourceChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Efficiency Metrics -->
+        <div class="w3-col m6">
+            <div class="w3-card w3-padding chart-card">
+                <div class="chart-header">
+                    <h4>🎯 Efficiency Metrics</h4>
+                </div>
+                <div class="chart-container">
+                    <canvas id="efficiencyChart"></canvas>
+                </div>
+            </div>
         </div>
     </div>
     
-    <div class="w3-col m6">
-        <div class="w3-card w3-padding">
-            <h4>👨‍🏫 Lecturer Workload</h4>
-            <div id="lecturerWorkloadChart" style="width:100%; height:300px;"></div>
-        </div>
+    <!-- Controls -->
+    <div class="w3-center w3-padding-24">
+        <button class="w3-button w3-purple w3-large w3-round" onclick="refreshAnalytics()">
+            🔄 Refresh Analytics
+        </button>
+        <button class="w3-button w3-blue w3-large w3-round" onclick="exportAnalyticsReport()">
+            📊 Generate Report
+        </button>
     </div>
 </div>
 
-<div class="w3-row-padding w3-margin-top">
-    <div class="w3-col m12">
-        <div class="w3-card w3-padding">
-            <h4>📅 Weekly Schedule Density</h4>
-            <div id="weeklyDensityChart" style="width:100%; height:400px;"></div>
-        </div>
-    </div>
-</div>
-    
-    <div class="w3-card w3-padding w3-margin-top">
-        <h4>📋 Recent System Events</h4>
-        <table class="w3-table-all w3-hoverable">
-            <thead>
-                <tr class="w3-light-grey">
-                    <th>Time</th>
-                    <th>Event</th>
-                    <th>User</th>
-                    <th>Details</th>
-                </tr>
-            </thead>
-            <tbody id="systemEvents">
-                <tr>
-                    <td>Just now</td>
-                    <td><span class="w3-tag w3-blue">INFO</span></td>
-                    <td>System</td>
-                    <td>Analytics dashboard loaded</td>
-                </tr>
-                <tr>
-                    <td>5 min ago</td>
-                    <td><span class="w3-tag w3-green">LOGIN</span></td>
-                    <td>Admin</td>
-                    <td>User logged into admin panel</td>
-                </tr>
-                <tr>
-                    <td>1 hour ago</td>
-                    <td><span class="w3-tag w3-blue">DATA</span></td>
-                    <td>System</td>
-                    <td>Daily data sync completed</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-</div>
+<style>
+#performanceMetrics .w3-col {
+    padding: 10px;
+}
+
+.metric-card {
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    color: white;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+}
+
+.metric-card:hover {
+    transform: translateY(-5px);
+}
+
+.metric-value {
+    font-size: 32px;
+    font-weight: bold;
+    margin: 10px 0;
+}
+
+.metric-label {
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+.gauge-container {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    margin: 0 auto;
+}
+
+.gauge-circle {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.gauge-value {
+    font-size: 36px;
+    font-weight: bold;
+    color: #333;
+}
+
+.gauge-label {
+    font-size: 14px;
+    color: #666;
+}
+</style>
 
 <script src="../JS/Authenticate.js"></script>
-<script src="https://www.gstatic.com/charts/loader.js"></script>
+<script src="VisualizationHelper.js"></script>
 <script>
-    google.charts.load('current', {'packages':['line']});
-    google.charts.setOnLoadCallback(drawCharts);
+// Chart instances
+let usageChart, resourceChart, efficiencyChart;
+let usagePeriod = 'day';
 
-    function drawCharts() {
-        // Sample data for usage chart
-        var data = new google.visualization.DataTable();
-        data.addColumn('string', 'Day');
-        data.addColumn('number', 'User Logins');
-        data.addColumn('number', 'Data Requests');
-        data.addColumn('number', 'API Calls');
-        
-        data.addRows([
-            ['Mon', 120, 450, 850],
-            ['Tue', 135, 480, 920],
-            ['Wed', 150, 520, 980],
-            ['Thu', 145, 510, 950],
-            ['Fri', 130, 490, 900],
-            ['Sat', 80, 300, 600],
-            ['Sun', 60, 250, 500]
-        ]);
-        
-        var options = {
-            title: 'Weekly System Usage',
-            curveType: 'function',
-            legend: { position: 'bottom' },
-            colors: ['#9c27b0', '#2196f3', '#4caf50']
-        };
-        
-        var chart = new google.visualization.LineChart(document.getElementById('usageChart'));
-        chart.draw(data, options);
-        
-        // Update stats
-        updateAnalyticsStats();
-    }
-
-    function updateAnalyticsStats() {
-        // Simulate loading data
-        $("#dataVolume").text("15,240");
-        $("#activeUsers").text("42");
-        $("#roomUtil").text("68%");
-        $("#lastUpdated").text(new Date().toLocaleTimeString());
-    }
-
-    function refreshAnalytics() {
-        $("#dataVolume").text("...");
-        $("#activeUsers").text("...");
-        $("#roomUtil").text("...");
-        
-        setTimeout(() => {
-            updateAnalyticsStats();
-            drawCharts();
-            alert("Analytics refreshed successfully!");
-        }, 1000);
-    }
-
-    function exportAnalytics() {
-        const date = new Date().toISOString().split('T')[0];
-        alert(`Exporting analytics report for ${date}\n\nReport would be downloaded as CSV/PDF in a real system.`);
-    }
-
-    $(document).ready(function() {
-        // Load initial data
-        setTimeout(updateAnalyticsStats, 500);
-    });
-</script>
-<script>
-// Add these chart functions to SystemAnalytics.html script
-
-function loadCourseComplexity() {
-    const currentSesi = window.parent.currentSesi;
-    const currentSemester = window.parent.currentSemester;
-    
-    fetch(`http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=subjek&sesi=${currentSesi}&semester=${currentSemester}`)
-        .then(res => res.json())
-        .then(courses => {
-            if (!Array.isArray(courses)) return;
-            
-            const data = new google.visualization.DataTable();
-            data.addColumn('string', 'Course');
-            data.addColumn('number', 'Students');
-            data.addColumn('number', 'Sections');
-            data.addColumn('number', 'Credit Hours');
-            
-            courses.slice(0, 15).forEach(course => {
-                data.addRow([
-                    course.kod_subjam || course.kod_subjek,
-                    parseInt(course.bil_pelajar) || 0,
-                    parseInt(course.bil_seksyen) || 0,
-                    parseInt(course.jam_kredit) || 0
-                ]);
-            });
-            
-            const options = {
-                title: 'Course Complexity Analysis',
-                hAxis: { title: 'Course' },
-                vAxis: { title: 'Count' },
-                seriesType: 'bars',
-                series: {
-                    0: { targetAxisIndex: 0 },
-                    1: { targetAxisIndex: 0, type: 'line' },
-                    2: { targetAxisIndex: 1, type: 'line' }
-                },
-                vAxes: {
-                    0: { title: 'Students/Sections' },
-                    1: { title: 'Credit Hours' }
-                },
-                colors: ['#9c27b0', '#2196f3', '#4caf50']
-            };
-            
-            const chart = new google.visualization.ComboChart(document.getElementById('courseComplexityChart'));
-            chart.draw(data, options);
-        });
-}
-
-function loadLecturerWorkload() {
-    const currentSesi = window.parent.currentSesi;
-    const currentSemester = window.parent.currentSemester;
-    
-    // Fetch lecturer schedules
-    fetch(`http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=jadual_pensyarah&sesi=${currentSesi}&semester=${currentSemester}&limit=100`)
-        .then(res => res.json())
-        .then(schedules => {
-            if (!Array.isArray(schedules)) return;
-            
-            // Count classes per lecturer
-            const lecturerWorkload = {};
-            schedules.forEach(schedule => {
-                const lecturer = schedule.pensyarah;
-                if (lecturer && lecturer.nama_pensyarah) {
-                    const name = lecturer.nama_pensyarah;
-                    lecturerWorkload[name] = (lecturerWorkload[name] || 0) + 1;
-                }
-            });
-            
-            // Sort and take top 10
-            const sorted = Object.entries(lecturerWorkload)
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, 10);
-            
-            const data = new google.visualization.DataTable();
-            data.addColumn('string', 'Lecturer');
-            data.addColumn('number', 'Classes');
-            
-            sorted.forEach(([name, count]) => {
-                data.addRow([name.split(' ')[0], count]); // Use first name only
-            });
-            
-            const options = {
-                title: 'Top 10 Lecturers by Class Count',
-                hAxis: { title: 'Lecturer' },
-                vAxis: { title: 'Number of Classes' },
-                colors: ['#2196f3'],
-                legend: { position: 'none' }
-            };
-            
-            const chart = new google.visualization.ColumnChart(document.getElementById('lecturerWorkloadChart'));
-            chart.draw(data, options);
-        });
-}
-
-function loadWeeklyScheduleDensity() {
-    const currentSesi = window.parent.currentSesi;
-    const currentSemester = window.parent.currentSemester;
-    
-    fetch(`http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=jadual_ruang&sesi=${currentSesi}&semester=${currentSemester}&limit=500`)
-        .then(res => res.json())
-        .then(schedules => {
-            if (!Array.isArray(schedules)) return;
-            
-            // Create matrix: days (2-6) x time slots (1-10)
-            const density = {};
-            for (let day = 2; day <= 6; day++) {
-                density[day] = {};
-                for (let slot = 1; slot <= 10; slot++) {
-                    if (slot !== 6) density[day][slot] = 0; // Skip slot 6 (lunch)
-                }
-            }
-            
-            // Count classes
-            schedules.forEach(schedule => {
-                const day = schedule.hari;
-                const slot = schedule.masa;
-                if (density[day] && density[day][slot] !== undefined) {
-                    density[day][slot]++;
-                }
-            });
-            
-            // Prepare data for heatmap
-            const timeSlots = {
-                1: '8-9', 2: '9-10', 3: '10-11', 4: '11-12', 5: '12-13',
-                7: '14-15', 8: '15-16', 9: '16-17', 10: '17-18'
-            };
-            
-            const days = {2: 'Mon', 3: 'Tue', 4: 'Wed', 5: 'Thu', 6: 'Fri'};
-            
-            const data = new google.visualization.DataTable();
-            data.addColumn('string', 'Time');
-            
-            Object.keys(days).forEach(day => {
-                data.addColumn('number', days[day]);
-            });
-            
-            Object.keys(timeSlots).forEach(slot => {
-                const row = [timeSlots[slot]];
-                Object.keys(days).forEach(day => {
-                    row.push(density[day][slot] || 0);
-                });
-                data.addRow(row);
-            });
-            
-            const options = {
-                title: 'Weekly Class Density Heatmap',
-                hAxis: { title: 'Day' },
-                vAxis: { title: 'Time Slot' },
-                heatmap: {
-                    colorAxis: {
-                        colors: ['#e0f7fa', '#80deea', '#26c6da', '#00acc1', '#00838f']
-                    }
-                }
-            };
-            
-            const chart = new google.visualization.HeatMap(document.getElementById('weeklyDensityChart'));
-            chart.draw(data, options);
-        });
-}
-
-// Update the existing google.charts.setOnLoadCallback to include new charts
-google.charts.setOnLoadCallback(function() {
-    drawCharts(); // Existing function
-    loadCourseComplexity();
-    loadLecturerWorkload();
-    loadWeeklyScheduleDensity();
+$(document).ready(function() {
+    loadPerformanceMetrics();
+    loadUsageChart();
+    loadResourceChart();
+    loadEfficiencyChart();
+    updateSystemHealth();
 });
 
-// Update refreshAnalytics function to reload all charts
+function loadPerformanceMetrics() {
+    const metrics = [
+        { label: 'Active Users', value: '142', change: '+12%', color: '#9c27b0', icon: '👥' },
+        { label: 'API Response', value: '98ms', change: '-5ms', color: '#2196f3', icon: '⚡' },
+        { label: 'Data Volume', value: '15.2K', change: '+3%', color: '#4caf50', icon: '💾' },
+        { label: 'Success Rate', value: '99.8%', change: '+0.2%', color: '#ff9800', icon: '✅' }
+    ];
+    
+    let html = '';
+    metrics.forEach(metric => {
+        html += `
+            <div class="w3-col m3">
+                <div class="metric-card" style="background: ${metric.color}">
+                    <div class="w3-xlarge">${metric.icon}</div>
+                    <div class="metric-value">${metric.value}</div>
+                    <div class="metric-label">${metric.label}</div>
+                    <div class="w3-small">${metric.change} from last week</div>
+                </div>
+            </div>
+        `;
+    });
+    
+    $('#performanceMetrics').html(html);
+}
+
+function loadUsageChart() {
+    const canvas = document.getElementById('usageChart');
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    
+    // Sample data based on period
+    let labels, data1, data2;
+    
+    switch(usagePeriod) {
+        case 'day':
+            labels = ['8AM', '10AM', '12PM', '2PM', '4PM', '6PM', '8PM'];
+            data1 = [45, 78, 92, 85, 65, 42, 25];
+            data2 = [120, 185, 220, 195, 160, 110, 75];
+            break;
+        case 'week':
+            labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+            data1 = [320, 340, 310, 350, 280, 120, 80];
+            data2 = [850, 920, 880, 950, 750, 400, 250];
+            break;
+        case 'month':
+            labels = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
+            data1 = [1250, 1380, 1420, 1350];
+            data2 = [3200, 3500, 3650, 3450];
+            break;
+    }
+    
+    if (usageChart) usageChart.destroy();
+    
+    usageChart = VisualizationHelper.createLineChart('usageChart', labels, [
+        {
+            label: 'User Activity',
+            data: data1,
+            borderColor: '#9c27b0',
+            backgroundColor: 'rgba(156, 39, 176, 0.1)',
+            fill: true
+        },
+        {
+            label: 'System Load',
+            data: data2,
+            borderColor: '#2196f3',
+            backgroundColor: 'rgba(33, 150, 243, 0.1)',
+            fill: true,
+            yAxisID: 'y1'
+        }
+    ], `System Usage - ${usagePeriod.charAt(0).toUpperCase() + usagePeriod.slice(1)}ly View`);
+}
+
+function toggleUsageChart(period) {
+    usagePeriod = period;
+    
+    // Update button styles
+    $('.w3-bar .w3-button').removeClass('w3-purple').addClass('w3-light-grey');
+    $(`.w3-bar .w3-button:contains('${period.charAt(0).toUpperCase() + period.slice(1)}')`)
+        .removeClass('w3-light-grey').addClass('w3-purple');
+    
+    loadUsageChart();
+}
+
+function loadResourceChart() {
+    const canvas = document.getElementById('resourceChart');
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    
+    const labels = ['CPU', 'Memory', 'Storage', 'Network', 'Database'];
+    const usage = [65, 78, 42, 55, 88];
+    const capacity = [100, 100, 100, 100, 100];
+    
+    if (resourceChart) resourceChart.destroy();
+    
+    resourceChart = VisualizationHelper.createChart('resourceChart', {
+        type: 'radar',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Current Usage',
+                    data: usage,
+                    backgroundColor: 'rgba(156, 39, 176, 0.2)',
+                    borderColor: '#9c27b0',
+                    borderWidth: 2,
+                    pointBackgroundColor: '#9c27b0'
+                },
+                {
+                    label: 'Capacity',
+                    data: capacity,
+                    backgroundColor: 'rgba(33, 150, 243, 0.1)',
+                    borderColor: '#2196f3',
+                    borderWidth: 1,
+                    borderDash: [5, 5],
+                    pointBackgroundColor: '#2196f3'
+                }
+            ]
+        },
+        options: {
+            scales: {
+                r: {
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: {
+                        stepSize: 20,
+                        callback: function(value) {
+                            return value + '%';
+                        }
+                    }
+                }
+            },
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Resource Utilization',
+                    font: { size: 16, weight: 'bold' }
+                }
+            }
+        }
+    });
+}
+
+function loadEfficiencyChart() {
+    const labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+    const efficiency = [88, 92, 85, 95, 90];
+    const target = [90, 90, 90, 90, 90];
+    
+    if (efficiencyChart) efficiencyChart.destroy();
+    
+    efficiencyChart = VisualizationHelper.createChart('efficiencyChart', {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Efficiency',
+                    data: efficiency,
+                    backgroundColor: VisualizationHelper.colors.green.map(c => c + 'CC'),
+                    borderColor: VisualizationHelper.colors.green,
+                    borderWidth: 1
+                },
+                {
+                    label: 'Target',
+                    data: target,
+                    type: 'line',
+                    borderColor: '#ff9800',
+                    borderWidth: 3,
+                    borderDash: [5, 5],
+                    fill: false,
+                    pointRadius: 0
+                }
+            ]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: {
+                        callback: function(value) {
+                            return value + '%';
+                        }
+                    }
+                }
+            },
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Weekly Efficiency vs Target',
+                    font: { size: 16, weight: 'bold' }
+                },
+                annotation: {
+                    annotations: {
+                        targetLine: {
+                            type: 'line',
+                            yMin: 90,
+                            yMax: 90,
+                            borderColor: '#ff9800',
+                            borderWidth: 2,
+                            borderDash: [5, 5]
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+function updateSystemHealth() {
+    const health = 95; // Simulated health score
+    
+    const gaugeHtml = `
+        <div class="gauge-container">
+            <svg width="200" height="200" viewBox="0 0 200 200">
+                <!-- Background circle -->
+                <circle cx="100" cy="100" r="90" fill="none" stroke="#f0f0f0" stroke-width="20"/>
+                <!-- Progress circle -->
+                <circle cx="100" cy="100" r="90" fill="none" stroke="${getHealthColor(health)}" 
+                    stroke-width="20" stroke-dasharray="${2 * Math.PI * 90}" 
+                    stroke-dashoffset="${2 * Math.PI * 90 * (1 - health / 100)}"
+                    stroke-linecap="round" transform="rotate(-90 100 100)"/>
+                <!-- Center text -->
+                <text x="100" y="110" text-anchor="middle" font-size="36" font-weight="bold" fill="#333">
+                    ${health}%
+                </text>
+                <text x="100" y="135" text-anchor="middle" font-size="14" fill="#666">
+                    Health Score
+                </text>
+            </svg>
+        </div>
+    `;
+    
+    $('#healthGauge').html(gaugeHtml);
+    
+    // Update status
+    let status, uptime;
+    if (health >= 90) {
+        status = 'Excellent';
+        uptime = '99.9%';
+    } else if (health >= 75) {
+        status = 'Good';
+        uptime = '99.8%';
+    } else {
+        status = 'Needs Attention';
+        uptime = '99.5%';
+    }
+    
+    $('#systemStatus').text(status);
+    $('#uptimeStatus').text(uptime);
+}
+
+function getHealthColor(score) {
+    if (score >= 90) return '#4caf50';
+    if (score >= 75) return '#ff9800';
+    return '#f44336';
+}
+
 function refreshAnalytics() {
-    drawCharts();
-    loadCourseComplexity();
-    loadLecturerWorkload();
-    loadWeeklyScheduleDensity();
-    updateAnalyticsStats();
-    alert("All charts refreshed!");
+    loadPerformanceMetrics();
+    loadUsageChart();
+    loadResourceChart();
+    loadEfficiencyChart();
+    updateSystemHealth();
+    
+    // Show refresh animation
+    const button = event.target;
+    const original = button.innerHTML;
+    button.innerHTML = '🔄 Refreshing...';
+    button.disabled = true;
+    
+    setTimeout(() => {
+        button.innerHTML = original;
+        button.disabled = false;
+    }, 1500);
+}
+
+function exportAnalyticsReport() {
+    alert('📊 Analytics Report Generated!\n\nReport includes:\n• Performance metrics\n• Usage trends\n• Resource utilization\n• Efficiency analysis\n\nReport would be downloaded as PDF in a real system.');
 }
 </script>

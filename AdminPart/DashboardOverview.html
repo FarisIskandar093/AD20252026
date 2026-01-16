@@ -157,47 +157,244 @@
             <span>📊</span>
             <span>System Visualizations</span>
         </h3>
+        <div class="w3-bar w3-light-grey w3-round">
+            <button class="w3-bar-item w3-button w3-purple" onclick="refreshAllCharts()">
+                🔄 Refresh Charts
+            </button>
+            <button class="w3-bar-item w3-button" onclick="exportCharts()">
+                📤 Export
+            </button>
+        </div>
     </div>
     
     <div class="w3-row-padding">
-        <!-- Student Distribution by Program -->
+        <!-- Student Distribution -->
         <div class="w3-col m6">
-            <div class="w3-card w3-padding">
-                <h4>Student Distribution by Program</h4>
-                <div id="programChart" style="width:100%; height:300px;"></div>
+            <div class="w3-card w3-padding chart-card">
+                <div class="chart-header">
+                    <h4>👥 Student Distribution</h4>
+                    <select class="w3-select w3-border w3-round" style="width:150px;" onchange="loadProgramDistribution()" id="programFilter">
+                        <option value="all">All Programs</option>
+                        <option value="top5">Top 5 Programs</option>
+                    </select>
+                </div>
+                <div class="chart-container">
+                    <canvas id="programChart"></canvas>
+                </div>
+                <div class="chart-footer">
+                    <div id="programStats" class="stats-summary">
+                        Loading statistics...
+                    </div>
+                </div>
             </div>
         </div>
         
-        <!-- Room Utilization Heatmap -->
+        <!-- Room Utilization -->
         <div class="w3-col m6">
-            <div class="w3-card w3-padding">
-                <h4>Room Utilization Heatmap</h4>
-                <div id="roomHeatmap" style="width:100%; height:300px;"></div>
+            <div class="w3-card w3-padding chart-card">
+                <div class="chart-header">
+                    <h4>🏫 Room Utilization</h4>
+                    <select class="w3-select w3-border w3-round" style="width:150px;" onchange="loadRoomUtilization()" id="roomFilter">
+                        <option value="N28">N28 Building</option>
+                        <option value="N28A">N28A Building</option>
+                    </select>
+                </div>
+                <div class="chart-container">
+                    <canvas id="roomChart"></canvas>
+                </div>
+                <div class="chart-footer">
+                    <div id="roomStats" class="stats-summary">
+                        Loading room data...
+                    </div>
+                </div>
             </div>
         </div>
     </div>
     
     <div class="w3-row-padding w3-margin-top">
-        <!-- Course Enrollment Trends -->
+        <!-- Course Enrollment -->
         <div class="w3-col m6">
-            <div class="w3-card w3-padding">
-                <h4>Course Enrollment Trends</h4>
-                <div id="enrollmentChart" style="width:100%; height:300px;"></div>
+            <div class="w3-card w3-padding chart-card">
+                <div class="chart-header">
+                    <h4>📚 Top Courses by Enrollment</h4>
+                    <select class="w3-select w3-border w3-round" style="width:150px;" onchange="loadCourseEnrollment()" id="courseFilter">
+                        <option value="10">Top 10 Courses</option>
+                        <option value="5">Top 5 Courses</option>
+                        <option value="15">Top 15 Courses</option>
+                    </select>
+                </div>
+                <div class="chart-container">
+                    <canvas id="courseChart"></canvas>
+                </div>
+                <div class="chart-footer">
+                    <div id="courseStats" class="stats-summary">
+                        Loading course data...
+                    </div>
+                </div>
             </div>
         </div>
         
         <!-- Time Slot Distribution -->
         <div class="w3-col m6">
+            <div class="w3-card w3-padding chart-card">
+                <div class="chart-header">
+                    <h4>⏰ Time Slot Distribution</h4>
+                    <button class="w3-button w3-purple w3-round w3-small" onclick="toggleTimeChart()">
+                        Switch View
+                    </button>
+                </div>
+                <div class="chart-container">
+                    <canvas id="timeChart"></canvas>
+                </div>
+                <div class="chart-footer">
+                    <div id="timeStats" class="stats-summary">
+                        Loading time data...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Summary Stats -->
+    <div class="w3-row-padding w3-margin-top">
+        <div class="w3-col m12">
             <div class="w3-card w3-padding">
-                <h4>Time Slot Distribution</h4>
-                <div id="timeSlotChart" style="width:100%; height:300px;"></div>
+                <h4>📈 Quick Stats Summary</h4>
+                <div class="w3-row" id="summaryStats">
+                    <div class="w3-col m3 w3-center">
+                        <div class="stat-circle" id="statStudents">
+                            <div class="stat-value">0</div>
+                            <div class="stat-label">Students</div>
+                        </div>
+                    </div>
+                    <div class="w3-col m3 w3-center">
+                        <div class="stat-circle" id="statCourses">
+                            <div class="stat-value">0</div>
+                            <div class="stat-label">Courses</div>
+                        </div>
+                    </div>
+                    <div class="w3-col m3 w3-center">
+                        <div class="stat-circle" id="statRooms">
+                            <div class="stat-value">0</div>
+                            <div class="stat-label">Rooms</div>
+                        </div>
+                    </div>
+                    <div class="w3-col m3 w3-center">
+                        <div class="stat-circle" id="statUtilization">
+                            <div class="stat-value">0%</div>
+                            <div class="stat-label">Utilization</div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
 </div>
 
+<style>
+.chart-card {
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+}
+
+.chart-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.chart-header h4 {
+    margin: 0;
+    color: #333;
+    font-weight: 600;
+}
+
+.chart-container {
+    position: relative;
+    height: 300px;
+    width: 100%;
+}
+
+.chart-footer {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+}
+
+.stats-summary {
+    font-size: 14px;
+    color: #666;
+    line-height: 1.5;
+}
+
+.stat-circle {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #9c27b0, #2196f3);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    box-shadow: 0 4px 15px rgba(156, 39, 176, 0.3);
+    transition: all 0.3s ease;
+}
+
+.stat-circle:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(156, 39, 176, 0.4);
+}
+
+.stat-value {
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+.loading-chart {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #666;
+}
+
+.loading-spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #9c27b0;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 10px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+</style>
+
 <script src="../JS/Authenticate.js"></script>
+<script src="VisualizationHelper.js"></script>
 <script>
 $(document).ready(function() {
     // Update date/time
@@ -256,14 +453,24 @@ $(document).ready(function() {
             })
             .catch(err => console.error("Error fetching rooms:", err));
     }
+    
+    // Load charts after a delay to ensure Google Charts is loaded
+    setTimeout(() => {
+        if (typeof google !== 'undefined' && google.visualization) {
+            loadEnhancedCharts();
+        } else {
+            console.warn("Google Charts not loaded yet, waiting...");
+            setTimeout(loadEnhancedCharts, 1000);
+        }
+    }, 1000);
 });
-</script>
-<script>
-// Load Google Charts
-google.charts.load('current', {'packages':['corechart', 'bar']});
-google.charts.setOnLoadCallback(loadEnhancedCharts);
 
 function loadEnhancedCharts() {
+    if (typeof google === 'undefined' || !google.visualization) {
+        console.error("Google Charts not available");
+        return;
+    }
+    
     loadProgramDistribution();
     loadRoomHeatmap();
     loadEnrollmentTrends();
@@ -305,7 +512,8 @@ function loadProgramDistribution() {
             
             const chart = new google.visualization.PieChart(document.getElementById('programChart'));
             chart.draw(data, options);
-        });
+        })
+        .catch(err => console.error("Error loading program distribution:", err));
 }
 
 function loadRoomHeatmap() {
@@ -361,7 +569,8 @@ function loadRoomHeatmap() {
             
             const chart = new google.visualization.BarChart(document.getElementById('roomHeatmap'));
             chart.draw(data, options);
-        });
+        })
+        .catch(err => console.error("Error loading room heatmap:", err));
 }
 
 function loadEnrollmentTrends() {
@@ -402,7 +611,8 @@ function loadEnrollmentTrends() {
             
             const chart = new google.visualization.ComboChart(document.getElementById('enrollmentChart'));
             chart.draw(data, options);
-        });
+        })
+        .catch(err => console.error("Error loading enrollment trends:", err));
 }
 
 function loadTimeSlotDistribution() {
@@ -452,6 +662,415 @@ function loadTimeSlotDistribution() {
             
             const chart = new google.visualization.ColumnChart(document.getElementById('timeSlotChart'));
             chart.draw(data, options);
+        })
+        .catch(err => console.error("Error loading time slot distribution:", err));
+}
+let programChart, roomChart, courseChart, timeChart;
+let timeChartType = 'bar';
+
+$(document).ready(function() {
+    // Load all charts
+    setTimeout(() => {
+        loadProgramDistribution();
+        loadRoomUtilization();
+        loadCourseEnrollment();
+        loadTimeDistribution();
+        loadSummaryStats();
+    }, 500);
+});
+
+async function loadProgramDistribution() {
+    const adminSessionID = window.parent.adminSessionID;
+    const currentSesi = window.parent.currentSesi;
+    const currentSemester = window.parent.currentSemester;
+    
+    $('#programStats').html('<div class="loading-spinner"></div><div>Loading program data...</div>');
+    
+    try {
+        const students = await VisualizationHelper.fetchTTMSData('pelajar', {
+            session_id: adminSessionID,
+            sesi: currentSesi,
+            semester: currentSemester,
+            limit: 200
         });
+        
+        if (students.length === 0) {
+            $('#programStats').html('No student data available');
+            return;
+        }
+        
+        // Group by program
+        const programCounts = {};
+        students.forEach(student => {
+            const program = student.kod_program || 'Unknown Program';
+            programCounts[program] = (programCounts[program] || 0) + 1;
+        });
+        
+        // Sort and filter
+        const filter = $('#programFilter').val();
+        let programs = Object.entries(programCounts)
+            .sort((a, b) => b[1] - a[1]);
+            
+        if (filter === 'top5') {
+            programs = programs.slice(0, 5);
+        }
+        
+        const labels = programs.map(([program]) => program.substring(0, 20) + (program.length > 20 ? '...' : ''));
+        const data = programs.map(([, count]) => count);
+        
+        // Create doughnut chart
+        if (programChart) programChart.destroy();
+        
+        programChart = VisualizationHelper.createDoughnutChart('programChart', labels, data, 'Student Distribution');
+        
+        // Update stats
+        const total = data.reduce((a, b) => a + b, 0);
+        const topProgram = programs[0];
+        $('#programStats').html(`
+            <strong>Total Students:</strong> ${VisualizationHelper.formatNumber(total)}<br>
+            <strong>Top Program:</strong> ${topProgram[0]} (${topProgram[1]} students)<br>
+            <strong>Programs Count:</strong> ${programs.length}
+        `);
+        
+        // Update summary stat
+        $('#statStudents .stat-value').text(VisualizationHelper.formatNumber(total));
+        
+    } catch (error) {
+        $('#programStats').html(`Error: ${error.message}`);
+        console.error('Error loading program distribution:', error);
+    }
+}
+
+async function loadRoomUtilization() {
+    const currentSesi = window.parent.currentSesi;
+    const currentSemester = window.parent.currentSemester;
+    const building = $('#roomFilter').val();
+    
+    $('#roomStats').html('<div class="loading-spinner"></div><div>Loading room data...</div>');
+    
+    try {
+        const schedules = await VisualizationHelper.fetchTTMSData('jadual_ruang', {
+            sesi: currentSesi,
+            semester: currentSemester,
+            kod_ruang_like: building,
+            limit: 500
+        });
+        
+        if (schedules.length === 0) {
+            $('#roomStats').html('No schedule data available');
+            return;
+        }
+        
+        // Group by room
+        const roomUsage = {};
+        schedules.forEach(schedule => {
+            const room = schedule.kod_ruang || 'Unknown Room';
+            roomUsage[room] = (roomUsage[room] || 0) + 1;
+        });
+        
+        // Get top 10 rooms
+        const rooms = Object.entries(roomUsage)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 10);
+        
+        const labels = rooms.map(([room]) => room);
+        const data = rooms.map(([, count]) => count);
+        
+        // Create gradient colors
+        const canvas = document.getElementById('roomChart');
+        const ctx = canvas.getContext('2d');
+        const gradient = VisualizationHelper.createGradient(ctx, 'rgba(33, 150, 243, 0.8)', 'rgba(33, 150, 243, 0.2)');
+        
+        // Create bar chart
+        if (roomChart) roomChart.destroy();
+        
+        roomChart = VisualizationHelper.createBarChart('roomChart', labels, [{
+            label: 'Classes per Week',
+            data: data,
+            backgroundColor: gradient,
+            borderColor: '#2196f3'
+        }], `${building} Building - Room Utilization`);
+        
+        // Update stats
+        const totalRooms = Object.keys(roomUsage).length;
+        const avgUtilization = Math.round(data.reduce((a, b) => a + b, 0) / totalRooms);
+        const mostUsed = rooms[0];
+        
+        $('#roomStats').html(`
+            <strong>Total Rooms Used:</strong> ${totalRooms}<br>
+            <strong>Most Active Room:</strong> ${mostUsed[0]} (${mostUsed[1]} classes)<br>
+            <strong>Average Usage:</strong> ${avgUtilization} classes/week
+        `);
+        
+        // Update summary stat
+        $('#statRooms .stat-value').text(totalRooms);
+        
+    } catch (error) {
+        $('#roomStats').html(`Error: ${error.message}`);
+        console.error('Error loading room utilization:', error);
+    }
+}
+
+async function loadCourseEnrollment() {
+    const currentSesi = window.parent.currentSesi;
+    const currentSemester = window.parent.currentSemester;
+    const limit = parseInt($('#courseFilter').val());
+    
+    $('#courseStats').html('<div class="loading-spinner"></div><div>Loading course data...</div>');
+    
+    try {
+        const courses = await VisualizationHelper.fetchTTMSData('subjek', {
+            sesi: currentSesi,
+            semester: currentSemester
+        });
+        
+        if (courses.length === 0) {
+            $('#courseStats').html('No course data available');
+            return;
+        }
+        
+        // Get top courses by enrollment
+        const topCourses = courses
+            .filter(course => course.bil_pelajar && course.kod_subjek)
+            .sort((a, b) => (parseInt(b.bil_pelajar) || 0) - (parseInt(a.bil_pelajar) || 0))
+            .slice(0, limit);
+        
+        const labels = topCourses.map(course => course.kod_subjek.substring(0, 15) + (course.kod_subjek.length > 15 ? '...' : ''));
+        const enrollment = topCourses.map(course => parseInt(course.bil_pelajar) || 0);
+        const sections = topCourses.map(course => parseInt(course.bil_seksyen) || 0);
+        
+        // Create mixed chart
+        if (courseChart) courseChart.destroy();
+        
+        const canvas = document.getElementById('courseChart');
+        const ctx = canvas.getContext('2d');
+        
+        courseChart = VisualizationHelper.createChart('courseChart', {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Enrollment',
+                        data: enrollment,
+                        backgroundColor: VisualizationHelper.createGradient(ctx, 'rgba(76, 175, 80, 0.8)', 'rgba(76, 175, 80, 0.2)'),
+                        borderColor: '#4caf50',
+                        borderWidth: 1,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: 'Sections',
+                        data: sections,
+                        type: 'line',
+                        borderColor: '#ff9800',
+                        backgroundColor: 'transparent',
+                        borderWidth: 3,
+                        tension: 0.2,
+                        yAxisID: 'y1'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                },
+                scales: {
+                    y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        title: {
+                            display: true,
+                            text: 'Enrollment'
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        title: {
+                            display: true,
+                            text: 'Sections'
+                        },
+                        grid: {
+                            drawOnChartArea: false,
+                        },
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Top Courses by Enrollment',
+                        font: { size: 16, weight: 'bold' }
+                    }
+                }
+            }
+        });
+        
+        // Update stats
+        const totalEnrollment = enrollment.reduce((a, b) => a + b, 0);
+        const avgSections = (sections.reduce((a, b) => a + b, 0) / sections.length).toFixed(1);
+        const topCourse = topCourses[0];
+        
+        $('#courseStats').html(`
+            <strong>Total Enrollment:</strong> ${VisualizationHelper.formatNumber(totalEnrollment)}<br>
+            <strong>Top Course:</strong> ${topCourse.kod_subjek} (${topCourse.bil_pelajar} students)<br>
+            <strong>Avg Sections:</strong> ${avgSections} per course
+        `);
+        
+        // Update summary stat
+        $('#statCourses .stat-value').text(courses.length);
+        
+    } catch (error) {
+        $('#courseStats').html(`Error: ${error.message}`);
+        console.error('Error loading course enrollment:', error);
+    }
+}
+
+async function loadTimeDistribution() {
+    const currentSesi = window.parent.currentSesi;
+    const currentSemester = window.parent.currentSemester;
+    
+    $('#timeStats').html('<div class="loading-spinner"></div><div>Loading time data...</div>');
+    
+    try {
+        const schedules = await VisualizationHelper.fetchTTMSData('jadual_ruang', {
+            sesi: currentSesi,
+            semester: currentSemester,
+            limit: 300
+        });
+        
+        if (schedules.length === 0) {
+            $('#timeStats').html('No schedule data available');
+            return;
+        }
+        
+        // Map time slots to readable format
+        const timeSlots = {
+            1: '8-9 AM', 2: '9-10 AM', 3: '10-11 AM', 4: '11-12 PM',
+            5: '12-1 PM', 7: '2-3 PM', 8: '3-4 PM', 9: '4-5 PM', 10: '5-6 PM'
+        };
+        
+        // Count classes by time slot
+        const slotCounts = {};
+        Object.keys(timeSlots).forEach(slot => {
+            slotCounts[slot] = 0;
+        });
+        
+        schedules.forEach(schedule => {
+            const slot = schedule.masa;
+            if (slotCounts[slot] !== undefined) {
+                slotCounts[slot]++;
+            }
+        });
+        
+        const labels = Object.values(timeSlots);
+        const data = Object.keys(timeSlots).map(slot => slotCounts[slot] || 0);
+        
+        // Create chart based on current type
+        if (timeChart) timeChart.destroy();
+        
+        if (timeChartType === 'bar') {
+            const canvas = document.getElementById('timeChart');
+            const ctx = canvas.getContext('2d');
+            
+            timeChart = VisualizationHelper.createBarChart('timeChart', labels, [{
+                label: 'Number of Classes',
+                data: data,
+                backgroundColor: VisualizationHelper.createGradient(ctx, 'rgba(255, 152, 0, 0.8)', 'rgba(255, 152, 0, 0.2)'),
+                borderColor: '#ff9800'
+            }], 'Class Distribution by Time Slot');
+        } else {
+            timeChart = VisualizationHelper.createLineChart('timeChart', labels, [{
+                label: 'Class Frequency',
+                data: data,
+                borderColor: '#ff9800',
+                backgroundColor: 'rgba(255, 152, 0, 0.1)',
+                fill: true
+            }], 'Class Distribution by Time Slot');
+        }
+        
+        // Update stats
+        const peakSlot = Object.keys(timeSlots).reduce((a, b) => slotCounts[a] > slotCounts[b] ? a : b);
+        const peakCount = slotCounts[peakSlot];
+        const totalClasses = data.reduce((a, b) => a + b, 0);
+        
+        $('#timeStats').html(`
+            <strong>Peak Hour:</strong> ${timeSlots[peakSlot]} (${peakCount} classes)<br>
+            <strong>Total Classes:</strong> ${totalClasses}<br>
+            <strong>Avg per Slot:</strong> ${Math.round(totalClasses / labels.length)}
+        `);
+        
+    } catch (error) {
+        $('#timeStats').html(`Error: ${error.message}`);
+        console.error('Error loading time distribution:', error);
+    }
+}
+
+function toggleTimeChart() {
+    timeChartType = timeChartType === 'bar' ? 'line' : 'bar';
+    loadTimeDistribution();
+}
+
+async function loadSummaryStats() {
+    try {
+        const currentSesi = window.parent.currentSesi;
+        const currentSemester = window.parent.currentSemester;
+        const adminSessionID = window.parent.adminSessionID;
+        
+        // Fetch all data in parallel
+        const [students, courses, rooms, schedules] = await Promise.all([
+            VisualizationHelper.fetchTTMSData('pelajar', {
+                session_id: adminSessionID,
+                sesi: currentSesi,
+                semester: currentSemester,
+                limit: 50
+            }),
+            VisualizationHelper.fetchTTMSData('subjek', {
+                sesi: currentSesi,
+                semester: currentSemester
+            }),
+            VisualizationHelper.fetchTTMSData('ruang', {
+                kod_fakulti: 'fsksm'
+            }),
+            VisualizationHelper.fetchTTMSData('jadual_ruang', {
+                sesi: currentSesi,
+                semester: currentSemester,
+                limit: 100
+            })
+        ]);
+        
+        // Calculate utilization (simplified)
+        const totalTimeSlots = 45; // 5 days * 9 time slots
+        const usedSlots = schedules.length;
+        const utilization = Math.round((usedSlots / totalTimeSlots) * 100);
+        
+        // Update all stats
+        $('#statStudents .stat-value').text(students.length);
+        $('#statCourses .stat-value').text(courses.length);
+        $('#statRooms .stat-value').text(rooms.length);
+        $('#statUtilization .stat-value').text(utilization + '%');
+        
+    } catch (error) {
+        console.error('Error loading summary stats:', error);
+    }
+}
+
+function refreshAllCharts() {
+    $('.stat-value').text('...');
+    loadProgramDistribution();
+    loadRoomUtilization();
+    loadCourseEnrollment();
+    loadTimeDistribution();
+    loadSummaryStats();
+}
+
+function exportCharts() {
+    alert('Chart export functionality would be implemented here.\n\nFeatures:\n• Export as PNG/JPEG\n• Export as PDF report\n• Export as CSV data\n• Share via email');
 }
 </script>
