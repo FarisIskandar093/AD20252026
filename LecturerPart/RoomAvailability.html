@@ -1,160 +1,315 @@
-<div class="w3-container">
-    <h2 class="w3-text-blue">🏫 Room Availability & Booking</h2>
-    <p class="w3-text-grey">Check room availability and request bookings</p>
-    
-    <div class="w3-row">
-        <div class="w3-col m8">
-            <!-- Room Search -->
-            <div class="w3-card w3-padding w3-margin-bottom">
-                <h4>🔍 Search Available Rooms</h4>
-                
-                <div class="w3-row w3-margin-bottom">
-                    <div class="w3-col m4">
-                        <label>Day:</label>
-                        <select id="searchDay" class="w3-input w3-border">
-                            <option value="2">Monday</option>
-                            <option value="3">Tuesday</option>
-                            <option value="4">Wednesday</option>
-                            <option value="5">Thursday</option>
-                            <option value="6">Friday</option>
-                        </select>
-                    </div>
-                    
-                    <div class="w3-col m4">
-                        <label>Time Slot:</label>
-                        <select id="searchTime" class="w3-input w3-border">
-                            <option value="1">8:00-9:00</option>
-                            <option value="2">9:00-10:00</option>
-                            <option value="3">10:00-11:00</option>
-                            <option value="4">11:00-12:00</option>
-                            <option value="5">12:00-13:00</option>
-                            <option value="7">14:00-15:00</option>
-                            <option value="8">15:00-16:00</option>
-                            <option value="9">16:00-17:00</option>
-                            <option value="10">17:00-18:00</option>
-                        </select>
-                    </div>
-                    
-                    <div class="w3-col m4">
-                        <label>Room Type:</label>
-                        <select id="searchType" class="w3-input w3-border">
-                            <option value="">Any Type</option>
-                            <option value="LECTURE">Lecture Hall</option>
-                            <option value="LAB">Computer Lab</option>
-                            <option value="TUTORIAL">Tutorial Room</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <button class="w3-button w3-blue w3-block" onclick="searchAvailableRooms()">
-                    🔍 Search Available Rooms
-                </button>
-            </div>
-            
-            <!-- Results -->
-            <div class="w3-card w3-padding">
-                <h4>📋 Available Rooms</h4>
-                <div id="roomResults">
-                    <div class="w3-center w3-padding-24">
-                        <p class="w3-text-grey">Search for rooms to see availability</p>
-                    </div>
-                </div>
-            </div>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Room Availability & Booking - UTM Lecturer</title>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="Styles/AvailabilityStyle.css">
+    <script src="../JS/Authenticate.js"></script>
+</head>
+<body>
+    <div class="page-wrapper">
+        <!-- Animated Background -->
+        <div class="animated-bg">
+            <div class="shape shape-1"></div>
+            <div class="shape shape-2"></div>
         </div>
-        
-        <div class="w3-col m4">
-            <!-- Booking Form -->
-            <div class="w3-card w3-padding">
-                <h4>📅 Request Booking</h4>
-                
-                <div class="w3-panel w3-light-blue w3-round">
-                    <p><strong>Note:</strong> Room bookings require approval from Academic Office.</p>
+
+        <div class="container">
+            <!-- Header -->
+            <div class="header-section">
+                <div class="header-content">
+                    <h2>🏫 Room Availability & Booking Dashboard</h2>
+                    <p class="subtitle">FSKSM Building N28/N28A - Lecturer View</p>
                 </div>
                 
-                <div class="w3-margin-bottom">
-                    <label>Course:</label>
-                    <select id="bookingCourse" class="w3-input w3-border">
-                        <option value="">Select Course...</option>
-                        <option value="SECV3104">SECV3104 - Application Development</option>
-                        <option value="SECJ1013">SECJ1013 - Programming Techniques</option>
-                    </select>
-                </div>
-                
-                <div class="w3-margin-bottom">
-                    <label>Purpose:</label>
-                    <select id="bookingPurpose" class="w3-input w3-border">
-                        <option value="LECTURE">Regular Lecture</option>
-                        <option value="TUTORIAL">Tutorial Session</option>
-                        <option value="MEETING">Student Consultation</option>
-                        <option value="MAKEUP">Make-up Class</option>
-                        <option value="OTHER">Other</option>
-                    </select>
-                </div>
-                
-                <div class="w3-margin-bottom">
-                    <label>Date:</label>
-                    <input type="date" id="bookingDate" class="w3-input w3-border" value="${new Date().toISOString().split('T')[0]}">
-                </div>
-                
-                <div class="w3-row">
-                    <div class="w3-col m6">
-                        <label>Start Time:</label>
-                        <input type="time" id="bookingStart" class="w3-input w3-border" value="14:00">
-                    </div>
-                    <div class="w3-col m6">
-                        <label>End Time:</label>
-                        <input type="time" id="bookingEnd" class="w3-input w3-border" value="16:00">
+                <!-- Real-Time Clock -->
+                <div class="time-display">
+                    <div class="clock-icon">🕐</div>
+                    <div class="clock-info">
+                        <div class="current-time" id="currentTime">00:00:00</div>
+                        <div class="current-date" id="currentDate">Loading...</div>
                     </div>
                 </div>
-                
-                <div class="w3-margin-bottom">
-                    <label>Additional Notes:</label>
-                    <textarea id="bookingNotes" class="w3-input w3-border" rows="3" placeholder="Special requirements, equipment needed, etc."></textarea>
-                </div>
-                
-                <button class="w3-button w3-green w3-block" onclick="submitBookingRequest()">
-                    📨 Submit Booking Request
-                </button>
             </div>
-            
-            <!-- My Bookings -->
-            <div class="w3-card w3-padding w3-margin-top">
-                <h4>📋 My Bookings</h4>
-                
-                <div id="myBookings">
-                    <div class="w3-panel w3-border w3-round w3-small">
-                        <p><strong>SECV3104 - MPK5</strong></p>
-                        <p>Mon, 10:00-12:00</p>
-                        <p><span class="w3-tag w3-blue">APPROVED</span></p>
+
+            <!-- Stats Cards -->
+            <div class="stats-container" id="statsContainer">
+                <div class="stat-card">
+                    <div class="stat-icon available-icon">✓</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="availableCount">-</div>
+                        <div class="stat-label">Available Now</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon occupied-icon">⊗</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="occupiedCount">-</div>
+                        <div class="stat-label">Occupied</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon total-icon">🏢</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="totalRooms">-</div>
+                        <div class="stat-label">Total Rooms</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon rate-icon">📊</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="utilizationRate">-</div>
+                        <div class="stat-label">Current Utilization</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content (Your original structure with updated UI) -->
+            <div class="filter-section">
+                <!-- Search Section -->
+                <div class="room-card" style="margin-bottom: 1.5rem; background: white; border: 2px solid #e0e7ff;">
+                    <div class="room-header">
+                        <div class="room-title">
+                            <div class="room-code" style="color: var(--primary-green);">🔍 Search Available Rooms</div>
+                            <div class="room-name">Find rooms for specific times</div>
+                        </div>
+                    </div>
+
+                    <div class="w3-row" style="margin: 1.5rem 0; gap: 1rem;">
+                        <div class="w3-col m4">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #666;">Day:</label>
+                            <select id="searchDay" class="w3-input w3-border" style="border-radius: 8px; padding: 10px; border: 2px solid #e0e7ff;">
+                                <option value="2">Monday</option>
+                                <option value="3">Tuesday</option>
+                                <option value="4">Wednesday</option>
+                                <option value="5">Thursday</option>
+                                <option value="6">Friday</option>
+                            </select>
+                        </div>
+                        
+                        <div class="w3-col m4">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #666;">Time Slot:</label>
+                            <select id="searchTime" class="w3-input w3-border" style="border-radius: 8px; padding: 10px; border: 2px solid #e0e7ff;">
+                                <option value="1">8:00-9:00</option>
+                                <option value="2">9:00-10:00</option>
+                                <option value="3">10:00-11:00</option>
+                                <option value="4">11:00-12:00</option>
+                                <option value="5">12:00-13:00</option>
+                                <option value="7">14:00-15:00</option>
+                                <option value="8">15:00-16:00</option>
+                                <option value="9">16:00-17:00</option>
+                                <option value="10">17:00-18:00</option>
+                            </select>
+                        </div>
+                        
+                        <div class="w3-col m4">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #666;">Room Type:</label>
+                            <select id="searchType" class="w3-input w3-border" style="border-radius: 8px; padding: 10px; border: 2px solid #e0e7ff;">
+                                <option value="">Any Type</option>
+                                <option value="LECTURE">Lecture Hall</option>
+                                <option value="LAB">Computer Lab</option>
+                                <option value="TUTORIAL">Tutorial Room</option>
+                            </select>
+                        </div>
                     </div>
                     
-                    <div class="w3-panel w3-border w3-round w3-small">
-                        <p><strong>Student Consultation - N28-201</strong></p>
-                        <p>Wed, 14:00-15:00</p>
-                        <p><span class="w3-tag w3-yellow">PENDING</span></p>
+                    <button class="w3-button" onclick="searchAvailableRooms()" 
+                            style="background: linear-gradient(135deg, var(--primary-green), var(--accent-green)); 
+                                   color: white; 
+                                   border: none; 
+                                   border-radius: 50px; 
+                                   padding: 12px 24px; 
+                                   font-weight: 600;
+                                   cursor: pointer;
+                                   transition: all 0.3s;
+                                   width: 100%;">
+                        🔍 Search Available Rooms
+                    </button>
+                </div>
+
+                <!-- Two Column Layout -->
+                <div class="w3-row" style="gap: 2rem;">
+                    <!-- Left Column: Results (70%) -->
+                    <div class="w3-col m8" style="padding: 0;">
+                        <div class="room-card" style="background: white; border: 2px solid #e0e7ff;">
+                            <div class="room-header">
+                                <div class="room-title">
+                                    <div class="room-code" style="color: var(--primary-green);">📋 Available Rooms</div>
+                                    <div class="room-name">Results for your search</div>
+                                </div>
+                            </div>
+                            
+                            <div id="roomResults" style="min-height: 300px;">
+                                <div class="loading-state" style="padding: 40px 20px;">
+                                    <div class="spinner-large"></div>
+                                    <p>Search for rooms to see availability</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Booking (30%) -->
+                    <div class="w3-col m4" style="padding: 0;">
+                        <!-- Booking Form -->
+                        <div class="room-card" style="margin-bottom: 1.5rem; background: white; border: 2px solid #e0e7ff;">
+                            <div class="room-header">
+                                <div class="room-title">
+                                    <div class="room-code" style="color: var(--primary-green);">📅 Request Booking</div>
+                                    <div class="room-name">Book rooms for your classes</div>
+                                </div>
+                            </div>
+
+                            <div style="background: linear-gradient(to right, #e3f2fd, #bbdefb); 
+                                        padding: 12px; 
+                                        border-radius: 8px; 
+                                        margin: 1rem 0; 
+                                        border-left: 4px solid #1976d2;">
+                                <p style="margin: 0; font-size: 13px; color: #0d47a1;">
+                                    <strong>Note:</strong> Room bookings require approval from Academic Office.
+                                </p>
+                            </div>
+                            
+                            <div style="margin-bottom: 1rem;">
+                                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #666;">Course:</label>
+                                <select id="bookingCourse" class="w3-input w3-border" style="border-radius: 8px; padding: 10px; border: 2px solid #e0e7ff;">
+                                    <option value="">Select Course...</option>
+                                    <option value="SECV3104">SECV3104 - Application Development</option>
+                                    <option value="SECJ1013">SECJ1013 - Programming Techniques</option>
+                                </select>
+                            </div>
+                            
+                            <div style="margin-bottom: 1rem;">
+                                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #666;">Purpose:</label>
+                                <select id="bookingPurpose" class="w3-input w3-border" style="border-radius: 8px; padding: 10px; border: 2px solid #e0e7ff;">
+                                    <option value="LECTURE">Regular Lecture</option>
+                                    <option value="TUTORIAL">Tutorial Session</option>
+                                    <option value="MEETING">Student Consultation</option>
+                                    <option value="MAKEUP">Make-up Class</option>
+                                    <option value="OTHER">Other</option>
+                                </select>
+                            </div>
+                            
+                            <div style="margin-bottom: 1rem;">
+                                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #666;">Date:</label>
+                                <input type="date" id="bookingDate" class="w3-input w3-border" 
+                                       value="${new Date().toISOString().split('T')[0]}" 
+                                       style="border-radius: 8px; padding: 10px; border: 2px solid #e0e7ff;">
+                            </div>
+                            
+                            <div class="w3-row" style="margin-bottom: 1rem; gap: 0.5rem;">
+                                <div class="w3-col m6">
+                                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #666;">Start Time:</label>
+                                    <input type="time" id="bookingStart" class="w3-input w3-border" value="14:00" 
+                                           style="border-radius: 8px; padding: 10px; border: 2px solid #e0e7ff;">
+                                </div>
+                                <div class="w3-col m6">
+                                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #666;">End Time:</label>
+                                    <input type="time" id="bookingEnd" class="w3-input w3-border" value="16:00" 
+                                           style="border-radius: 8px; padding: 10px; border: 2px solid #e0e7ff;">
+                                </div>
+                            </div>
+                            
+                            <div style="margin-bottom: 1.5rem;">
+                                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #666;">Additional Notes:</label>
+                                <textarea id="bookingNotes" class="w3-input w3-border" rows="3" 
+                                          placeholder="Special requirements, equipment needed, etc."
+                                          style="border-radius: 8px; padding: 10px; border: 2px solid #e0e7ff; resize: vertical;"></textarea>
+                            </div>
+                            
+                            <button class="w3-button" onclick="submitBookingRequest()" 
+                                    style="background: linear-gradient(135deg, #43a047, #66bb6a); 
+                                           color: white; 
+                                           border: none; 
+                                           border-radius: 50px; 
+                                           padding: 12px 24px; 
+                                           font-weight: 600;
+                                           cursor: pointer;
+                                           transition: all 0.3s;
+                                           width: 100%;">
+                                📨 Submit Booking Request
+                            </button>
+                        </div>
+
+                        <!-- My Bookings -->
+                        <div class="room-card" style="background: white; border: 2px solid #e0e7ff;">
+                            <div class="room-header">
+                                <div class="room-title">
+                                    <div class="room-code" style="color: var(--primary-green);">📋 My Bookings</div>
+                                    <div class="room-name">Your room booking requests</div>
+                                </div>
+                            </div>
+                            
+                            <div id="myBookings" style="margin-top: 1rem;">
+                                <div style="background: #f8fafc; padding: 12px; border-radius: 8px; margin-bottom: 0.75rem; border-left: 4px solid #1976d2;">
+                                    <p style="margin: 0 0 5px 0; font-weight: 600; color: #1a237e;">SECV3104 - MPK5</p>
+                                    <p style="margin: 0 0 5px 0; font-size: 13px; color: #666;">Mon, 10:00-12:00</p>
+                                    <span style="background: #1976d2; color: white; padding: 4px 12px; border-radius: 50px; font-size: 12px; font-weight: 600;">APPROVED</span>
+                                </div>
+                                
+                                <div style="background: #f8fafc; padding: 12px; border-radius: 8px; border-left: 4px solid #fb8c00;">
+                                    <p style="margin: 0 0 5px 0; font-weight: 600; color: #1a237e;">Student Consultation - N28-201</p>
+                                    <p style="margin: 0 0 5px 0; font-size: 13px; color: #666;">Wed, 14:00-15:00</p>
+                                    <span style="background: #fb8c00; color: white; padding: 4px 12px; border-radius: 50px; font-size: 12px; font-weight: 600;">PENDING</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<script src="../JS/Authenticate.js"></script>
+   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <script>
-    function searchAvailableRooms() {
+(function() {
+    // ==========================================
+    // UPDATE REAL-TIME CLOCK (From student view)
+    // ==========================================
+    function updateClock() {
+        const now = new Date();
+        
+        const timeString = now.toLocaleTimeString('en-US', { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false 
+        });
+        $('#currentTime').text(timeString);
+        
+        const dateString = now.toLocaleDateString('en-US', { 
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+        $('#currentDate').text(dateString);
+    }
+
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    // ==========================================
+    // YOUR ORIGINAL LECTURER FUNCTIONS WITH UPDATED UI ONLY
+    // ==========================================
+    
+    // Function 1: searchAvailableRooms - Only UI updated
+    window.searchAvailableRooms = function () {
+
         const day = $("#searchDay").val();
         const time = $("#searchTime").val();
         const type = $("#searchType").val();
         
-        // Show loading
+        // Show loading (Updated UI)
         $("#roomResults").html(`
-            <div class="w3-center w3-padding-24">
-                <div class="loading-spinner"></div>
+            <div class="loading-state" style="padding: 40px 20px;">
+                <div class="spinner-large"></div>
                 <p>Searching for available rooms...</p>
             </div>
         `);
         
-        // Simulate API call
+        // Simulate API call (SAME as original)
         setTimeout(() => {
             const sampleRooms = [
                 { code: "MPK5", name: "Makmal Pengaturcaraan 05", type: "LAB", capacity: 40, status: "AVAILABLE" },
@@ -164,7 +319,7 @@
                 { code: "BK3", name: "Bilik Kuliah 03", type: "LECTURE", capacity: 60, status: "AVAILABLE" }
             ];
             
-            // Filter by type if specified
+            // Filter by type if specified (SAME as original)
             let filteredRooms = sampleRooms;
             if (type) {
                 filteredRooms = sampleRooms.filter(room => room.type === type);
@@ -173,29 +328,57 @@
             let resultsHTML = '';
             
             if (filteredRooms.length === 0) {
+                // Updated UI only
                 resultsHTML = `
-                    <div class="w3-panel w3-yellow">
-                        <p>No rooms found matching your criteria.</p>
+                    <div style="background: linear-gradient(to right, #fff3cd, #ffeaa7); 
+                                padding: 20px; 
+                                border-radius: 8px; 
+                                border-left: 4px solid #ffc107;
+                                margin: 1rem 0;">
+                        <p style="margin: 0; color: #856404; font-weight: 600;">No rooms found matching your criteria.</p>
                     </div>
                 `;
             } else {
                 filteredRooms.forEach(room => {
-                    const statusClass = room.status === "AVAILABLE" ? "w3-green" : "w3-red";
+                    // Updated UI only - same logic
+                    const statusClass = room.status === "AVAILABLE" ? "available" : "occupied";
                     const statusText = room.status === "AVAILABLE" ? "Available" : "Occupied";
+                    const statusColor = room.status === "AVAILABLE" ? "#43a047" : "#e53935";
                     
                     resultsHTML += `
-                        <div class="w3-panel w3-border w3-round-large w3-margin-bottom">
-                            <div class="w3-row">
-                                <div class="w3-col m8">
-                                    <h5><strong>${room.code}</strong> - ${room.name}</h5>
-                                    <p>Type: ${room.type} | Capacity: ${room.capacity} students</p>
+                        <div class="room-card" style="margin-bottom: 1rem; border-color: ${statusColor};">
+                            <div class="room-header">
+                                <div class="room-title">
+                                    <div class="room-code">${room.code}</div>
+                                    <div class="room-name">${room.name}</div>
                                 </div>
-                                <div class="w3-col m4 w3-right-align">
-                                    <span class="w3-tag ${statusClass}">${statusText}</span><br>
-                                    <button class="w3-button w3-blue w3-small w3-margin-top" onclick="selectRoom('${room.code}')">
-                                        Select
-                                    </button>
+                                <div class="room-status-badge ${statusClass}">
+                                    ${room.status === "AVAILABLE" ? '✓' : '⊗'}
                                 </div>
+                            </div>
+                            
+                            <div class="room-meta">
+                                <span class="room-type-badge ${room.type === 'LAB' ? 'lab' : 'lecture'}">
+                                    ${room.type === 'LAB' ? '💻 Lab' : '📖 Lecture'}
+                                </span>
+                                <span class="room-capacity">👥 ${room.capacity} students</span>
+                            </div>
+                            
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
+                                <div>
+                                    <strong style="color: ${statusColor};">${statusText}</strong>
+                                </div>
+                                <button class="w3-button" onclick="selectRoom('${room.code}')" 
+                                        style="background: ${statusColor}; 
+                                               color: white; 
+                                               border: none; 
+                                               border-radius: 8px; 
+                                               padding: 8px 16px; 
+                                               font-weight: 600;
+                                               cursor: pointer;
+                                               transition: all 0.3s;">
+                                    Select Room
+                                </button>
                             </div>
                         </div>
                     `;
@@ -203,19 +386,36 @@
             }
             
             $("#roomResults").html(resultsHTML);
-        }, 1000);
+        }, 1000); // SAME 1000ms delay as original
     }
 
-    function selectRoom(roomCode) {
-        // Auto-fill booking form with selected room
+    // Function 2: selectRoom - Only UI updated (alert → notification)
+    window.selectRoom = function (roomCode) {
+        // Auto-fill booking form with selected room (SAME as original)
         $("#bookingCourse").focus();
-        alert(`Room ${roomCode} selected. Please complete the booking form.`);
         
-        // In a real system, you would store the selected room
+        // Updated UI: Changed alert to notification
+        // Show notification
+        const notification = $(`
+            <div class="notification" style="position: fixed; top: 20px; right: 20px; background: white; padding: 16px 24px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); border-left: 4px solid #1976d2; z-index: 1000; max-width: 400px; animation: slideInRight 0.3s ease-out;">
+                <p style="margin: 0; color: #1a237e; font-weight: 600;">Room ${roomCode} selected. Please complete the booking form.</p>
+            </div>
+        `);
+        
+        $('body').append(notification);
+        
+        setTimeout(() => {
+            notification.fadeOut(300, function() {
+                $(this).remove();
+            });
+        }, 3000);
+        
+        // In a real system, you would store the selected room (SAME as original)
         sessionStorage.setItem('selectedRoom', roomCode);
     }
 
-    function submitBookingRequest() {
+    // Function 3: submitBookingRequest - Only UI updated
+    window.submitBookingRequest = function ()  {
         const course = $("#bookingCourse").val();
         const purpose = $("#bookingPurpose").val();
         const date = $("#bookingDate").val();
@@ -224,12 +424,26 @@
         const notes = $("#bookingNotes").val();
         
         if (!course) {
-            alert("Please select a course");
+            // Updated UI: notification instead of alert
+            const notification = $(`
+                <div class="notification" style="position: fixed; top: 20px; right: 20px; background: white; padding: 16px 24px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); border-left: 4px solid #fb8c00; z-index: 1000; max-width: 400px; animation: slideInRight 0.3s ease-out;">
+                    <p style="margin: 0; color: #1a237e; font-weight: 600;">Please select a course</p>
+                </div>
+            `);
+            $('body').append(notification);
+            setTimeout(() => notification.fadeOut(300).remove(), 3000);
             return;
         }
         
         if (!date || !startTime || !endTime) {
-            alert("Please provide date and time");
+            // Updated UI: notification instead of alert
+            const notification = $(`
+                <div class="notification" style="position: fixed; top: 20px; right: 20px; background: white; padding: 16px 24px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); border-left: 4px solid #fb8c00; z-index: 1000; max-width: 400px; animation: slideInRight 0.3s ease-out;">
+                    <p style="margin: 0; color: #1a237e; font-weight: 600;">Please provide date and time</p>
+                </div>
+            `);
+            $('body').append(notification);
+            setTimeout(() => notification.fadeOut(300).remove(), 3000);
             return;
         }
         
@@ -243,28 +457,36 @@
             timestamp: new Date().toISOString()
         };
         
-        // In a real system, send to backend
+        // In a real system, send to backend (SAME as original)
         console.log("Booking request:", bookingDetails);
         
-        alert(`✅ Booking request submitted for ${course} on ${date} (${startTime}-${endTime})\n\nStatus: Pending approval from Academic Office.`);
+        // Updated UI: notification instead of alert
+        const successNotification = $(`
+            <div class="notification" style="position: fixed; top: 20px; right: 20px; background: white; padding: 16px 24px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); border-left: 4px solid #43a047; z-index: 1000; max-width: 400px; animation: slideInRight 0.3s ease-out;">
+                <p style="margin: 0; color: #1a237e; font-weight: 600;">✅ Booking request submitted for ${course} on ${date} (${startTime}-${endTime})</p>
+                <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">Status: Pending approval from Academic Office.</p>
+            </div>
+        `);
+        $('body').append(successNotification);
+        setTimeout(() => successNotification.fadeOut(300).remove(), 5000);
         
-        // Clear form
+        // Clear form (SAME as original)
         $("#bookingCourse").val("");
         $("#bookingNotes").val("");
         
-        // Add to "My Bookings"
+        // Add to "My Bookings" with updated UI
         const newBooking = `
-            <div class="w3-panel w3-border w3-round w3-small">
-                <p><strong>${course} - Room TBD</strong></p>
-                <p>${date}, ${startTime}-${endTime}</p>
-                <p><span class="w3-tag w3-yellow">PENDING</span></p>
+            <div style="background: #f8fafc; padding: 12px; border-radius: 8px; margin-bottom: 0.75rem; border-left: 4px solid #fb8c00;">
+                <p style="margin: 0 0 5px 0; font-weight: 600; color: #1a237e;">${course} - Room TBD</p>
+                <p style="margin: 0 0 5px 0; font-size: 13px; color: #666;">${date}, ${startTime}-${endTime}</p>
+                <span style="background: #fb8c00; color: white; padding: 4px 12px; border-radius: 50px; font-size: 12px; font-weight: 600;">PENDING</span>
             </div>
         `;
         
         $("#myBookings").prepend(newBooking);
     }
 
-    // Load initial data
+    // Load initial data (SAME as original)
     $(document).ready(function() {
         // Set default search to current day/time
         const now = new Date();
@@ -286,5 +508,33 @@
         if (defaultTimeSlot >= 1 && defaultTimeSlot <= 10) {
             $("#searchTime").val(defaultTimeSlot);
         }
+        
+        // Initialize with some sample stats (This is NEW for the UI)
+        setTimeout(() => {
+            $('#availableCount').text('15').addClass('count-up');
+            $('#occupiedCount').text('8').addClass('count-up');
+            $('#totalRooms').text('23').addClass('count-up');
+            $('#utilizationRate').text('35%').addClass('count-up');
+        }, 500);
     });
+
+    // Add CSS for slide in animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+
+})();
 </script>
+</body>
+</html>

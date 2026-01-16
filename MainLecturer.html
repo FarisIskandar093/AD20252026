@@ -65,6 +65,28 @@
             50% { opacity: 0.9; }
             100% { opacity: 1; }
         }
+        
+        /* Adjusted for removed tools */
+        .nav-section {
+            margin-bottom: 10px;
+        }
+        
+        .nav-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+            display: block;
+            padding-left: 15px;
+        }
+        
+        .nav-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #e0e0e0, transparent);
+            margin: 15px 0;
+        }
     </style>
     <script src="JS/Authenticate.js"></script>
 </head>
@@ -107,14 +129,15 @@
             <a href="#" class="w3-bar-item w3-button" id="time-clash">⚠️ Time Clash Detection</a>
         </div>
         
-        <div class="nav-divider"></div>
+        <!-- REMOVED TOOLS SECTION -->
+        <!-- <div class="nav-divider"></div>
         
         <div class="nav-section">
             <span class="nav-label">TOOLS</span>
             <a href="#" class="w3-bar-item w3-button" id="student-list">👥 Student Lists</a>
             <a href="#" class="w3-bar-item w3-button" id="attendance">✅ Attendance</a>
             <a href="#" class="w3-bar-item w3-button" id="grades">📝 Grades</a>
-        </div>
+        </div> -->
     </div>
 </nav>
 
@@ -249,10 +272,10 @@ $(document).ready(function() {
     $("#room-usage").click(() => handleMenuClick('room-usage', 'LecturerPart/RoomUsage/RoomUsage.html'));
     $("#time-clash").click(() => handleMenuClick('time-clash', 'LecturerPart/TimetableClash/timetableClashLect.html'));
     
-    // Tools
-    $("#student-list").click(() => handleMenuClick('student-list', 'LecturerPart/StudentList.html'));
-    $("#attendance").click(() => handleMenuClick('attendance', 'LecturerPart/Attendance.html'));
-    $("#grades").click(() => handleMenuClick('grades', 'LecturerPart/Grades.html'));
+    // REMOVED Tools menu bindings
+    // $("#student-list").click(() => handleMenuClick('student-list', 'LecturerPart/StudentList.html'));
+    // $("#attendance").click(() => handleMenuClick('attendance', 'LecturerPart/Attendance.html'));
+    // $("#grades").click(() => handleMenuClick('grades', 'LecturerPart/Grades.html'));
     
     // --- BUTTON HANDLERS ---
     $("#adminAccess").click(function(e) {
