@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>My Timetable</title>
+    <title>My Teaching Schedule</title>
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <link rel="stylesheet" href="Styles/MyTimetableStyle.css"> 
     
@@ -17,22 +17,22 @@
 <div class="decorative-leaf leaf-3"></div>
 
 <div class="page-header">
-    <h2 class="w3-center animated-title">📅 My Timetable</h2>
+    <h2 class="w3-center animated-title">👨‍🏫 My Teaching Schedule</h2>
 </div>
 
 <div class="info-box">
     <div class="info-card">
-        <span class="info-icon">👤</span>
+        <span class="info-icon">👨‍🏫</span>
         <div class="info-content">
-            <label>Student:</label>
-            <span id="studentName">Loading...</span>
+            <label>Lecturer:</label>
+            <span id="lecturerName">Loading...</span>
         </div>
     </div>
     <div class="info-card">
         <span class="info-icon">🎓</span>
         <div class="info-content">
-            <label>Matric No:</label>
-            <span id="matricNo">Loading...</span>
+            <label>Staff No:</label>
+            <span id="staffNo">Loading...</span>
         </div>
     </div>
     <div class="info-card">
@@ -46,7 +46,7 @@
 
 <div class="loading" id="loadingMsg">
     <div class="loading-spinner"></div>
-    <p>🔄 Loading your timetable from TTMS...</p>
+    <p>🔄 Loading your teaching schedule from TTMS...</p>
 </div>
 
 <div id="freeTimeChartDiv" style="max-width: 100%; height: 400px; margin-bottom: 2rem; overflow: hidden;"></div>
@@ -76,7 +76,7 @@
 
 <div id="courseListSection" style="display:none;">
     <div class="section-header">
-        <h3 class="w3-center">📚 My Courses This Semester</h3>
+        <h3 class="w3-center">📚 Courses I'm Teaching This Semester</h3>
     </div>
     
     <table class="w3-table-all w3-hoverable course-table">
@@ -86,6 +86,7 @@
                 <th>Course Code</th>
                 <th>Course Name</th>
                 <th>Section</th>
+                <th>Students</th>
                 <th>Status</th>
             </tr>
         </thead>
@@ -99,13 +100,10 @@
 <script>
 $(document).ready(function() {
 
-    // --- GLOBAL TRACKING FOR FREE TIME ---
-    // Total possible slots per day: 10 hours (8:00 to 18:00)
+    // --- GLOBAL TRACKING FOR TEACHING TIME ---
     const HOURS_PER_DAY = 10;
-    // Set stores unique occupied slots using key: 'Day-Time' (e.g., '2-4' for Mon, 10am)
     let occupiedSlots = new Set();
     
-    // Day code mapping (API uses 2 for Monday, 6 for Friday)
     const DAYS_OF_WEEK = {
         2: 'Monday',
         3: 'Tuesday',
@@ -115,30 +113,23 @@ $(document).ready(function() {
     };
 
     // ==========================================
-    // 1. AUTO-GET MATRIC FROM localStorage
+    // 1. AUTO-GET STAFF NO FROM localStorage
     // ==========================================
     const userSession = JSON.parse(localStorage.getItem("TTMSFC_userSession"));
     
     if (!userSession) {
-        // Fallback for testing when localStorage is not available
-        const matric = ''; 
-        const fullName = '';
-        $("#studentName").text(fullName);
-        $("#matricNo").text(matric);
-        
-    } else {
-        const matric = userSession.login_name;  
-        const fullName = userSession.full_name;
-        $("#studentName").text(fullName);
-        $("#matricNo").text(matric);
+        window.location.replace("Login.html");
+        return;
     }
-    
-    const matric = $("#matricNo").text();
-    const fullName = $("#studentName").text();
 
-    console.log("✅ Auto-detected Matric:", matric);
-    console.log("✅ Student Name:", fullName);
+    const staffNo = userSession.login_name;  
+    const fullName = userSession.full_name;
+    $("#lecturerName").text(fullName);
+    $("#staffNo").text(staffNo);
 
+    console.log("✅ Lecturer Detected:");
+    console.log("✅ Staff No:", staffNo);
+    console.log("✅ Lecturer Name:", fullName);
 
     // ==========================================
     // 2. GET CURRENT SESSION/SEMESTER & START EXECUTION
@@ -146,8 +137,6 @@ $(document).ready(function() {
     let currentSesi = window.parent.currentSesi;
     let currentSemester = window.parent.currentSemester;
     
-    // FIX: Load the chart package and wrap the entire execution inside the callback.
-    // This resolves the "Must call google.charts.load" error.
     google.charts.load('current', {'packages':['corechart']});
     google.charts.setOnLoadCallback(startExecution);
     
@@ -155,12 +144,12 @@ $(document).ready(function() {
         if (!currentSesi || !currentSemester) {
             console.warn("⚠️ Session/Semester not available from parent, fetching...");
             fetchCurrentSession().then(() => {
-                loadTimetable(matric, currentSesi, currentSemester);
+                loadTeachingSchedule(staffNo, currentSesi, currentSemester);
             });
         } else {
             $("#sessionSem").text(`${currentSesi} - Semester ${currentSemester}`);
             console.log("✅ Using session:", currentSesi, "Semester:", currentSemester);
-            loadTimetable(matric, currentSesi, currentSemester);
+            loadTeachingSchedule(staffNo, currentSesi, currentSemester);
         }
     }
 
@@ -184,26 +173,22 @@ $(document).ready(function() {
             });
     }
 
-    function loadTimetable(matric, sesi, semester) {
+    function loadTeachingSchedule(staffNo, sesi, semester) {
         buildEmptyTable();
-        fetchStudentSubjects(matric, sesi, semester);
+        fetchTeachingSubjects(staffNo, sesi, semester);
     }
 
     // ==========================================
-    // 3. BUILD EMPTY TIMETABLE GRID (FLIPPED)
+    // 3. BUILD EMPTY TIMETABLE GRID
     // ==========================================
     function buildEmptyTable() {
         let body = "";
-        // Now each row is a DAY
         for (let day = 2; day <= 6; day++) {  
             body += "<tr>";
             body += `<td class="day-column"><strong>${DAYS_OF_WEEK[day]}</strong></td>`;
             
-            // Time slots: 1-5 (8:00-13:00), then BREAK, then 7-10 (14:00-18:00)
-            // Slot 6 (13:00-14:00) is the break
             for (let hour = 1; hour <= 10; hour++) {
                 if (hour === 6) {
-                    // This is the break slot - make it non-clickable/non-data
                     body += `<td class="break-slot">BREAK</td>`;
                 } else {
                     body += `<td data-day='${day}' data-time='${hour}'></td>`;
@@ -213,74 +198,83 @@ $(document).ready(function() {
         }
         $("#timetableBody").html(body);
         
-        // Clear previous tracking for fresh calculation
         occupiedSlots.clear();
     }
 
     // ==========================================
-    // 4. FETCH STUDENT'S SUBJECTS
+    // 4. FETCH LECTURER'S TEACHING SUBJECTS
     // ==========================================
-    function fetchStudentSubjects(matric, sesi, semester) {
-        const url = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pelajar_subjek&no_matrik=${matric}`;
+    function fetchTeachingSubjects(staffNo, sesi, semester) {
+        const url = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pensyarah_subjek&no_pekerja=${staffNo}`;
 
         fetch(url)
             .then(res => res.json())
             .then(subjects => {
-                const currentSubjects = subjects.filter(s => 
+                const teachingSubjects = subjects.filter(s => 
                     s.sesi === sesi && s.semester == semester
                 );
 
-                if (currentSubjects.length === 0) {
-                    $("#loadingMsg").html("⚠️ No subjects found for current semester.");
-                    // Draw empty chart if no subjects
-                    drawFreeTimeChart(); 
+                if (teachingSubjects.length === 0) {
+                    $("#loadingMsg").html("⚠️ No teaching assignments found for this semester.");
+                    drawTeachingTimeChart(); 
                     return;
                 }
 
-                displayCourseList(currentSubjects);
-                let promises = currentSubjects.map(subj => fetchSubjectTimetable(subj));
+                displayTeachingList(teachingSubjects);
+                let promises = teachingSubjects.map(subj => fetchSubjectTimetable(subj));
 
                 Promise.all(promises).then(() => {
                     $("#loadingMsg").hide();
                     $("#timetableTable").show();
-                    console.log("✅ Timetable loaded successfully!");
+                    console.log("✅ Teaching schedule loaded!");
                     
-                    // Draw the free time chart after everything is placed
-                    drawFreeTimeChart(); 
+                    drawTeachingTimeChart(); 
                 });
             })
             .catch(err => {
-                console.error("❌ Error fetching subjects:", err);
-                $("#loadingMsg").html("❌ Error loading subjects. Please try again.");
+                console.error("❌ Error fetching teaching subjects:", err);
+                $("#loadingMsg").html("❌ Error loading teaching schedule.");
             });
     }
 
     // ==========================================
-    // 4.5 DISPLAY COURSE LIST
+    // 4.5 DISPLAY TEACHING LIST
     // ==========================================
-    function displayCourseList(courses) {
+    function displayTeachingList(courses) {
         $("#courseListBody").empty();
         
         courses.forEach((course, index) => {
-            let statusBadge = '';
-            if (course.status === 'UM') {
-                statusBadge = '<span class="w3-tag w3-green status-badge">UM</span>';
-            } else if (course.status === '-') {
-                statusBadge = '<span class="w3-tag w3-blue status-badge">Active</span>';
-            } else {
-                statusBadge = `<span class="w3-tag w3-grey status-badge">${course.status}</span>`;
-            }
-
-            const row = `
-                <tr class="course-row">
-                    <td>${index + 1}</td>
-                    <td><strong>${course.kod_subjek}</strong></td>
-                    <td>${course.nama_subjek}</td>
-                    <td class="w3-center">${course.seksyen}</td>
-                    <td class="w3-center">${statusBadge}</td>
-                </tr>
-            `;
-            $("#courseListBody").append(row);
+            // Fetch student count for each course
+            fetch(`http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pelajar_subjek&sesi=${currentSesi}&semester=${currentSemester}&kod_subjek=${course.kod_subjek}&seksyen=${course.seksyen}`)
+                .then(res => res.json())
+                .then(students => {
+                    const studentCount = Array.isArray(students) ? students.length : 0;
+                    
+                    const row = `
+                        <tr class="course-row">
+                            <td>${index + 1}</td>
+                            <td><strong>${course.kod_subjek}</strong></td>
+                            <td>${course.nama_subjek}</td>
+                            <td class="w3-center">${course.seksyen}</td>
+                            <td class="w3-center"><span class="w3-tag w3-blue">${studentCount}</span></td>
+                            <td class="w3-center"><span class="w3-tag w3-green">Teaching</span></td>
+                        </tr>
+                    `;
+                    $("#courseListBody").append(row);
+                })
+                .catch(err => {
+                    const row = `
+                        <tr class="course-row">
+                            <td>${index + 1}</td>
+                            <td><strong>${course.kod_subjek}</strong></td>
+                            <td>${course.nama_subjek}</td>
+                            <td class="w3-center">${course.seksyen}</td>
+                            <td class="w3-center"><span class="w3-tag w3-grey">?</span></td>
+                            <td class="w3-center"><span class="w3-tag w3-green">Teaching</span></td>
+                        </tr>
+                    `;
+                    $("#courseListBody").append(row);
+                });
         });
 
         $("#courseListSection").show();
@@ -310,24 +304,20 @@ $(document).ready(function() {
     // 6. PLACE SUBJECT INTO TIMETABLE GRID
     // ==========================================
     function mapTTMSTimeToTableTime(masa) {
-    if (masa <= 5) {
-        return masa-1;        // 8–13 stays same
-    } else if (masa >= 7) {
-        return masa - 1;    // shift AFTER break
+        if (masa <= 5) {
+            return masa-1;
+        } else if (masa >= 7) {
+            return masa - 1;
+        }
+        return null;
     }
-    return null; // ignore break (masa === 6)
-}
-
     
     function placeIntoTable(subject, slot) {
         const day = slot.hari;      
         const time = mapTTMSTimeToTableTime(slot.masa);
 
-// Ignore break time completely
-if (time === null) return;
-     
+        if (time === null) return;
         
-        // Track occupied slots using the day-time key
         const slotKey = `${day}-${time}`;
         occupiedSlots.add(slotKey);
 
@@ -339,11 +329,14 @@ if (time === null) return;
             <div class="slot">
                 <div class="slot-header">
                     <strong>${subject.kod_subjek}</strong>
-                    <span class="slot-section">${subject.seksyen}</span>
+                    <span class="slot-section">Sec ${subject.seksyen}</span>
                 </div>
                 <div class="slot-title">${subject.nama_subjek}</div>
                 <div class="slot-room">
                     <span class="room-icon">📍</span> ${room}
+                </div>
+                <div class="slot-teaching">
+                    <span class="teaching-icon">👨‍🏫</span> You Teach
                 </div>
             </div>
         `;
@@ -352,62 +345,39 @@ if (time === null) return;
     }
 
     // ==========================================
-    // 7. TIME FORMATTING (Corrected for TTMS API)
+    // 8. CHARTING LOGIC (TEACHING TIME CHART)
     // ==========================================
-    function formatTime(masa) {
-      
-        const timeMap = {
-            1: "8:00 - 9:00",
-            2: "9:00 - 10:00",
-            3: "10:00 - 11:00",
-            4: "11:00 - 12:00",
-            5: "12:00 - 13:00",
-            6: "BREAK",
-            7: "14:00 - 15:00",
-            8: "15:00 - 16:00",
-            9: "16:00 - 17:00",
-            10: "17:00 - 18:00"
-        };
-        
-        return timeMap[masa] || "Unknown";
-    }
-
-    // ==========================================
-    // 8. CHARTING LOGIC (STACKED COLUMN CHART BY DAY)
-    // ==========================================
-    function drawFreeTimeChart() {
+    function drawTeachingTimeChart() {
         // 1. Initialize data structure for 5 days
         const dailyDataMap = {};
         for (let dayCode = 2; dayCode <= 6; dayCode++) {
             dailyDataMap[dayCode] = {
                 dayName: DAYS_OF_WEEK[dayCode],
-                occupied: 0,
+                teaching: 0,
                 free: HOURS_PER_DAY
             };
         }
 
-        // 2. Count occupied hours per day
+        // 2. Count teaching hours per day
         occupiedSlots.forEach(slotKey => {
-            // slotKey is 'DayCode-Time' (e.g., '2-4')
             const dayCode = slotKey.split('-')[0];
             
             if (dailyDataMap[dayCode]) {
-                dailyDataMap[dayCode].occupied++;
+                dailyDataMap[dayCode].teaching++;
                 dailyDataMap[dayCode].free--;
             }
         });
         
         // 3. Prepare Google Chart DataTable
         const dataArray = [
-          ['Day', 'Occupied Time (Hrs)', 'Free Time (Hrs)']
+          ['Day', 'Teaching Hours', 'Free Hours']
         ];
 
-        // Convert the map data into the array format required by Google Charts
         for (let dayCode = 2; dayCode <= 6; dayCode++) {
             const dayEntry = dailyDataMap[dayCode];
             dataArray.push([
                 dayEntry.dayName,
-                dayEntry.occupied,
+                dayEntry.teaching,
                 dayEntry.free
             ]);
         }
@@ -416,7 +386,7 @@ if (time === null) return;
 
         // 4. Define Chart Options
         const options = {
-          title: 'Daily Time Allocation (8:00 - 18:00)',
+          title: 'Weekly Teaching Allocation (8:00 - 18:00)',
           isStacked: true,
           legend: { position: 'top', maxLines: 3 },
           vAxis: {
@@ -428,7 +398,7 @@ if (time === null) return;
           hAxis: {
             title: 'Day of Week'
           },
-          colors: ['#10b981', '#d1d5db'],
+          colors: ['#3b82f6', '#d1d5db'], // Blue for teaching
           height: 400,
           chartArea: {
             width: '85%',

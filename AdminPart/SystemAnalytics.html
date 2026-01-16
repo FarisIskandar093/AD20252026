@@ -70,6 +70,31 @@
             </div>
         </div>
     </div>
+
+    <div class="w3-row-padding w3-margin-top">
+    <div class="w3-col m6">
+        <div class="w3-card w3-padding">
+            <h4>📚 Course Complexity Analysis</h4>
+            <div id="courseComplexityChart" style="width:100%; height:300px;"></div>
+        </div>
+    </div>
+    
+    <div class="w3-col m6">
+        <div class="w3-card w3-padding">
+            <h4>👨‍🏫 Lecturer Workload</h4>
+            <div id="lecturerWorkloadChart" style="width:100%; height:300px;"></div>
+        </div>
+    </div>
+</div>
+
+<div class="w3-row-padding w3-margin-top">
+    <div class="w3-col m12">
+        <div class="w3-card w3-padding">
+            <h4>📅 Weekly Schedule Density</h4>
+            <div id="weeklyDensityChart" style="width:100%; height:400px;"></div>
+        </div>
+    </div>
+</div>
     
     <div class="w3-card w3-padding w3-margin-top">
         <h4>📋 Recent System Events</h4>
@@ -173,4 +198,183 @@
         // Load initial data
         setTimeout(updateAnalyticsStats, 500);
     });
+</script>
+<script>
+// Add these chart functions to SystemAnalytics.html script
+
+function loadCourseComplexity() {
+    const currentSesi = window.parent.currentSesi;
+    const currentSemester = window.parent.currentSemester;
+    
+    fetch(`http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=subjek&sesi=${currentSesi}&semester=${currentSemester}`)
+        .then(res => res.json())
+        .then(courses => {
+            if (!Array.isArray(courses)) return;
+            
+            const data = new google.visualization.DataTable();
+            data.addColumn('string', 'Course');
+            data.addColumn('number', 'Students');
+            data.addColumn('number', 'Sections');
+            data.addColumn('number', 'Credit Hours');
+            
+            courses.slice(0, 15).forEach(course => {
+                data.addRow([
+                    course.kod_subjam || course.kod_subjek,
+                    parseInt(course.bil_pelajar) || 0,
+                    parseInt(course.bil_seksyen) || 0,
+                    parseInt(course.jam_kredit) || 0
+                ]);
+            });
+            
+            const options = {
+                title: 'Course Complexity Analysis',
+                hAxis: { title: 'Course' },
+                vAxis: { title: 'Count' },
+                seriesType: 'bars',
+                series: {
+                    0: { targetAxisIndex: 0 },
+                    1: { targetAxisIndex: 0, type: 'line' },
+                    2: { targetAxisIndex: 1, type: 'line' }
+                },
+                vAxes: {
+                    0: { title: 'Students/Sections' },
+                    1: { title: 'Credit Hours' }
+                },
+                colors: ['#9c27b0', '#2196f3', '#4caf50']
+            };
+            
+            const chart = new google.visualization.ComboChart(document.getElementById('courseComplexityChart'));
+            chart.draw(data, options);
+        });
+}
+
+function loadLecturerWorkload() {
+    const currentSesi = window.parent.currentSesi;
+    const currentSemester = window.parent.currentSemester;
+    
+    // Fetch lecturer schedules
+    fetch(`http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=jadual_pensyarah&sesi=${currentSesi}&semester=${currentSemester}&limit=100`)
+        .then(res => res.json())
+        .then(schedules => {
+            if (!Array.isArray(schedules)) return;
+            
+            // Count classes per lecturer
+            const lecturerWorkload = {};
+            schedules.forEach(schedule => {
+                const lecturer = schedule.pensyarah;
+                if (lecturer && lecturer.nama_pensyarah) {
+                    const name = lecturer.nama_pensyarah;
+                    lecturerWorkload[name] = (lecturerWorkload[name] || 0) + 1;
+                }
+            });
+            
+            // Sort and take top 10
+            const sorted = Object.entries(lecturerWorkload)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 10);
+            
+            const data = new google.visualization.DataTable();
+            data.addColumn('string', 'Lecturer');
+            data.addColumn('number', 'Classes');
+            
+            sorted.forEach(([name, count]) => {
+                data.addRow([name.split(' ')[0], count]); // Use first name only
+            });
+            
+            const options = {
+                title: 'Top 10 Lecturers by Class Count',
+                hAxis: { title: 'Lecturer' },
+                vAxis: { title: 'Number of Classes' },
+                colors: ['#2196f3'],
+                legend: { position: 'none' }
+            };
+            
+            const chart = new google.visualization.ColumnChart(document.getElementById('lecturerWorkloadChart'));
+            chart.draw(data, options);
+        });
+}
+
+function loadWeeklyScheduleDensity() {
+    const currentSesi = window.parent.currentSesi;
+    const currentSemester = window.parent.currentSemester;
+    
+    fetch(`http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=jadual_ruang&sesi=${currentSesi}&semester=${currentSemester}&limit=500`)
+        .then(res => res.json())
+        .then(schedules => {
+            if (!Array.isArray(schedules)) return;
+            
+            // Create matrix: days (2-6) x time slots (1-10)
+            const density = {};
+            for (let day = 2; day <= 6; day++) {
+                density[day] = {};
+                for (let slot = 1; slot <= 10; slot++) {
+                    if (slot !== 6) density[day][slot] = 0; // Skip slot 6 (lunch)
+                }
+            }
+            
+            // Count classes
+            schedules.forEach(schedule => {
+                const day = schedule.hari;
+                const slot = schedule.masa;
+                if (density[day] && density[day][slot] !== undefined) {
+                    density[day][slot]++;
+                }
+            });
+            
+            // Prepare data for heatmap
+            const timeSlots = {
+                1: '8-9', 2: '9-10', 3: '10-11', 4: '11-12', 5: '12-13',
+                7: '14-15', 8: '15-16', 9: '16-17', 10: '17-18'
+            };
+            
+            const days = {2: 'Mon', 3: 'Tue', 4: 'Wed', 5: 'Thu', 6: 'Fri'};
+            
+            const data = new google.visualization.DataTable();
+            data.addColumn('string', 'Time');
+            
+            Object.keys(days).forEach(day => {
+                data.addColumn('number', days[day]);
+            });
+            
+            Object.keys(timeSlots).forEach(slot => {
+                const row = [timeSlots[slot]];
+                Object.keys(days).forEach(day => {
+                    row.push(density[day][slot] || 0);
+                });
+                data.addRow(row);
+            });
+            
+            const options = {
+                title: 'Weekly Class Density Heatmap',
+                hAxis: { title: 'Day' },
+                vAxis: { title: 'Time Slot' },
+                heatmap: {
+                    colorAxis: {
+                        colors: ['#e0f7fa', '#80deea', '#26c6da', '#00acc1', '#00838f']
+                    }
+                }
+            };
+            
+            const chart = new google.visualization.HeatMap(document.getElementById('weeklyDensityChart'));
+            chart.draw(data, options);
+        });
+}
+
+// Update the existing google.charts.setOnLoadCallback to include new charts
+google.charts.setOnLoadCallback(function() {
+    drawCharts(); // Existing function
+    loadCourseComplexity();
+    loadLecturerWorkload();
+    loadWeeklyScheduleDensity();
+});
+
+// Update refreshAnalytics function to reload all charts
+function refreshAnalytics() {
+    drawCharts();
+    loadCourseComplexity();
+    loadLecturerWorkload();
+    loadWeeklyScheduleDensity();
+    updateAnalyticsStats();
+    alert("All charts refreshed!");
+}
 </script>

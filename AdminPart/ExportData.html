@@ -68,6 +68,55 @@
                 </div>
             </div>
         </div>
+
+        <div class="w3-row-padding w3-margin-top">
+    <div class="w3-col m12">
+        <div class="w3-card w3-padding">
+            <h4>📈 Export Visualizations</h4>
+            <p>Export charts and graphs as images or PDFs</p>
+            
+            <div class="w3-row">
+                <div class="w3-col m3">
+                    <div class="w3-card w3-hover-shadow w3-padding w3-center" style="cursor:pointer;" onclick="exportChart('programDistribution')">
+                        <div class="w3-xxlarge">📊</div>
+                        <h5>Program Distribution</h5>
+                        <p>Pie chart</p>
+                    </div>
+                </div>
+                
+                <div class="w3-col m3">
+                    <div class="w3-card w3-hover-shadow w3-padding w3-center" style="cursor:pointer;" onclick="exportChart('roomUtilization')">
+                        <div class="w3-xxlarge">🏫</div>
+                        <h5>Room Utilization</h5>
+                        <p>Heatmap</p>
+                    </div>
+                </div>
+                
+                <div class="w3-col m3">
+                    <div class="w3-card w3-hover-shadow w3-padding w3-center" style="cursor:pointer;" onclick="exportChart('enrollmentTrends')">
+                        <div class="w3-xxlarge">📚</div>
+                        <h5>Enrollment Trends</h5>
+                        <p>Bar chart</p>
+                    </div>
+                </div>
+                
+                <div class="w3-col m3">
+                    <div class="w3-card w3-hover-shadow w3-padding w3-center" style="cursor:pointer;" onclick="exportChart('weeklySchedule')">
+                        <div class="w3-xxlarge">📅</div>
+                        <h5>Weekly Schedule</h5>
+                        <p>Density map</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="w3-margin-top w3-center">
+                <button class="w3-button w3-purple" onclick="exportAllCharts()">
+                    📦 Export All Visualizations
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
         
         <div class="w3-col m4">
             <div class="w3-card w3-padding">
@@ -199,4 +248,55 @@
         // Initialize
         selectFormat('csv');
     });
+</script>
+<script>
+// Add these functions to ExportData.html script
+
+function exportChart(chartType) {
+    const chartNames = {
+        'programDistribution': 'Program Distribution Chart',
+        'roomUtilization': 'Room Utilization Heatmap',
+        'enrollmentTrends': 'Enrollment Trends Chart',
+        'weeklySchedule': 'Weekly Schedule Density'
+    };
+    
+    if (confirm(`Export ${chartNames[chartType]} as PNG image?`)) {
+        // In a real system, this would capture the chart canvas and generate download
+        alert(`✅ ${chartNames[chartType]} exported as PNG\n\nIn a real system, this would download the chart image.`);
+        
+        // Add to export history
+        const now = new Date();
+        const historyEntry = `
+            <div class="w3-panel w3-border w3-round w3-small w3-margin-bottom">
+                <p><strong>${now.toLocaleDateString()} ${now.toLocaleTimeString()}</strong></p>
+                <p>Chart Export: ${chartNames[chartType]}</p>
+                <p class="w3-text-blue">📈 Visualization exported as PNG</p>
+            </div>
+        `;
+        
+        $("#exportHistory").prepend(historyEntry);
+    }
+}
+
+function exportAllCharts() {
+    if (confirm("Export all visualizations as a PDF report?")) {
+        alert("📊 Generating comprehensive visualization report...");
+        
+        // Simulate processing
+        setTimeout(() => {
+            alert("✅ Visualization report generated!\n\nReport includes:\n• Program Distribution\n• Room Utilization\n• Enrollment Trends\n• Weekly Schedule Density\n• Lecturer Workload\n• Course Complexity");
+            
+            const now = new Date();
+            const historyEntry = `
+                <div class="w3-panel w3-border w3-round w3-small w3-margin-bottom">
+                    <p><strong>${now.toLocaleDateString()} ${now.toLocaleTimeString()}</strong></p>
+                    <p>Complete Visualization Report</p>
+                    <p class="w3-text-green">📋 All charts exported as PDF report</p>
+                </div>
+            `;
+            
+            $("#exportHistory").prepend(historyEntry);
+        }, 2000);
+    }
+}
 </script>

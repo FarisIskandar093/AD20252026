@@ -48,6 +48,31 @@
                     <p><strong>Type:</strong> <span id="roomType">Unknown</span></p>
                     <p><strong>Weekly Usage:</strong> <span id="roomUsage">0</span> hours</p>
                 </div>
+                <div class="w3-row-padding w3-margin-top">
+    <div class="w3-col m12">
+        <div class="w3-card w3-padding">
+            <h4>📈 Room Analytics</h4>
+            
+            <div class="w3-row">
+                <div class="w3-col m8">
+                    <div id="roomAnalyticsChart" style="width:100%; height:300px;"></div>
+                </div>
+                <div class="w3-col m4">
+                    <div class="w3-panel w3-light-blue w3-round">
+                        <h5>Room Efficiency</h5>
+                        <p><strong>Utilization Rate:</strong> <span id="utilizationRate">0%</span></p>
+                        <p><strong>Peak Hours:</strong> <span id="peakHours">N/A</span></p>
+                        <p><strong>Available Slots:</strong> <span id="availableSlots">0</span></p>
+                    </div>
+                    
+                    <button class="w3-button w3-purple w3-block w3-margin-top" onclick="analyzeRoomEfficiency()">
+                        🔍 Analyze Efficiency
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
             </div>
         </div>
         
@@ -270,4 +295,66 @@
             }
         };
     });
+</script>
+<script>
+// Add these functions to RoomManagement.html script
+
+function analyzeRoomEfficiency() {
+    const roomCode = $("#roomSelect").val();
+    if (!roomCode) {
+        alert("Please select a room first");
+        return;
+    }
+    
+    const currentSesi = window.parent.currentSesi;
+    const currentSemester = window.parent.currentSemester;
+    
+    fetch(`http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=jadual_ruang&sesi=${currentSesi}&semester=${currentSemester}&kod_ruang=${roomCode}`)
+        .then(res => res.json())
+        .then(schedule => {
+            if (!Array.isArray(schedule)) return;
+            
+            // Calculate utilization
+            const totalSlots = 45; // 5 days * 9 time slots
+            const usedSlots = schedule.length;
+            const utilizationRate = Math.round((usedSlots / totalSlots) * 100);
+            
+            // Find peak hours
+            const timeCounts = {};
+            schedule.forEach(slot => {
+                timeCounts[slot.masa] = (timeCounts[slot.masa] || 0) + 1;
+            });
+            
+            let peakTime = Object.keys(timeCounts).reduce((a, b) => timeCounts[a] > timeCounts[b] ? a : b);
+            const peakHours = {
+                1: '8-9 AM', 2: '9-10 AM', 3: '10-11 AM', 4: '11-12 PM',
+                5: '12-1 PM', 7: '2-3 PM', 8: '3-4 PM', 9: '4-5 PM', 10: '5-6 PM'
+            };
+            
+            // Update metrics
+            $("#utilizationRate").text(utilizationRate + '%');
+            $("#peakHours").text(peakHours[peakTime] || 'N/A');
+            $("#availableSlots").text(totalSlots - usedSlots);
+            
+            // Create visualization
+            const vizData = new google.visualization.DataTable();
+            vizData.addColumn('string', 'Metric');
+            vizData.addColumn('number', 'Value');
+            
+            vizData.addRow(['Used Slots', usedSlots]);
+            vizData.addRow(['Available Slots', totalSlots - usedSlots]);
+            
+            const options = {
+                title: `${roomCode} Room Utilization`,
+                pieHole: 0.4,
+                colors: ['#2196f3', '#e0e0e0']
+            };
+            
+            const chart = new google.visualization.PieChart(document.getElementById('roomAnalyticsChart'));
+            chart.draw(vizData, options);
+        });
+}
+
+// Load Google Charts
+google.charts.load('current', {'packages':['corechart']});
 </script>

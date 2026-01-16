@@ -202,7 +202,7 @@
         // CACHE VARIABLES
         // ==========================================
         let cachedRooms = [];
-        let allRoomSchedules = {}; // Store all schedules organized by room
+        let allRoomSchedules = {};
         let updateInterval = null;
         let utilizationChart = null;
 
@@ -290,7 +290,7 @@
 
                 console.log(`📚 Found ${allSubjects.length} subjects`);
 
-                const roomScheduleMap = {}; // { roomCode: { dayCode: [schedule entries with full details] } }
+                const roomScheduleMap = {};
                 const fetchPromises = [];
 
                 // Get all valid sections with lecturers and students

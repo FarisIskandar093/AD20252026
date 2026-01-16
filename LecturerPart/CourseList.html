@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Course Analytics Dashboard - UTM</title>
+  <title>Course Analytics Dashboard - UTM (Lecturer View)</title>
   <link rel="stylesheet" href="Styles/CourseStyle.css">
   <script src="../JS/Authenticate.js"></script>
 </head>
@@ -22,20 +22,20 @@
     <div class="header">
       <div class="header-content">
         <div class="logo-section">
-          <div class="logo-icon">📚</div>
+          <div class="logo-icon">👨‍🏫</div>
           <div>
             <h1>Course Analytics Dashboard</h1>
-            <p class="subtitle">Session 2025/2026 - Semester 1</p>
+            <p class="subtitle">Faculty-wide Analytics for Session 2025/2026 - Semester 1</p>
           </div>
         </div>
         <div class="stats-quick-view" id="quickStats">
           <div class="stat-card">
             <div class="stat-value" id="totalCourses">-</div>
-            <div class="stat-label">Courses</div>
+            <div class="stat-label">All Courses</div>
           </div>
           <div class="stat-card">
             <div class="stat-value" id="totalStudents">-</div>
-            <div class="stat-label">Students</div>
+            <div class="stat-label">Total Students</div>
           </div>
           <div class="stat-card">
             <div class="stat-value" id="totalLecturers">-</div>
@@ -103,7 +103,7 @@
 
       <div class="chart-card chart-card-wide">
         <div class="chart-header">
-          <h3>🎓 Lecturer Workload Distribution</h3>
+          <h3>🎓 Lecturer Teaching Load Distribution</h3>
           <span class="chart-badge">Column Chart</span>
         </div>
         <div id="chart_lecturers" class="chart-content">
@@ -202,7 +202,7 @@ var allCourseData = null;
 var currentFilter = 'all';
 var currentSort = { field: 'nama_subjek', ascending: true };
 
-// Get session_id from localStorage (similar to dashboard)
+// Get session_id from localStorage
 const userSession = JSON.parse(localStorage.getItem("TTMSFC_userSession"));
 const sessionId = userSession ? userSession.session_id : null;
 
@@ -362,14 +362,14 @@ function drawScatterChart() {
   chart.draw(data, options);
 }
 
-// Draw Lecturer Workload Chart
+// Draw Lecturer Teaching Load Chart
 function drawLecturerChart() {
   if (!allCourseData || allCourseData.length === 0) return;
   
   var sorted = [...allCourseData]
     .filter(c => c.totalLecturers > 0)
     .sort((a, b) => b.totalLecturers - a.totalLecturers)
-    .slice(0, 15); // Show top 15 courses
+    .slice(0, 15);
   
   var data = new google.visualization.DataTable();
   data.addColumn('string', 'Course');
@@ -390,7 +390,7 @@ function drawLecturerChart() {
   data.addRows(chartData);
 
   var options = {
-    title: 'Top 15 Courses by Lecturer Count',
+    title: 'Top 15 Courses by Number of Lecturers',
     titleTextStyle: { fontSize: 18, bold: true, color: '#1a237e' },
     vAxis: { 
       title: 'Number of Lecturers',
@@ -477,7 +477,7 @@ function populateTable(data) {
   });
 }
 
-// Fetch lecturer details using session_id (like in dashboard)
+// Fetch lecturer details
 async function fetchLecturerDetails(courseCode, courseName) {
   var modal = document.getElementById('lecturerModal');
   document.getElementById('modalCourseCode').textContent = courseCode;
@@ -486,14 +486,12 @@ async function fetchLecturerDetails(courseCode, courseName) {
   document.getElementById('modalBody').innerHTML = '<div class="loading-modal"><div class="spinner-large"></div><p>Loading lecturer information...</p></div>';
   
   try {
-    // Build URL with session_id if available
     let url = `${baseUrl}?entity=subjek_pensyarah&kod_subjek=${encodeURIComponent(courseCode)}`;
     
     if (sessionId) {
       url += `&session_id=${sessionId}`;
     }
     
-    // Also add sesi and semester parameters
     url += `&sesi=${encodeURIComponent(sesi)}&semester=${semester}`;
     
     console.log('🔍 Fetching lecturers:', url);
@@ -509,7 +507,6 @@ async function fetchLecturerDetails(courseCode, courseName) {
       return;
     }
     
-    // Filter for current session and semester
     const currentLecturers = lecturers.filter(l => 
       l.sesi === sesi && l.semester == semester
     );
@@ -519,7 +516,6 @@ async function fetchLecturerDetails(courseCode, courseName) {
       return;
     }
     
-    // Group by section to avoid duplicates
     const lecturersBySection = {};
     currentLecturers.forEach(l => {
       const section = l.seksyen || 'Unknown';

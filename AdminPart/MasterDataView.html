@@ -68,6 +68,39 @@
     <div id="dataError" class="w3-panel w3-red w3-round" style="display:none;">
         <p>❌ Error loading data. Please check console for details.</p>
     </div>
+    <div class="w3-row-padding w3-margin-top">
+    <div class="w3-col m12">
+        <div class="w3-card w3-padding">
+            <h4>📊 Data Visualization Preview</h4>
+            
+            <div class="w3-bar w3-light-grey w3-round w3-margin-bottom">
+                <button class="w3-bar-item w3-button" onclick="showDataViz('distribution')">Distribution</button>
+                <button class="w3-bar-item w3-button" onclick="showDataViz('trends')">Trends</button>
+                <button class="w3-bar-item w3-button" onclick="showDataViz('comparison')">Comparison</button>
+            </div>
+            
+            <div id="dataVizContainer" style="display:none;">
+                <div class="w3-row">
+                    <div class="w3-col m8">
+                        <div id="dataVizChart" style="width:100%; height:300px;"></div>
+                    </div>
+                    <div class="w3-col m4">
+                        <div class="w3-panel w3-light-blue w3-round">
+                            <h5>Visualization Insights</h5>
+                            <p id="vizInsights">Select a visualization type to see insights.</p>
+                        </div>
+                        
+                        <div class="w3-margin-top">
+                            <button class="w3-button w3-purple w3-block" onclick="generateDataViz()">
+                                Generate Visualization
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 </div>
 
 <script src="../JS/Authenticate.js"></script>
@@ -200,4 +233,108 @@
             loadEntity('pelajar');
         }, 500);
     });
+</script>
+<script>
+// Add these functions to MasterDataView.html script
+
+function showDataViz(type) {
+    $("#dataVizContainer").show();
+    
+    // Update active button
+    $('.w3-bar-item.w3-button').removeClass('w3-purple');
+    $(`.w3-bar-item.w3-button:contains('${type.charAt(0).toUpperCase() + type.slice(1)}')`).addClass('w3-purple');
+    
+    const insights = {
+        'distribution': 'Shows how data is distributed across different categories.',
+        'trends': 'Displays patterns and trends over time or sequence.',
+        'comparison': 'Compares different data points or categories.'
+    };
+    
+    $("#vizInsights").text(insights[type] || 'Select a visualization type.');
+}
+
+function generateDataViz() {
+    if (!window.currentEntityData || window.currentEntityData.length === 0) {
+        alert("Please load data first");
+        return;
+    }
+    
+    const data = window.currentEntityData;
+    
+    // Simple visualization based on entity type
+    if (currentEntity === 'pelajar') {
+        // Visualize student program distribution
+        const programData = {};
+        data.forEach(student => {
+            const program = student.kod_program || 'Unknown';
+            programData[program] = (programData[program] || 0) + 1;
+        });
+        
+        const vizData = new google.visualization.DataTable();
+        vizData.addColumn('string', 'Program');
+        vizData.addColumn('number', 'Students');
+        
+        Object.keys(programData).forEach(program => {
+            vizData.addRow([program, programData[program]]);
+        });
+        
+        const options = {
+            title: `Student Distribution (${data.length} records)`,
+            pieSliceText: 'value',
+            backgroundColor: '#f5f5f5'
+        };
+        
+        const chart = new google.visualization.PieChart(document.getElementById('dataVizChart'));
+        chart.draw(vizData, options);
+        
+    } else if (currentEntity === 'subjek') {
+        // Visualize course enrollment
+        const vizData = new google.visualization.DataTable();
+        vizData.addColumn('string', 'Course');
+        vizData.addColumn('number', 'Students');
+        vizData.addColumn('number', 'Sections');
+        
+        data.slice(0, 10).forEach(course => {
+            vizData.addRow([
+                course.kod_subjek,
+                parseInt(course.bil_pelajar) || 0,
+                parseInt(course.bil_seksyen) || 0
+            ]);
+        });
+        
+        const options = {
+            title: 'Course Enrollment Analysis',
+            hAxis: { title: 'Course Code' },
+            vAxis: { title: 'Count' },
+            seriesType: 'bars',
+            series: { 1: { type: 'line' } }
+        };
+        
+        const chart = new google.visualization.ComboChart(document.getElementById('dataVizChart'));
+        chart.draw(vizData, options);
+    }
+    
+    $("#vizInsights").html(`
+        <strong>Visualization Generated:</strong>
+        <p>Based on ${data.length} records of ${currentEntity}</p>
+        <p>Click and drag to zoom, hover for details</p>
+    `);
+}
+
+// Modify loadCurrentEntity function to store data
+function loadCurrentEntity() {
+    // ... existing code ...
+    
+    fetch(url)
+        .then(res => res.json())
+        .then(data => {
+            // Store data for visualization
+            window.currentEntityData = data;
+            // ... rest of existing code ...
+        })
+        // ... rest of existing code ...
+}
+
+// Load Google Charts for visualization
+google.charts.load('current', {'packages':['corechart']});
 </script>

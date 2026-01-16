@@ -24,15 +24,15 @@
     <div class="info-card">
         <span class="info-icon">👤</span>
         <div class="info-content">
-            <label>Student:</label>
-            <span id="studentName">Loading...</span>
+            <label>Lecturer:</label>
+            <span id="lecturerName">Loading...</span>
         </div>
     </div>
     <div class="info-card">
         <span class="info-icon">🎓</span>
         <div class="info-content">
-            <label>Matric No:</label>
-            <span id="matricNo">Loading...</span>
+            <label>Staff No:</label>
+            <span id="staffNo">Loading...</span>
         </div>
     </div>
     <div class="info-card">
@@ -121,23 +121,23 @@ $(document).ready(function() {
     
     if (!userSession) {
         // Fallback for testing when localStorage is not available
-        const matric = ''; 
+        const staff = ''; 
         const fullName = '';
-        $("#studentName").text(fullName);
-        $("#matricNo").text(matric);
+        $("#lecturerName").text(fullName);
+        $("#staffNo").text(staff);
         
     } else {
-        const matric = userSession.login_name;  
+        const staff = userSession.login_name;  
         const fullName = userSession.full_name;
-        $("#studentName").text(fullName);
-        $("#matricNo").text(matric);
+        $("#lecturerName").text(fullName);
+        $("#staffNo").text(staff);
     }
     
-    const matric = $("#matricNo").text();
-    const fullName = $("#studentName").text();
+    const staff = $("#staffNo").text();
+    const fullName = $("#lecturerName").text();
 
-    console.log("✅ Auto-detected Matric:", matric);
-    console.log("✅ Student Name:", fullName);
+    console.log("✅ Auto-detected Staff No:", staff);
+    console.log("✅ Lecturer Name:", fullName);
 
 
     // ==========================================
@@ -155,12 +155,12 @@ $(document).ready(function() {
         if (!currentSesi || !currentSemester) {
             console.warn("⚠️ Session/Semester not available from parent, fetching...");
             fetchCurrentSession().then(() => {
-                loadTimetable(matric, currentSesi, currentSemester);
+                loadTimetable(staff, currentSesi, currentSemester);
             });
         } else {
             $("#sessionSem").text(`${currentSesi} - Semester ${currentSemester}`);
             console.log("✅ Using session:", currentSesi, "Semester:", currentSemester);
-            loadTimetable(matric, currentSesi, currentSemester);
+            loadTimetable(staff, currentSesi, currentSemester);
         }
     }
 
@@ -184,9 +184,9 @@ $(document).ready(function() {
             });
     }
 
-    function loadTimetable(matric, sesi, semester) {
+    function loadTimetable(staff, sesi, semester) {
         buildEmptyTable();
-        fetchStudentSubjects(matric, sesi, semester);
+        fetchStudentSubjects(staff, sesi, semester);
     }
 
     // ==========================================
@@ -220,8 +220,8 @@ $(document).ready(function() {
     // ==========================================
     // 4. FETCH STUDENT'S SUBJECTS
     // ==========================================
-    function fetchStudentSubjects(matric, sesi, semester) {
-        const url = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pelajar_subjek&no_matrik=${matric}`;
+    function fetchStudentSubjects(staff, sesi, semester) {
+        const url = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pelajar_subjek&no_matrik=${staff}`;
 
         fetch(url)
             .then(res => res.json())

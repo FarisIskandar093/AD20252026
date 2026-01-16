@@ -6,8 +6,8 @@
   <div class="analytics-card">
     <div class="header-section">
       <div class="header-icon">👨‍🏫</div>
-      <h1 class="header-titles">Lecturer Enrollment Analytics</h1>
-      <p class="header-subtitle">Top 10 Most Popular Lecturers by Total Student Enrollment</p>
+      <h1 class="header-titles">Lecturer Teaching Analytics</h1>
+      <p class="header-subtitle">Analyze teaching loads and course popularity</p>
     </div>
 
     <!-- Filters -->
@@ -60,7 +60,7 @@
     <div class="chart-section">
       <h2 class="section-title">
         <span class="section-icon">🏆</span>
-        <span id="chartTitle">Top 10 Lecturers Ranking</span>
+        <span id="chartTitle">Top 10 Lecturers by Teaching Load</span>
       </h2>
       <div id="lecturerChart" class="loading">Loading lecturer data</div>
     </div>
@@ -70,16 +70,16 @@
 <script src="../../JS/Authenticate.js"></script>
 <script>
 (function() {
-  // Get user from parent window's global variable
-  const userSession = window.userSession;
+  // Get lecturer from localStorage
+  const userSession = JSON.parse(localStorage.getItem("TTMSFC_userSession"));
   
-  if (!userSession || !userSession.login) {
+  if (!userSession || !userSession.login_name) {
     document.getElementById('lecturerChart').innerHTML = 
       '<div class="empty-state"><div class="empty-state-icon">🚫</div><div class="empty-state-text">Session error. Please refresh the page.</div></div>';
     return;
   }
 
-  const matricNo = userSession.login;
+  const staffNo = userSession.login_name;
   const sessionId = userSession.session_id || '';
 
   let currentSesi = '';
@@ -203,7 +203,7 @@
     
     if (!currentSesi || !currentSemester) return;
 
-    chartEl.innerHTML = "<div class='loading'>Analyzing lecturer enrollment data</div>";
+    chartEl.innerHTML = "<div class='loading'>Analyzing lecturer teaching data</div>";
 
     try {
       // Fetch all subject sections for the selected session/semester
@@ -326,7 +326,7 @@
     if (query) {
       chartTitle.textContent = `Search Results (${lecturers.length})`;
     } else {
-      chartTitle.textContent = 'Top 10 Lecturers Ranking';
+      chartTitle.textContent = 'Top 10 Lecturers by Teaching Load';
     }
     
     if (lecturers.length === 0) {
@@ -364,7 +364,7 @@
               <div class="progress-bar-bg">
                 <div class="progress-bar-fill" style="width: ${percentage}%">
                   <div class="student-count">
-                    👥 ${lecturer.students.toLocaleString()}
+                    👥 ${lecturer.students.toLocaleString()} students
                   </div>
                 </div>
               </div>

@@ -6,7 +6,7 @@
   <div class="page-header">
     <h3>
       <span class="header-icon">📚</span>
-      Subject Sections – With Class Schedule
+      Subject Sections – With Class Schedule (Lecturer View)
     </h3>
     <p class="subtitle">Explore all available course sections and their schedules</p>
   </div>
@@ -23,6 +23,12 @@
       <label for="semesterSelect">📅 Semester</label>
       <select id="semesterSelect">
         <option value="">Select session first</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label for="lecturerFilter">👨‍🏫 Filter Lecturer:</label>
+      <select id="lecturerFilter">
+        <option value="">All Lecturers</option>
       </select>
     </div>
   </div>
@@ -54,16 +60,15 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
 (function() {
-  // Get user from parent window's global variable
-  const userSession = window.userSession;
+  const userSession = JSON.parse(localStorage.getItem("TTMSFC_userSession"));
   
-  if (!userSession || !userSession.login) {
+  if (!userSession || !userSession.login_name) {
     document.getElementById('sectionsContent').innerHTML = 
       '<div class="empty-message">Session error. Please refresh the page.</div>';
     return;
   }
 
-  const matricNo = userSession.login;
+  const staffNo = userSession.login_name;
 
   const hariMap = { 2: "Mon", 3: "Tue", 4: "Wed", 5: "Thu", 6: "Fri", 7: "Sat", 8: "Sun" };
   const masaMap = {
@@ -78,6 +83,7 @@
   let currentSemester = '';
   let totalPages = 0;
   let roomUsageChart = null;
+  let allLecturers = [];
 
   // Green color palette for the chart
   const greenColors = [
@@ -88,6 +94,7 @@
   document.getElementById("searchInput").addEventListener("input", filterAndRender);
   document.getElementById("sessionSelect").addEventListener("change", handleSessionChange);
   document.getElementById("semesterSelect").addEventListener("change", handleSemesterChange);
+  document.getElementById("lecturerFilter").addEventListener("change", filterAndRender);
 
   initAndLoad();
 
@@ -97,7 +104,10 @@
     const semesterSelect = document.getElementById("semesterSelect");
 
     try {
-      const url = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pelajar_subjek&no_matrik=${encodeURIComponent(matricNo)}`;
+      // First, load lecturers for filter
+      await loadLecturers();
+
+      const url = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pelajar_subjek&no_matrik=${staffNo}`;
       const res = await fetch(url);
       const data = await res.json();
 
@@ -146,6 +156,38 @@
     }
   }
 
+  async function loadLecturers() {
+    try {
+      const res = await fetch(`http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pensyarah`);
+      const lecturers = await res.json();
+      
+      if (Array.isArray(lecturers)) {
+        allLecturers = lecturers;
+        const lecturerFilter = document.getElementById('lecturerFilter');
+        
+        // Sort lecturers by name
+        lecturers.sort((a, b) => {
+          const nameA = (a.nama_pensyarah || a.nama || '').toLowerCase();
+          const nameB = (b.nama_pensyarah || b.nama || '').toLowerCase();
+          return nameA.localeCompare(nameB);
+        });
+        
+        lecturers.forEach(lecturer => {
+          const name = lecturer.nama_pensyarah || lecturer.nama || 'Unknown';
+          const staffNumber = lecturer.no_pekerja || lecturer.kod_pekerja || '';
+          if (name && name !== 'Unknown') {
+            const option = document.createElement('option');
+            option.value = staffNumber;
+            option.textContent = name;
+            lecturerFilter.appendChild(option);
+          }
+        });
+      }
+    } catch (err) {
+      console.error("Error loading lecturers:", err);
+    }
+  }
+
   function handleSessionChange() {
     const sesi = document.getElementById("sessionSelect").value;
     const semesterSelect = document.getElementById("semesterSelect");
@@ -153,7 +195,7 @@
       semesterSelect.innerHTML = '<option>Select session first</option>';
       return;
     }
-    fetch(`http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pelajar_subjek&no_matrik=${encodeURIComponent(matricNo)}`)
+    fetch(`http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pelajar_subjek&no_matrik=${encodeURIComponent(staffNo)}`)
       .then(r => r.json())
       .then(data => {
         const sessions = {};
@@ -371,10 +413,26 @@
 
   function filterAndRender() {
     const query = document.getElementById("searchInput").value.toLowerCase();
+    const selectedLecturer = document.getElementById("lecturerFilter").value;
+    
     let filteredData = allEnrichedData;
 
     if (query) {
-      filteredData = allEnrichedData.filter(item => item.searchable.includes(query));
+      filteredData = filteredData.filter(item => item.searchable.includes(query));
+    }
+
+    if (selectedLecturer) {
+      // Find lecturer name from staff number
+      const lecturer = allLecturers.find(l => 
+        (l.no_pekerja === selectedLecturer || l.kod_pekerja === selectedLecturer)
+      );
+      
+      if (lecturer) {
+        const lecturerName = lecturer.nama_pensyarah || lecturer.nama;
+        filteredData = filteredData.filter(item => 
+          item.lecturer && item.lecturer.toLowerCase().includes(lecturerName.toLowerCase())
+        );
+      }
     }
 
     totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
@@ -410,7 +468,7 @@
                   <tr>
                     <th>Section</th>
                     <th>👨‍🏫 Lecturer</th>
-                    <th>👥 Enrolled</th>
+                    <th>👥 Students</th>
                     <th>📅 Schedule (Day – Time – Room)</th>
                   </tr>
                 </thead>
