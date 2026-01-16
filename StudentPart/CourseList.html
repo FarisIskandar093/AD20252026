@@ -3,64 +3,188 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Course List - UTM</title>
+  <title>Course Analytics Dashboard - UTM</title>
   <link rel="stylesheet" href="Styles/CourseStyle.css">
   <script src="../JS/Authenticate.js"></script>
 </head>
 <body>
 
-<div class="container">
-  <div class="header">
-    <h1>📚 Course Management System</h1>
-    <p>Session 2025/2026 - Semester 1</p>
+<div class="page-wrapper">
+  <!-- Animated Background -->
+  <div class="animated-bg">
+    <div class="shape shape-1"></div>
+    <div class="shape shape-2"></div>
+    <div class="shape shape-3"></div>
   </div>
 
-  <div id="chart_div">
-    <div class="chart-placeholder">Loading chart...</div>
-  </div>
-  
-  <div class="search-container">
-    <input type="text" id="searchInput" placeholder="Search by course name or code..." />
-    <span class="search-icon">🔍</span>
-  </div>
+  <div class="container">
+    <!-- Header Section -->
+    <div class="header">
+      <div class="header-content">
+        <div class="logo-section">
+          <div class="logo-icon">📚</div>
+          <div>
+            <h1>Course Analytics Dashboard</h1>
+            <p class="subtitle">Session 2025/2026 - Semester 1</p>
+          </div>
+        </div>
+        <div class="stats-quick-view" id="quickStats">
+          <div class="stat-card">
+            <div class="stat-value" id="totalCourses">-</div>
+            <div class="stat-label">Courses</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="totalStudents">-</div>
+            <div class="stat-label">Students</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="totalLecturers">-</div>
+            <div class="stat-label">Lecturers</div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-  <hr>
+    <!-- Search and Filter Section -->
+    <div class="search-section">
+      <div class="search-container">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="Search by course name or code..." />
+        <div class="search-clear" id="clearSearch" style="display: none;">✕</div>
+      </div>
+      <div class="filter-chips">
+        <button class="chip active" data-filter="all">All Courses</button>
+        <button class="chip" data-filter="high">High Enrollment (50+)</button>
+        <button class="chip" data-filter="medium">Medium (20-49)</button>
+        <button class="chip" data-filter="low">Low (< 20)</button>
+      </div>
+    </div>
 
-  <div class="table-container">
-    <table>
-      <thead>
-        <tr>
-          <th>Course Name</th>
-          <th>Course Code</th>
-          <th>Sections</th>
-          <th>Lecturers</th>
-          <th>Students</th>
-        </tr>
-      </thead>
-      <tbody id="courseTableBody">
-        <tr>
-          <td colspan="5" class="loading">Loading course data...</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-  
-  <div id="noResults" style="display: none; text-align: center; padding: 40px; color: #666;">
-    No courses found matching your search.
+    <!-- Charts Dashboard -->
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3>📊 Top 10 Courses by Enrollment</h3>
+          <span class="chart-badge">Bar Chart</span>
+        </div>
+        <div id="chart_enrollment" class="chart-content">
+          <div class="chart-placeholder">
+            <div class="spinner-large"></div>
+            <p>Loading chart data...</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3>👥 Student Distribution</h3>
+          <span class="chart-badge">Pie Chart</span>
+        </div>
+        <div id="chart_distribution" class="chart-content">
+          <div class="chart-placeholder">
+            <div class="spinner-large"></div>
+            <p>Loading chart data...</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-card chart-card-wide">
+        <div class="chart-header">
+          <h3>📈 Class Size Analysis</h3>
+          <span class="chart-badge">Scatter Chart</span>
+        </div>
+        <div id="chart_scatter" class="chart-content">
+          <div class="chart-placeholder">
+            <div class="spinner-large"></div>
+            <p>Loading chart data...</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-card chart-card-wide">
+        <div class="chart-header">
+          <h3>🎓 Lecturer Workload Distribution</h3>
+          <span class="chart-badge">Column Chart</span>
+        </div>
+        <div id="chart_lecturers" class="chart-content">
+          <div class="chart-placeholder">
+            <div class="spinner-large"></div>
+            <p>Loading chart data...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="section-divider">
+
+    <!-- Data Table Section -->
+    <div class="table-section">
+      <div class="table-header">
+        <h2>📋 Course Details</h2>
+        <div class="table-actions">
+          <button class="action-btn" id="exportBtn">
+            <span>📥</span> Export Data
+          </button>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table id="courseTable">
+          <thead>
+            <tr>
+              <th class="sortable" data-sort="nama_subjek">
+                Course Name <span class="sort-icon">↕</span>
+              </th>
+              <th class="sortable" data-sort="kod_subjek">
+                Course Code <span class="sort-icon">↕</span>
+              </th>
+              <th class="sortable" data-sort="totalSections">
+                Sections <span class="sort-icon">↕</span>
+              </th>
+              <th class="sortable" data-sort="totalLecturers">
+                Lecturers <span class="sort-icon">↕</span>
+              </th>
+              <th class="sortable" data-sort="totalStudents">
+                Students <span class="sort-icon">↕</span>
+              </th>
+              <th>Avg. Class Size</th>
+            </tr>
+          </thead>
+          <tbody id="courseTableBody">
+            <tr>
+              <td colspan="6" class="loading">
+                <div class="spinner-large"></div>
+                <p>Loading course data...</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <div id="noResults" class="no-results" style="display: none;">
+        <div class="no-results-icon">🔍</div>
+        <h3>No courses found</h3>
+        <p>Try adjusting your search or filter criteria</p>
+      </div>
+    </div>
   </div>
 </div>
 
-<!-- Modal for Lecturer Details -->
+<!-- Enhanced Modal for Lecturer Details -->
 <div id="lecturerModal" class="modal">
   <div class="modal-content">
     <div class="modal-header">
-      <span class="close">&times;</span>
-      <h2 id="modalCourseCode">Course Code</h2>
-      <p id="modalCourseName">Course Name</p>
+      <div class="modal-header-content">
+        <div>
+          <h2 id="modalCourseCode">Course Code</h2>
+          <p id="modalCourseName">Course Name</p>
+        </div>
+        <span class="close">&times;</span>
+      </div>
     </div>
     <div class="modal-body" id="modalBody">
       <div class="loading-modal">
-        <div class="spinner"></div>
+        <div class="spinner-large"></div>
         <p>Loading lecturer information...</p>
       </div>
     </div>
@@ -75,159 +199,465 @@ var sesi = "2025/2026";
 var semester = "1";
 var courseData = null;
 var allCourseData = null;
+var currentFilter = 'all';
+var currentSort = { field: 'nama_subjek', ascending: true };
+
+// Get session_id from localStorage (similar to dashboard)
+const userSession = JSON.parse(localStorage.getItem("TTMSFC_userSession"));
+const sessionId = userSession ? userSession.session_id : null;
+
+console.log("📋 Session Info:", {
+  sesi: sesi,
+  semester: semester,
+  sessionId: sessionId
+});
 
 google.charts.load('current', {'packages':['corechart']});
 
-function drawChart() {
+// Draw Enrollment Bar Chart
+function drawEnrollmentChart() {
   if (!courseData || courseData.length === 0) {
-    document.getElementById('chart_div').innerHTML = '<div class="chart-placeholder">No course data available for chart</div>';
+    document.getElementById('chart_enrollment').innerHTML = '<div class="chart-placeholder"><p>No data available</p></div>';
     return;
   }
   
   var data = new google.visualization.DataTable();
   data.addColumn('string', 'Course');
   data.addColumn('number', 'Students');
+  data.addColumn({type: 'string', role: 'style'});
   
-  var chartData = courseData.map(course => 
-    [course.nama_subjek + ' (' + course.kod_subjek + ')', course.totalStudents || 0]
+  var colors = ['#2e7d32', '#388e3c', '#43a047', '#4caf50', '#66bb6a', '#81c784', '#a5d6a7', '#c8e6c9', '#dcedc8', '#f1f8e9'];
+  
+  var chartData = courseData.slice(0, 10).map((course, index) => 
+    [course.kod_subjek, course.totalStudents || 0, colors[index]]
   );
   
   data.addRows(chartData);
 
   var options = {
     title: 'Top 10 Courses by Student Enrollment',
-    titleTextStyle: { fontSize: 20, bold: true, color: '#2e7d32' },
+    titleTextStyle: { fontSize: 18, bold: true, color: '#1a237e' },
     hAxis: {
       title: 'Number of Students',
       minValue: 0,
-      textStyle: { fontSize: 12 }
+      textStyle: { fontSize: 11 }
     },
     vAxis: {
-      title: 'Course',
-      textStyle: { fontSize: 12 }
+      textStyle: { fontSize: 11 }
     },
-    colors: ['#4caf50'],
-    chartArea: { left: '20%', top: '10%', width: '70%', height: '80%' },
-    backgroundColor: '#f9f9f9',
-    legend: { position: 'none' }
+    chartArea: { left: '15%', top: '12%', width: '75%', height: '75%' },
+    backgroundColor: 'transparent',
+    legend: { position: 'none' },
+    animation: {
+      startup: true,
+      duration: 1000,
+      easing: 'out'
+    }
   };
 
-  var chart = new google.visualization.BarChart(document.getElementById('chart_div'));
+  var chart = new google.visualization.BarChart(document.getElementById('chart_enrollment'));
+  chart.draw(data, options);
+}
+
+// Draw Distribution Pie Chart
+function drawDistributionChart() {
+  if (!allCourseData || allCourseData.length === 0) return;
+  
+  var high = allCourseData.filter(c => c.totalStudents >= 50).length;
+  var medium = allCourseData.filter(c => c.totalStudents >= 20 && c.totalStudents < 50).length;
+  var low = allCourseData.filter(c => c.totalStudents < 20 && c.totalStudents > 0).length;
+  var empty = allCourseData.filter(c => c.totalStudents === 0).length;
+  
+  var data = google.visualization.arrayToDataTable([
+    ['Category', 'Courses'],
+    ['High (50+)', high],
+    ['Medium (20-49)', medium],
+    ['Low (< 20)', low],
+    ['No Students', empty]
+  ]);
+
+  var options = {
+    title: 'Course Distribution by Enrollment',
+    titleTextStyle: { fontSize: 18, bold: true, color: '#1a237e' },
+    colors: ['#2e7d32', '#66bb6a', '#ffb300', '#f44336'],
+    pieHole: 0.4,
+    chartArea: { left: '5%', top: '12%', width: '90%', height: '75%' },
+    backgroundColor: 'transparent',
+    legend: { position: 'bottom', textStyle: { fontSize: 11 } },
+    animation: {
+      startup: true,
+      duration: 1000,
+      easing: 'out'
+    }
+  };
+
+  var chart = new google.visualization.PieChart(document.getElementById('chart_distribution'));
+  chart.draw(data, options);
+}
+
+// Draw Enhanced Scatter Chart - Student Enrollment per Section
+function drawScatterChart() {
+  if (!allCourseData || allCourseData.length === 0) return;
+  
+  var data = new google.visualization.DataTable();
+  data.addColumn('number', 'Average Students per Section');
+  data.addColumn('number', 'Number of Sections');
+  data.addColumn({type: 'string', role: 'tooltip'});
+  
+  var chartData = allCourseData
+    .filter(c => c.totalStudents > 0 && c.totalSections > 0)
+    .map(c => {
+      const avgClassSize = Math.round(c.totalStudents / c.totalSections);
+      const tooltip = `${c.kod_subjek}\n${c.nama_subjek}\nSections: ${c.totalSections}\nTotal Students: ${c.totalStudents}\nAvg per Section: ${avgClassSize}`;
+      return [
+        avgClassSize,
+        c.totalSections,
+        tooltip
+      ];
+    });
+  
+  data.addRows(chartData);
+
+  var options = {
+    title: 'Class Size Distribution Across Sections',
+    titleTextStyle: { fontSize: 18, bold: true, color: '#1a237e' },
+    hAxis: { 
+      title: 'Average Students per Section',
+      minValue: 0,
+      textStyle: { fontSize: 11 },
+      titleTextStyle: { fontSize: 13, bold: true },
+      gridlines: { color: '#e0e0e0' }
+    },
+    vAxis: { 
+      title: 'Number of Sections',
+      minValue: 0,
+      textStyle: { fontSize: 11 },
+      titleTextStyle: { fontSize: 13, bold: true },
+      gridlines: { color: '#e0e0e0' }
+    },
+    colors: ['#4caf50'],
+    pointSize: 7,
+    pointShape: 'circle',
+    chartArea: { left: '12%', top: '12%', width: '78%', height: '70%' },
+    backgroundColor: 'transparent',
+    legend: 'none',
+    trendlines: {
+      0: {
+        type: 'linear',
+        color: '#ff9800',
+        lineWidth: 2,
+        opacity: 0.5,
+        showR2: true,
+        visibleInLegend: true
+      }
+    },
+    animation: {
+      startup: true,
+      duration: 1000,
+      easing: 'out'
+    }
+  };
+
+  var chart = new google.visualization.ScatterChart(document.getElementById('chart_scatter'));
+  chart.draw(data, options);
+}
+
+// Draw Lecturer Workload Chart
+function drawLecturerChart() {
+  if (!allCourseData || allCourseData.length === 0) return;
+  
+  var sorted = [...allCourseData]
+    .filter(c => c.totalLecturers > 0)
+    .sort((a, b) => b.totalLecturers - a.totalLecturers)
+    .slice(0, 15); // Show top 15 courses
+  
+  var data = new google.visualization.DataTable();
+  data.addColumn('string', 'Course');
+  data.addColumn('number', 'Lecturers');
+  data.addColumn({type: 'string', role: 'style'});
+  data.addColumn({type: 'string', role: 'tooltip'});
+  
+  var chartData = sorted.map(c => {
+    const avgStudentsPerLecturer = c.totalLecturers > 0 ? Math.round(c.totalStudents / c.totalLecturers) : 0;
+    return [
+      c.kod_subjek,
+      c.totalLecturers,
+      'color: #1a237e',
+      `${c.kod_subjek}\n${c.nama_subjek}\nLecturers: ${c.totalLecturers}\nSections: ${c.totalSections}\nStudents: ${c.totalStudents}\nAvg Students/Lecturer: ${avgStudentsPerLecturer}`
+    ];
+  });
+  
+  data.addRows(chartData);
+
+  var options = {
+    title: 'Top 15 Courses by Lecturer Count',
+    titleTextStyle: { fontSize: 18, bold: true, color: '#1a237e' },
+    vAxis: { 
+      title: 'Number of Lecturers',
+      minValue: 0,
+      textStyle: { fontSize: 11 },
+      titleTextStyle: { fontSize: 13, bold: true }
+    },
+    hAxis: {
+      textStyle: { fontSize: 10 },
+      slantedText: true,
+      slantedTextAngle: 45
+    },
+    chartArea: { left: '8%', top: '12%', width: '85%', height: '65%' },
+    backgroundColor: 'transparent',
+    legend: 'none',
+    bar: { groupWidth: '75%' },
+    animation: {
+      startup: true,
+      duration: 1000,
+      easing: 'out'
+    }
+  };
+
+  var chart = new google.visualization.ColumnChart(document.getElementById('chart_lecturers'));
   chart.draw(data, options);
 }
 
 google.charts.setOnLoadCallback(function() {
-  if (courseData) drawChart();
+  if (courseData) {
+    drawEnrollmentChart();
+    drawDistributionChart();
+    drawScatterChart();
+    drawLecturerChart();
+  }
 });
+
+function updateQuickStats() {
+  if (!allCourseData) return;
+  
+  var totalStudents = allCourseData.reduce((sum, c) => sum + (c.totalStudents || 0), 0);
+  var totalLecturers = allCourseData.reduce((sum, c) => sum + (c.totalLecturers || 0), 0);
+  
+  $('#totalCourses').text(allCourseData.length).addClass('count-up');
+  $('#totalStudents').text(totalStudents.toLocaleString()).addClass('count-up');
+  $('#totalLecturers').text(totalLecturers).addClass('count-up');
+}
 
 function populateTable(data) {
   $('#courseTableBody').empty();
   
   if (!data || data.length === 0) {
     $('#noResults').show();
+    $('.table-container').hide();
     return;
   }
   
   $('#noResults').hide();
-  
-  // Sort alphabetically by course name
-  data.sort((a, b) => (a.nama_subjek || '').localeCompare(b.nama_subjek || ''));
+  $('.table-container').show();
   
   data.forEach(function(course) {
+    var avgClassSize = course.totalSections > 0 ? 
+      Math.round(course.totalStudents / course.totalSections) : 0;
+    
     var row = $('<tr></tr>');
-    row.append('<td>' + (course.nama_subjek || 'N/A') + '</td>');
-    row.append('<td>' + (course.kod_subjek || 'N/A') + '</td>');
-    row.append('<td>' + (course.totalSections || 0) + '</td>');
+    row.append(`<td><div class="course-name">${course.nama_subjek || 'N/A'}</div></td>`);
+    row.append(`<td><span class="course-code">${course.kod_subjek || 'N/A'}</span></td>`);
+    row.append(`<td><span class="badge badge-blue">${course.totalSections || 0}</span></td>`);
     
     var lecturerCount = course.totalLecturers || 0;
-    var lecturerCell = $('<td>' + lecturerCount + '</td>');
+    var lecturerCell = $(`<td><span class="badge badge-purple ${lecturerCount > 0 ? 'clickable' : ''}">${lecturerCount}</span></td>`);
     
     if (lecturerCount > 0) {
-      lecturerCell.addClass('clickable-cell');
-      lecturerCell.attr('data-course-code', course.kod_subjek);
-      lecturerCell.attr('data-course-name', course.nama_subjek);
-      lecturerCell.on('click', function() {
+      lecturerCell.find('.badge').attr('data-course-code', course.kod_subjek);
+      lecturerCell.find('.badge').attr('data-course-name', course.nama_subjek);
+      lecturerCell.find('.badge').on('click', function() {
         fetchLecturerDetails($(this).attr('data-course-code'), $(this).attr('data-course-name'));
       });
     }
     
     row.append(lecturerCell);
-    row.append('<td>' + (course.totalStudents || 0) + '</td>');
+    row.append(`<td><span class="badge badge-green">${course.totalStudents || 0}</span></td>`);
+    row.append(`<td><span class="avg-size">${avgClassSize}</span></td>`);
     $('#courseTableBody').append(row);
   });
 }
 
-function fetchLecturerDetails(courseCode, courseName) {
+// Fetch lecturer details using session_id (like in dashboard)
+async function fetchLecturerDetails(courseCode, courseName) {
   var modal = document.getElementById('lecturerModal');
   document.getElementById('modalCourseCode').textContent = courseCode;
   document.getElementById('modalCourseName').textContent = courseName;
   modal.style.display = 'block';
-  document.getElementById('modalBody').innerHTML = '<div class="loading-modal"><div class="spinner"></div><p>Loading lecturer information...</p></div>';
+  document.getElementById('modalBody').innerHTML = '<div class="loading-modal"><div class="spinner-large"></div><p>Loading lecturer information...</p></div>';
   
-  fetch(`${baseUrl}?entity=subjek_pensyarah&kod_subjek=${encodeURIComponent(courseCode)}`)
-    .then(res => res.ok ? res.json() : Promise.reject('Network error'))
-    .then(lecturers => {
-      if (!Array.isArray(lecturers) || lecturers.length === 0) {
-        document.getElementById('modalBody').innerHTML = '<div class="error-message">No lecturer information available.</div>';
-        return;
-      }
+  try {
+    // Build URL with session_id if available
+    let url = `${baseUrl}?entity=subjek_pensyarah&kod_subjek=${encodeURIComponent(courseCode)}`;
+    
+    if (sessionId) {
+      url += `&session_id=${sessionId}`;
+    }
+    
+    // Also add sesi and semester parameters
+    url += `&sesi=${encodeURIComponent(sesi)}&semester=${semester}`;
+    
+    console.log('🔍 Fetching lecturers:', url);
+    
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('Network error');
+    
+    const lecturers = await res.json();
+    console.log('👨‍🏫 Lecturer data received:', lecturers);
+    
+    if (!Array.isArray(lecturers) || lecturers.length === 0) {
+      document.getElementById('modalBody').innerHTML = '<div class="error-message">📭 No lecturer information available.</div>';
+      return;
+    }
+    
+    // Filter for current session and semester
+    const currentLecturers = lecturers.filter(l => 
+      l.sesi === sesi && l.semester == semester
+    );
+    
+    if (currentLecturers.length === 0) {
+      document.getElementById('modalBody').innerHTML = '<div class="error-message">📭 No lecturer info for current semester.</div>';
+      return;
+    }
+    
+    // Group by section to avoid duplicates
+    const lecturersBySection = {};
+    currentLecturers.forEach(l => {
+      const section = l.seksyen || 'Unknown';
+      const name = l.nama_pensyarah || l.nama || 'TBA';
       
-      const currentLecturers = lecturers.filter(l => l.sesi === sesi && l.semester == semester);
-      if (currentLecturers.length === 0) {
-        document.getElementById('modalBody').innerHTML = '<div class="error-message">No lecturer info for current semester.</div>';
-        return;
+      if (!lecturersBySection[section]) {
+        lecturersBySection[section] = name;
       }
-      
-      let html = '';
-      currentLecturers.forEach(l => {
-        html += `<div class="lecturer-item">
-          <div class="lecturer-name">${l.nama_pensyarah || 'Unknown'}</div>
-          <div class="lecturer-section">Section: ${l.seksyen || 'N/A'}</div>
-        </div>`;
-      });
-      document.getElementById('modalBody').innerHTML = html;
-    })
-    .catch(err => {
-      console.error('Error:', err);
-      document.getElementById('modalBody').innerHTML = '<div class="error-message">Failed to load lecturer data.</div>';
     });
+    
+    let html = '<div class="lecturers-grid">';
+    Object.entries(lecturersBySection).forEach(([section, name]) => {
+      html += `<div class="lecturer-card">
+        <div class="lecturer-avatar">👨‍🏫</div>
+        <div class="lecturer-info">
+          <div class="lecturer-name">${name}</div>
+          <div class="lecturer-section">Section ${section}</div>
+        </div>
+      </div>`;
+    });
+    html += '</div>';
+    document.getElementById('modalBody').innerHTML = html;
+    
+  } catch (err) {
+    console.error('Error:', err);
+    document.getElementById('modalBody').innerHTML = '<div class="error-message">❌ Failed to load lecturer data.</div>';
+  }
 }
 
-$('#searchInput').on('keyup', function() {
+// Search functionality
+$('#searchInput').on('input', function() {
   const term = $(this).val().toLowerCase().trim();
+  $('#clearSearch').toggle(term.length > 0);
+  
   if (!allCourseData) return;
   
-  const filtered = term ? allCourseData.filter(c => 
+  let filtered = term ? allCourseData.filter(c => 
     (c.nama_subjek || '').toLowerCase().includes(term) || 
     (c.kod_subjek || '').toLowerCase().includes(term)
   ) : allCourseData;
   
+  filtered = applyFilter(filtered);
   populateTable(filtered);
 });
 
-// Fetch unique lecturer count per course (considering section)
-async function fetchLecturerCount(courseCode) {
-  try {
-    const res = await fetch(`${baseUrl}?entity=subjek_pensyarah&kod_subjek=${encodeURIComponent(courseCode)}`);
-    if (!res.ok) return 0;
-    
-    const lecturers = await res.json();
-    if (!Array.isArray(lecturers)) return 0;
-    
-    // Create unique keys: lecturer + section
-    const uniqueLecturerSections = new Set();
-    lecturers.forEach(l => {
-      if (l.sesi === sesi && l.semester == semester && l.nama_pensyarah && l.seksyen) {
-        uniqueLecturerSections.add(`${l.nama_pensyarah}|${l.seksyen}`);
-      }
-    });
-    
-    return uniqueLecturerSections.size;
-  } catch (e) {
-    console.error(`Lecturer count error for ${courseCode}:`, e);
-    return 0;
+$('#clearSearch').on('click', function() {
+  $('#searchInput').val('');
+  $(this).hide();
+  let filtered = applyFilter(allCourseData);
+  populateTable(filtered);
+});
+
+// Filter functionality
+$('.chip').on('click', function() {
+  $('.chip').removeClass('active');
+  $(this).addClass('active');
+  currentFilter = $(this).data('filter');
+  
+  if (!allCourseData) return;
+  
+  const searchTerm = $('#searchInput').val().toLowerCase().trim();
+  let filtered = searchTerm ? allCourseData.filter(c => 
+    (c.nama_subjek || '').toLowerCase().includes(searchTerm) || 
+    (c.kod_subjek || '').toLowerCase().includes(searchTerm)
+  ) : allCourseData;
+  
+  filtered = applyFilter(filtered);
+  populateTable(filtered);
+});
+
+function applyFilter(data) {
+  switch(currentFilter) {
+    case 'high':
+      return data.filter(c => c.totalStudents >= 50);
+    case 'medium':
+      return data.filter(c => c.totalStudents >= 20 && c.totalStudents < 50);
+    case 'low':
+      return data.filter(c => c.totalStudents < 20);
+    default:
+      return data;
   }
 }
+
+// Sorting functionality
+$('.sortable').on('click', function() {
+  const field = $(this).data('sort');
+  
+  if (currentSort.field === field) {
+    currentSort.ascending = !currentSort.ascending;
+  } else {
+    currentSort.field = field;
+    currentSort.ascending = true;
+  }
+  
+  $('.sort-icon').text('↕');
+  $(this).find('.sort-icon').text(currentSort.ascending ? '↑' : '↓');
+  
+  const searchTerm = $('#searchInput').val().toLowerCase().trim();
+  let filtered = searchTerm ? allCourseData.filter(c => 
+    (c.nama_subjek || '').toLowerCase().includes(searchTerm) || 
+    (c.kod_subjek || '').toLowerCase().includes(searchTerm)
+  ) : [...allCourseData];
+  
+  filtered = applyFilter(filtered);
+  
+  filtered.sort((a, b) => {
+    let valA = a[field] || '';
+    let valB = b[field] || '';
+    
+    if (typeof valA === 'string') valA = valA.toLowerCase();
+    if (typeof valB === 'string') valB = valB.toLowerCase();
+    
+    if (valA < valB) return currentSort.ascending ? -1 : 1;
+    if (valA > valB) return currentSort.ascending ? 1 : -1;
+    return 0;
+  });
+  
+  populateTable(filtered);
+});
+
+// Export functionality
+$('#exportBtn').on('click', function() {
+  if (!allCourseData) return;
+  
+  const csv = ['Course Name,Course Code,Sections,Lecturers,Students,Avg Class Size'];
+  allCourseData.forEach(c => {
+    const avgSize = c.totalSections > 0 ? Math.round(c.totalStudents / c.totalSections) : 0;
+    csv.push(`"${c.nama_subjek}","${c.kod_subjek}",${c.totalSections},${c.totalLecturers},${c.totalStudents},${avgSize}`);
+  });
+  
+  const blob = new Blob([csv.join('\n')], { type: 'text/csv' });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `course_data_${sesi.replace('/', '_')}_sem${semester}.csv`;
+  a.click();
+  window.URL.revokeObjectURL(url);
+});
 
 async function fetchCourseData() {
   try {
@@ -238,7 +668,6 @@ async function fetchCourseData() {
     const courses = await res.json();
     if (!Array.isArray(courses)) throw new Error('Invalid course data');
 
-    // Map directly from API fields
     allCourseData = courses.map(course => ({
       kod_subjek: course.kod_subjek || 'N/A',
       nama_subjek: course.nama_subjek || 'N/A',
@@ -247,21 +676,25 @@ async function fetchCourseData() {
       totalStudents: parseInt(course.bil_pelajar) || 0
     }));
 
-    // Sort alphabetically for initial display
     allCourseData.sort((a, b) => (a.nama_subjek || '').localeCompare(b.nama_subjek || ''));
 
-    // Populate table
+    updateQuickStats();
     populateTable(allCourseData);
 
-    // Prepare top 10 for chart
     const withStudents = allCourseData.filter(c => c.totalStudents > 0);
     withStudents.sort((a, b) => b.totalStudents - a.totalStudents);
     courseData = withStudents.slice(0, 10);
-    if (google.visualization) drawChart();
+    
+    if (google.visualization) {
+      drawEnrollmentChart();
+      drawDistributionChart();
+      drawScatterChart();
+      drawLecturerChart();
+    }
 
   } catch (err) {
     console.error('Fetch error:', err);
-    $('#courseTableBody').html('<tr><td colspan="5" style="text-align:center; color:#d32f2f;">Error loading course data.</td></tr>');
+    $('#courseTableBody').html('<tr><td colspan="6" class="error-message">❌ Error loading course data. Please refresh the page.</td></tr>');
   }
 }
 
@@ -269,9 +702,19 @@ async function fetchCourseData() {
 fetchCourseData();
 
 // Modal handlers
-document.querySelector('.close').onclick = () => document.getElementById('lecturerModal').style.display = 'none';
-window.onclick = e => { if (e.target === document.getElementById('lecturerModal')) e.target.style.display = 'none'; };
-document.addEventListener('keydown', e => { if (e.key === 'Escape') document.getElementById('lecturerModal').style.display = 'none'; });
+$('.close').on('click', () => $('#lecturerModal').hide());
+$(window).on('click', (e) => { if (e.target.id === 'lecturerModal') $('#lecturerModal').hide(); });
+$(document).on('keydown', (e) => { if (e.key === 'Escape') $('#lecturerModal').hide(); });
+
+// Window resize handler for charts
+$(window).on('resize', function() {
+  if (courseData && google.visualization) {
+    drawEnrollmentChart();
+    drawDistributionChart();
+    drawScatterChart();
+    drawLecturerChart();
+  }
+});
 </script>
 
 </body>
