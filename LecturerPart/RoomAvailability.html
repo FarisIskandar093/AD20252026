@@ -1,290 +1,972 @@
-<div class="w3-container">
-    <h2 class="w3-text-blue">🏫 Room Availability & Booking</h2>
-    <p class="w3-text-grey">Check room availability and request bookings</p>
-    
-    <div class="w3-row">
-        <div class="w3-col m8">
-            <!-- Room Search -->
-            <div class="w3-card w3-padding w3-margin-bottom">
-                <h4>🔍 Search Available Rooms</h4>
-                
-                <div class="w3-row w3-margin-bottom">
-                    <div class="w3-col m4">
-                        <label>Day:</label>
-                        <select id="searchDay" class="w3-input w3-border">
-                            <option value="2">Monday</option>
-                            <option value="3">Tuesday</option>
-                            <option value="4">Wednesday</option>
-                            <option value="5">Thursday</option>
-                            <option value="6">Friday</option>
-                        </select>
-                    </div>
-                    
-                    <div class="w3-col m4">
-                        <label>Time Slot:</label>
-                        <select id="searchTime" class="w3-input w3-border">
-                            <option value="1">8:00-9:00</option>
-                            <option value="2">9:00-10:00</option>
-                            <option value="3">10:00-11:00</option>
-                            <option value="4">11:00-12:00</option>
-                            <option value="5">12:00-13:00</option>
-                            <option value="7">14:00-15:00</option>
-                            <option value="8">15:00-16:00</option>
-                            <option value="9">16:00-17:00</option>
-                            <option value="10">17:00-18:00</option>
-                        </select>
-                    </div>
-                    
-                    <div class="w3-col m4">
-                        <label>Room Type:</label>
-                        <select id="searchType" class="w3-input w3-border">
-                            <option value="">Any Type</option>
-                            <option value="LECTURE">Lecture Hall</option>
-                            <option value="LAB">Computer Lab</option>
-                            <option value="TUTORIAL">Tutorial Room</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <button class="w3-button w3-blue w3-block" onclick="searchAvailableRooms()">
-                    🔍 Search Available Rooms
-                </button>
-            </div>
-            
-            <!-- Results -->
-            <div class="w3-card w3-padding">
-                <h4>📋 Available Rooms</h4>
-                <div id="roomResults">
-                    <div class="w3-center w3-padding-24">
-                        <p class="w3-text-grey">Search for rooms to see availability</p>
-                    </div>
-                </div>
-            </div>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Room Availability - UTM</title>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="Styles/AvailabilityStyle.css">
+    <script src="../JS/Authenticate.js"></script>
+</head>
+<body>
+    <div class="page-wrapper">
+        <!-- Animated Background -->
+        <div class="animated-bg">
+            <div class="shape shape-1"></div>
+            <div class="shape shape-2"></div>
         </div>
-        
-        <div class="w3-col m4">
-            <!-- Booking Form -->
-            <div class="w3-card w3-padding">
-                <h4>📅 Request Booking</h4>
-                
-                <div class="w3-panel w3-light-blue w3-round">
-                    <p><strong>Note:</strong> Room bookings require approval from Academic Office.</p>
+
+        <div class="container">
+            <!-- Header -->
+            <div class="header-section">
+                <div class="header-content">
+                    <h2>🏫 Room Availability Dashboard</h2>
+                    <p class="subtitle">FSKSM Building N28/N28A</p>
                 </div>
                 
-                <div class="w3-margin-bottom">
-                    <label>Course:</label>
-                    <select id="bookingCourse" class="w3-input w3-border">
-                        <option value="">Select Course...</option>
-                        <option value="SECV3104">SECV3104 - Application Development</option>
-                        <option value="SECJ1013">SECJ1013 - Programming Techniques</option>
-                    </select>
-                </div>
-                
-                <div class="w3-margin-bottom">
-                    <label>Purpose:</label>
-                    <select id="bookingPurpose" class="w3-input w3-border">
-                        <option value="LECTURE">Regular Lecture</option>
-                        <option value="TUTORIAL">Tutorial Session</option>
-                        <option value="MEETING">Student Consultation</option>
-                        <option value="MAKEUP">Make-up Class</option>
-                        <option value="OTHER">Other</option>
-                    </select>
-                </div>
-                
-                <div class="w3-margin-bottom">
-                    <label>Date:</label>
-                    <input type="date" id="bookingDate" class="w3-input w3-border" value="${new Date().toISOString().split('T')[0]}">
-                </div>
-                
-                <div class="w3-row">
-                    <div class="w3-col m6">
-                        <label>Start Time:</label>
-                        <input type="time" id="bookingStart" class="w3-input w3-border" value="14:00">
-                    </div>
-                    <div class="w3-col m6">
-                        <label>End Time:</label>
-                        <input type="time" id="bookingEnd" class="w3-input w3-border" value="16:00">
+                <!-- Real-Time Clock -->
+                <div class="time-display">
+                    <div class="clock-icon">🕐</div>
+                    <div class="clock-info">
+                        <div class="current-time" id="currentTime">00:00:00</div>
+                        <div class="current-date" id="currentDate">Loading...</div>
                     </div>
                 </div>
-                
-                <div class="w3-margin-bottom">
-                    <label>Additional Notes:</label>
-                    <textarea id="bookingNotes" class="w3-input w3-border" rows="3" placeholder="Special requirements, equipment needed, etc."></textarea>
-                </div>
-                
-                <button class="w3-button w3-green w3-block" onclick="submitBookingRequest()">
-                    📨 Submit Booking Request
-                </button>
             </div>
-            
-            <!-- My Bookings -->
-            <div class="w3-card w3-padding w3-margin-top">
-                <h4>📋 My Bookings</h4>
-                
-                <div id="myBookings">
-                    <div class="w3-panel w3-border w3-round w3-small">
-                        <p><strong>SECV3104 - MPK5</strong></p>
-                        <p>Mon, 10:00-12:00</p>
-                        <p><span class="w3-tag w3-blue">APPROVED</span></p>
+
+            <!-- Stats Cards -->
+            <div class="stats-container" id="statsContainer">
+                <div class="stat-card">
+                    <div class="stat-icon available-icon">✓</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="availableCount">-</div>
+                        <div class="stat-label">Available Now</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon occupied-icon">⊗</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="occupiedCount">-</div>
+                        <div class="stat-label">Occupied</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon total-icon">🏢</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="totalRooms">-</div>
+                        <div class="stat-label">Total Rooms</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon rate-icon">📊</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="utilizationRate">-</div>
+                        <div class="stat-label">Current Utilization</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Daily Schedule Analytics -->
+            <div class="analytics-section" style="margin: 2rem 0; background: white; border-radius: 16px; padding: 2rem; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+                    <div>
+                        <h3 style="margin: 0; color: #1e293b; display: flex; align-items: center; gap: 0.5rem;">
+                            <span style="font-size: 1.5rem;">📈</span>
+                            Today's Room Utilization Analysis
+                        </h3>
+                        <p style="margin: 0.5rem 0 0 0; color: #64748b; font-size: 0.9rem;">
+                            Hourly occupancy patterns across all N28/N28A rooms
+                        </p>
+                    </div>
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <div style="width: 16px; height: 16px; background: #10b981; border-radius: 4px;"></div>
+                            <span style="font-size: 0.85rem; color: #64748b;">Occupied</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <div style="width: 16px; height: 16px; background: #e5e7eb; border-radius: 4px;"></div>
+                            <span style="font-size: 0.85rem; color: #64748b;">Available</span>
+                        </div>
+                    </div>
+                </div>
+                <div style="position: relative; height: 350px;">
+                    <canvas id="utilizationChart"></canvas>
+                </div>
+                <div id="dailyStats" style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #e5e7eb;">
+                    <!-- Daily statistics will be populated here -->
+                </div>
+            </div>
+
+            <!-- Filter Section -->
+            <div class="filter-section">
+                <div class="search-bar">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="searchInput" placeholder="Search room code or name (e.g., N28-105)..." />
+                    <div class="search-clear" id="clearSearch" style="display: none;">✕</div>
+                </div>
+
+                <div class="filter-chips">
+                    <div class="filter-group">
+                        <label class="filter-label">Type:</label>
+                        <label class="chip-checkbox">
+                            <input type="checkbox" class="filter-type" value="lecture" checked>
+                            <span class="chip">📖 Lecture</span>
+                        </label>
+                        <label class="chip-checkbox">
+                            <input type="checkbox" class="filter-type" value="lab" checked>
+                            <span class="chip">💻 Lab</span>
+                        </label>
                     </div>
                     
-                    <div class="w3-panel w3-border w3-round w3-small">
-                        <p><strong>Student Consultation - N28-201</strong></p>
-                        <p>Wed, 14:00-15:00</p>
-                        <p><span class="w3-tag w3-yellow">PENDING</span></p>
+                    <div class="filter-group">
+                        <label class="filter-label">Status:</label>
+                        <label class="chip-checkbox">
+                            <input type="checkbox" class="filter-status" value="available" checked>
+                            <span class="chip chip-success">✓ Available</span>
+                        </label>
+                        <label class="chip-checkbox">
+                            <input type="checkbox" class="filter-status" value="occupied" checked>
+                            <span class="chip chip-danger">⊗ Occupied</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Room Grid -->
+            <div class="rooms-section">
+                <div class="section-header">
+                    <h3>📋 Room Status</h3>
+                    <div class="refresh-info">
+                        <span class="pulse-dot"></span>
+                        <span>Live • Updates every 30min</span>
+                    </div>
+                </div>
+
+                <div id="roomAvailabilityContent" class="rooms-grid">
+                    <div class="loading-state">
+                        <div class="spinner-large"></div>
+                        <p>Loading room availability...</p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<script src="../JS/Authenticate.js"></script>
-<script>
-    function searchAvailableRooms() {
-        const day = $("#searchDay").val();
-        const time = $("#searchTime").val();
-        const type = $("#searchType").val();
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+    (function() {
+        // ==========================================
+        // CONSTANTS & CONFIGURATIONS
+        // ==========================================
+        const BASE_URL = "http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=";
         
-        // Show loading
-        $("#roomResults").html(`
-            <div class="w3-center w3-padding-24">
-                <div class="loading-spinner"></div>
-                <p>Searching for available rooms...</p>
-            </div>
-        `);
+        // Get session info from localStorage
+        const userSession = JSON.parse(localStorage.getItem("TTMSFC_userSession"));
+        const sessionId = userSession ? userSession.session_id : null;
         
-        // Simulate API call
-        setTimeout(() => {
-            const sampleRooms = [
-                { code: "MPK5", name: "Makmal Pengaturcaraan 05", type: "LAB", capacity: 40, status: "AVAILABLE" },
-                { code: "BK4", name: "Bilik Kuliah 04", type: "LECTURE", capacity: 80, status: "AVAILABLE" },
-                { code: "N28-201", name: "Meeting Room 201", type: "MEETING", capacity: 20, status: "AVAILABLE" },
-                { code: "MPK3", name: "Makmal Pengaturcaraan 03", type: "LAB", capacity: 40, status: "OCCUPIED" },
-                { code: "BK3", name: "Bilik Kuliah 03", type: "LECTURE", capacity: 60, status: "AVAILABLE" }
-            ];
+        const DAY_CODE_MAP = {
+            0: null,    // Sunday
+            1: 2,       // Monday → API code 2
+            2: 3,       // Tuesday → API code 3
+            3: 4,       // Wednesday → API code 4
+            4: 5,       // Thursday → API code 5
+            5: 6,       // Friday → API code 6
+            6: null     // Saturday
+        };
+
+        const TIME_SLOTS = {
+            1: { start: "07:00", end: "08:00" },
+            2: { start: "08:00", end: "09:00" },
+            3: { start: "09:00", end: "10:00" },
+            4: { start: "10:00", end: "11:00" },
+            5: { start: "11:00", end: "12:00" },
+            6: { start: "12:00", end: "13:00" },
+            7: { start: "13:00", end: "14:00" },
+            8: { start: "14:00", end: "15:00" },
+            9: { start: "15:00", end: "16:00" },
+            10: { start: "16:00", end: "17:00" }
+        };
+
+        // Get session/semester from parent or localStorage
+        let currentSesi = window.parent.currentSesi || "2025/2026";
+        let currentSemester = window.parent.currentSemester || "1";
+
+        console.log("📋 Room Availability Session Info:", {
+            sesi: currentSesi,
+            semester: currentSemester,
+            sessionId: sessionId
+        });
+
+        // ==========================================
+        // CACHE VARIABLES
+        // ==========================================
+        let cachedRooms = [];
+        let allRoomSchedules = {}; // Store all schedules organized by room
+        let updateInterval = null;
+        let utilizationChart = null;
+
+        // ==========================================
+        // UPDATE REAL-TIME CLOCK
+        // ==========================================
+        function updateClock() {
+            const now = new Date();
             
-            // Filter by type if specified
-            let filteredRooms = sampleRooms;
-            if (type) {
-                filteredRooms = sampleRooms.filter(room => room.type === type);
+            const timeString = now.toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false 
+            });
+            $('#currentTime').text(timeString);
+            
+            const dateString = now.toLocaleDateString('en-US', { 
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            $('#currentDate').text(dateString);
+        }
+
+        updateClock();
+        setInterval(updateClock, 1000);
+
+        // ==========================================
+        // GET CURRENT TIME INFO
+        // ==========================================
+        function getCurrentTimeInfo() {
+            const now = new Date();
+            const currentDay = now.getDay();
+            const currentHour = now.getHours();
+            const currentMinute = now.getMinutes();
+            const currentTimeInMinutes = currentHour * 60 + currentMinute;
+            const apiDayCode = DAY_CODE_MAP[currentDay];
+
+            return { currentDay, currentHour, currentMinute, currentTimeInMinutes, apiDayCode, now };
+        }
+
+        // ==========================================
+        // FETCH ALL ROOMS
+        // ==========================================
+        async function fetchAllRooms() {
+            try {
+                let url = `${BASE_URL}ruang`;
+                if (sessionId) {
+                    url += `&session_id=${sessionId}`;
+                }
+                
+                const response = await fetch(url);
+                const rooms = await response.json();
+                
+                if (!Array.isArray(rooms)) return [];
+                
+                // Filter only N28 and N28A rooms
+                return rooms.filter(room => {
+                    const kodRuang = room.kod_ruang || '';
+                    return kodRuang.startsWith('N28') || kodRuang.startsWith('N28A');
+                });
+            } catch (err) {
+                console.error("Error fetching rooms:", err);
+                return [];
             }
-            
-            let resultsHTML = '';
-            
-            if (filteredRooms.length === 0) {
-                resultsHTML = `
-                    <div class="w3-panel w3-yellow">
-                        <p>No rooms found matching your criteria.</p>
-                    </div>
-                `;
+        }
+
+        // ==========================================
+        // FETCH ALL SUBJECT SCHEDULES AND ORGANIZE BY ROOM
+        // ==========================================
+        async function fetchAllSubjectSchedules() {
+            try {
+                // Fetch all subject sections for current session/semester
+                let sectionsUrl = `${BASE_URL}subjek_seksyen&sesi=${currentSesi}&semester=${currentSemester}`;
+                if (sessionId) {
+                    sectionsUrl += `&session_id=${sessionId}`;
+                }
+                
+                const sectionsResponse = await fetch(sectionsUrl);
+                const allSubjects = await sectionsResponse.json();
+
+                if (!Array.isArray(allSubjects)) return {};
+
+                console.log(`📚 Found ${allSubjects.length} subjects`);
+
+                const roomScheduleMap = {}; // { roomCode: { dayCode: [schedule entries with full details] } }
+                const fetchPromises = [];
+
+                // Get all valid sections with lecturers and students
+                const validSubjects = allSubjects.filter(subj => 
+                    subj.seksyen_list && Array.isArray(subj.seksyen_list) && subj.seksyen_list.length > 0
+                );
+
+                console.log(`✅ Processing ${validSubjects.length} subjects with sections`);
+
+                validSubjects.forEach(subj => {
+                    subj.seksyen_list.forEach(sec => {
+                        // Only process sections with lecturers and students
+                        if ((sec.pensyarah || '').trim() && (sec.bil_pelajar || 0) > 0) {
+                            fetchPromises.push((async () => {
+                                try {
+                                    let scheduleUrl = `${BASE_URL}jadual_subjek&sesi=${encodeURIComponent(currentSesi)}&semester=${encodeURIComponent(currentSemester)}&kod_subjek=${encodeURIComponent(subj.kod_subjek)}&seksyen=${encodeURIComponent(sec.seksyen)}`;
+                                    if (sessionId) {
+                                        scheduleUrl += `&session_id=${sessionId}`;
+                                    }
+                                    
+                                    const res = await fetch(scheduleUrl);
+                                    const scheduleData = await res.json();
+
+                                    if (Array.isArray(scheduleData)) {
+                                        scheduleData.forEach(entry => {
+                                            if (entry.ruang && entry.hari && entry.masa) {
+                                                const roomCode = entry.ruang.kod_ruang;
+                                                const dayCode = entry.hari;
+                                                const timeSlot = entry.masa;
+
+                                                // Initialize structure if needed
+                                                if (!roomScheduleMap[roomCode]) {
+                                                    roomScheduleMap[roomCode] = {};
+                                                }
+                                                if (!roomScheduleMap[roomCode][dayCode]) {
+                                                    roomScheduleMap[roomCode][dayCode] = [];
+                                                }
+
+                                                // Add schedule entry with full details
+                                                roomScheduleMap[roomCode][dayCode].push({
+                                                    masa: timeSlot,
+                                                    subjek: entry.subjek ? entry.subjek.kod_subjek : subj.kod_subjek,
+                                                    subjekNama: entry.subjek ? entry.subjek.nama_subjek : subj.nama_subjek,
+                                                    seksyen: entry.seksyen || sec.seksyen,
+                                                    pensyarah: sec.pensyarah || 'N/A',
+                                                    bilPelajar: sec.bil_pelajar || 0
+                                                });
+                                            }
+                                        });
+                                    }
+                                } catch (err) {
+                                    console.error(`Error fetching schedule for ${subj.kod_subjek}-${sec.seksyen}:`, err);
+                                }
+                            })());
+                        }
+                    });
+                });
+
+                await Promise.all(fetchPromises);
+
+                // Sort time slots for each room/day
+                Object.keys(roomScheduleMap).forEach(roomCode => {
+                    Object.keys(roomScheduleMap[roomCode]).forEach(dayCode => {
+                        roomScheduleMap[roomCode][dayCode].sort((a, b) => a.masa - b.masa);
+                    });
+                });
+
+                console.log(`📊 Processed schedules for ${Object.keys(roomScheduleMap).length} rooms`);
+                return roomScheduleMap;
+            } catch (err) {
+                console.error("Error fetching subject schedules:", err);
+                return {};
+            }
+        }
+
+        // ==========================================
+        // ANALYZE ROOM FOR THE DAY
+        // ==========================================
+        function analyzeRoomSchedule(roomCode, currentTimeInfo) {
+            const { apiDayCode, currentTimeInMinutes } = currentTimeInfo;
+
+            // Weekend check
+            if (!apiDayCode) {
+                return { 
+                    status: 'available', 
+                    reason: 'Weekend - No classes',
+                    todayClasses: [],
+                    currentClass: null,
+                    nextClass: null
+                };
+            }
+
+            // Get today's schedule for this room
+            const roomData = allRoomSchedules[roomCode];
+            if (!roomData || !roomData[apiDayCode]) {
+                return { 
+                    status: 'available', 
+                    reason: 'No classes scheduled today',
+                    todayClasses: [],
+                    currentClass: null,
+                    nextClass: null
+                };
+            }
+
+            const todaySchedule = roomData[apiDayCode];
+
+            // Build today's classes list
+            const todayClasses = todaySchedule.map(entry => {
+                const timeSlot = TIME_SLOTS[entry.masa];
+                return {
+                    time: timeSlot ? `${timeSlot.start} - ${timeSlot.end}` : 'Unknown',
+                    subject: entry.subjek,
+                    subjectName: entry.subjekNama,
+                    section: entry.seksyen,
+                    lecturer: entry.pensyarah,
+                    enrolled: entry.bilPelajar,
+                    masa: entry.masa,
+                    timeSlot: timeSlot
+                };
+            });
+
+            // Find current class
+            let currentClass = null;
+            for (let entry of todaySchedule) {
+                const timeSlot = TIME_SLOTS[entry.masa];
+                if (!timeSlot) continue;
+
+                const [startHour, startMin] = timeSlot.start.split(':').map(Number);
+                const [endHour, endMin] = timeSlot.end.split(':').map(Number);
+                const startTime = startHour * 60 + startMin;
+                const endTime = endHour * 60 + endMin;
+
+                if (currentTimeInMinutes >= startTime && currentTimeInMinutes < endTime) {
+                    const minutesLeft = endTime - currentTimeInMinutes;
+                    currentClass = {
+                        subject: entry.subjek,
+                        subjectName: entry.subjekNama,
+                        section: entry.seksyen,
+                        lecturer: entry.pensyarah,
+                        enrolled: entry.bilPelajar,
+                        time: `${timeSlot.start} - ${timeSlot.end}`,
+                        endTime: timeSlot.end,
+                        minutesLeft: minutesLeft
+                    };
+                    break;
+                }
+            }
+
+            // Find next class
+            let nextClass = null;
+            for (let entry of todaySchedule) {
+                const timeSlot = TIME_SLOTS[entry.masa];
+                if (!timeSlot) continue;
+
+                const [startHour, startMin] = timeSlot.start.split(':').map(Number);
+                const startTime = startHour * 60 + startMin;
+
+                if (currentTimeInMinutes < startTime) {
+                    const minutesUntil = startTime - currentTimeInMinutes;
+                    nextClass = {
+                        subject: entry.subjek,
+                        subjectName: entry.subjekNama,
+                        section: entry.seksyen,
+                        lecturer: entry.pensyarah,
+                        time: timeSlot.start,
+                        minutesUntil: minutesUntil
+                    };
+                    break;
+                }
+            }
+
+            // Determine status
+            if (currentClass) {
+                return {
+                    status: 'occupied',
+                    reason: 'Class in session',
+                    todayClasses: todayClasses,
+                    currentClass: currentClass,
+                    nextClass: nextClass
+                };
+            } else if (nextClass) {
+                return {
+                    status: 'available',
+                    reason: 'Available now',
+                    todayClasses: todayClasses,
+                    currentClass: null,
+                    nextClass: nextClass
+                };
             } else {
-                filteredRooms.forEach(room => {
-                    const statusClass = room.status === "AVAILABLE" ? "w3-green" : "w3-red";
-                    const statusText = room.status === "AVAILABLE" ? "Available" : "Occupied";
-                    
-                    resultsHTML += `
-                        <div class="w3-panel w3-border w3-round-large w3-margin-bottom">
-                            <div class="w3-row">
-                                <div class="w3-col m8">
-                                    <h5><strong>${room.code}</strong> - ${room.name}</h5>
-                                    <p>Type: ${room.type} | Capacity: ${room.capacity} students</p>
-                                </div>
-                                <div class="w3-col m4 w3-right-align">
-                                    <span class="w3-tag ${statusClass}">${statusText}</span><br>
-                                    <button class="w3-button w3-blue w3-small w3-margin-top" onclick="selectRoom('${room.code}')">
-                                        Select
-                                    </button>
-                                </div>
+                return {
+                    status: 'available',
+                    reason: 'Available for rest of day',
+                    todayClasses: todayClasses,
+                    currentClass: null,
+                    nextClass: null
+                };
+            }
+        }
+
+        // ==========================================
+        // ANALYZE FULL DAY SCHEDULE FOR ALL ROOMS
+        // ==========================================
+        function analyzeDailySchedule(rooms, currentTimeInfo) {
+            const { apiDayCode } = currentTimeInfo;
+            
+            // Initialize hourly occupancy data (time slots 1-10)
+            const hourlyData = {};
+            for (let hour = 1; hour <= 10; hour++) {
+                hourlyData[hour] = { occupied: 0, available: 0 };
+            }
+
+            if (!apiDayCode) {
+                // Weekend - all rooms available all day
+                rooms.forEach(() => {
+                    for (let hour = 1; hour <= 10; hour++) {
+                        hourlyData[hour].available++;
+                    }
+                });
+                return hourlyData;
+            }
+
+            // Analyze each room for each time slot
+            rooms.forEach(room => {
+                const roomCode = room.kod_ruang || '';
+                const roomData = allRoomSchedules[roomCode];
+
+                // Check each hour
+                for (let hour = 1; hour <= 10; hour++) {
+                    let isOccupied = false;
+
+                    if (roomData && roomData[apiDayCode]) {
+                        // Check if this time slot is occupied
+                        isOccupied = roomData[apiDayCode].some(entry => entry.masa === hour);
+                    }
+
+                    if (isOccupied) {
+                        hourlyData[hour].occupied++;
+                    } else {
+                        hourlyData[hour].available++;
+                    }
+                }
+            });
+
+            return hourlyData;
+        }
+
+        // ==========================================
+        // RENDER UTILIZATION CHART
+        // ==========================================
+        function renderUtilizationChart(hourlyData, currentTimeInfo) {
+            const labels = [];
+            const occupiedData = [];
+            const availableData = [];
+            
+            for (let hour = 1; hour <= 10; hour++) {
+                const timeSlot = TIME_SLOTS[hour];
+                labels.push(timeSlot ? timeSlot.start : `${hour + 6}:00`);
+                occupiedData.push(hourlyData[hour].occupied);
+                availableData.push(hourlyData[hour].available);
+            }
+
+            // Destroy previous chart
+            if (utilizationChart) {
+                utilizationChart.destroy();
+            }
+
+            const ctx = document.getElementById('utilizationChart').getContext('2d');
+            utilizationChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Occupied Rooms',
+                            data: occupiedData,
+                            backgroundColor: '#10b981',
+                            borderColor: '#059669',
+                            borderWidth: 2,
+                            borderRadius: 8,
+                            borderSkipped: false,
+                        },
+                        {
+                            label: 'Available Rooms',
+                            data: availableData,
+                            backgroundColor: '#e5e7eb',
+                            borderColor: '#d1d5db',
+                            borderWidth: 2,
+                            borderRadius: 8,
+                            borderSkipped: false,
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                            titleFont: { size: 14, weight: 'bold' },
+                            bodyFont: { size: 13 },
+                            padding: 12,
+                            cornerRadius: 8,
+                            callbacks: {
+                                title: function(context) {
+                                    return `Time: ${context[0].label}`;
+                                },
+                                label: function(context) {
+                                    const total = occupiedData[context.dataIndex] + availableData[context.dataIndex];
+                                    const percentage = total > 0 ? ((context.parsed.y / total) * 100).toFixed(1) : 0;
+                                    return `${context.dataset.label}: ${context.parsed.y} rooms (${percentage}%)`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            stacked: true,
+                            grid: { display: false },
+                            ticks: {
+                                font: { size: 11, weight: '500' },
+                                color: '#64748b'
+                            }
+                        },
+                        y: {
+                            stacked: true,
+                            beginAtZero: true,
+                            grid: {
+                                color: '#f1f5f9',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                font: { size: 11, weight: '500' },
+                                color: '#64748b',
+                                stepSize: 5
+                            },
+                            title: {
+                                display: true,
+                                text: 'Number of Rooms',
+                                font: { size: 12, weight: '600' },
+                                color: '#475569'
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeInOutQuart'
+                    }
+                }
+            });
+
+            // Calculate and display daily statistics
+            let totalOccupancy = 0;
+            let peakHour = 1;
+            let peakOccupancy = 0;
+            let quietHour = 1;
+            let quietOccupancy = Infinity;
+
+            for (let hour = 1; hour <= 10; hour++) {
+                const occupied = hourlyData[hour].occupied;
+                totalOccupancy += occupied;
+                
+                if (occupied > peakOccupancy) {
+                    peakOccupancy = occupied;
+                    peakHour = hour;
+                }
+                
+                if (occupied < quietOccupancy) {
+                    quietOccupancy = occupied;
+                    quietHour = hour;
+                }
+            }
+
+            const avgOccupancy = (totalOccupancy / 10).toFixed(1);
+            const totalRooms = cachedRooms.length;
+            const avgUtilization = totalRooms > 0 ? ((avgOccupancy / totalRooms) * 100).toFixed(1) : 0;
+
+            const peakTimeSlot = TIME_SLOTS[peakHour];
+            const quietTimeSlot = TIME_SLOTS[quietHour];
+
+            $('#dailyStats').html(`
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                    <div style="padding: 1rem; background: #f8fafc; border-radius: 12px; border-left: 4px solid #10b981;">
+                        <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase; font-weight: 600; margin-bottom: 0.5rem;">Peak Hour</div>
+                        <div style="font-size: 1.5rem; font-weight: 700; color: #1e293b;">${peakTimeSlot ? peakTimeSlot.start : '--'}</div>
+                        <div style="font-size: 0.85rem; color: #64748b; margin-top: 0.25rem;">${peakOccupancy} rooms occupied</div>
+                    </div>
+                    <div style="padding: 1rem; background: #f8fafc; border-radius: 12px; border-left: 4px solid #3b82f6;">
+                        <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase; font-weight: 600; margin-bottom: 0.5rem;">Quietest Hour</div>
+                        <div style="font-size: 1.5rem; font-weight: 700; color: #1e293b;">${quietTimeSlot ? quietTimeSlot.start : '--'}</div>
+                        <div style="font-size: 0.85rem; color: #64748b; margin-top: 0.25rem;">${quietOccupancy} rooms occupied</div>
+                    </div>
+                    <div style="padding: 1rem; background: #f8fafc; border-radius: 12px; border-left: 4px solid #8b5cf6;">
+                        <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase; font-weight: 600; margin-bottom: 0.5rem;">Avg Occupancy</div>
+                        <div style="font-size: 1.5rem; font-weight: 700; color: #1e293b;">${avgOccupancy}</div>
+                        <div style="font-size: 0.85rem; color: #64748b; margin-top: 0.25rem;">rooms per hour</div>
+                    </div>
+                    <div style="padding: 1rem; background: #f8fafc; border-radius: 12px; border-left: 4px solid #f59e0b;">
+                        <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase; font-weight: 600; margin-bottom: 0.5rem;">Avg Utilization</div>
+                        <div style="font-size: 1.5rem; font-weight: 700; color: #1e293b;">${avgUtilization}%</div>
+                        <div style="font-size: 0.85rem; color: #64748b; margin-top: 0.25rem;">throughout the day</div>
+                    </div>
+                </div>
+            `);
+        }
+
+        // ==========================================
+        // DETERMINE ROOM TYPE
+        // ==========================================
+        function getRoomType(roomName) {
+            const name = (roomName || '').toLowerCase();
+            if (name.includes('lab') || name.includes('makmal')) {
+                return { type: 'lab', label: 'Lab', icon: '💻' };
+            }
+            return { type: 'lecture', label: 'Lecture', icon: '📖' };
+        }
+
+        // ==========================================
+        // UPDATE STATISTICS
+        // ==========================================
+        function updateStatistics(rooms, currentTimeInfo) {
+            let availableCount = 0;
+            let occupiedCount = 0;
+
+            rooms.forEach(room => {
+                const analysis = analyzeRoomSchedule(room.kod_ruang || '', currentTimeInfo);
+                if (analysis.status === 'available') {
+                    availableCount++;
+                } else {
+                    occupiedCount++;
+                }
+            });
+
+            const total = rooms.length;
+            const utilizationRate = total > 0 ? Math.round((occupiedCount / total) * 100) : 0;
+
+            $('#availableCount').text(availableCount).addClass('count-up');
+            $('#occupiedCount').text(occupiedCount).addClass('count-up');
+            $('#totalRooms').text(total).addClass('count-up');
+            $('#utilizationRate').text(utilizationRate + '%').addClass('count-up');
+        }
+
+        // ==========================================
+        // RENDER ROOMS
+        // ==========================================
+        function renderRooms(rooms, currentTimeInfo) {
+            if (rooms.length === 0) {
+                $('#roomAvailabilityContent').html(`
+                    <div class="error-state">
+                        <div class="error-icon">⚠️</div>
+                        <h3>No Rooms Found</h3>
+                        <p>No N28/N28A rooms found in the system.</p>
+                    </div>
+                `);
+                return;
+            }
+
+            // Get filter values
+            const searchTerm = $('#searchInput').val().toLowerCase().trim();
+            const selectedTypes = $('.filter-type:checked').map(function() { return $(this).val(); }).get();
+            const selectedStatuses = $('.filter-status:checked').map(function() { return $(this).val(); }).get();
+
+            // Filter rooms
+            let filteredRooms = rooms.filter(room => {
+                const roomCode = (room.kod_ruang || '').toLowerCase();
+                const roomName = (room.nama_ruang || room.nama_ruang_singkatan || '').toLowerCase();
+                const roomTypeInfo = getRoomType(room.nama_ruang || room.nama_ruang_singkatan);
+                const analysis = analyzeRoomSchedule(room.kod_ruang || '', currentTimeInfo);
+
+                // Search match
+                const matchesSearch = searchTerm === '' ||
+                    roomCode.includes(searchTerm) ||
+                    roomName.includes(searchTerm);
+
+                // Type match - if no types selected, show all
+                const matchesType = selectedTypes.length === 0 || selectedTypes.includes(roomTypeInfo.type);
+
+                // Status match - if no statuses selected, show all
+                const matchesStatus = selectedStatuses.length === 0 || selectedStatuses.includes(analysis.status);
+
+                return matchesSearch && matchesType && matchesStatus;
+            });
+
+            // Sort by room code
+            filteredRooms.sort((a, b) => (a.kod_ruang || '').localeCompare(b.kod_ruang || ''));
+
+            // Update stats based on ALL rooms, not just filtered ones
+            updateStatistics(rooms, currentTimeInfo);
+
+            // Render room cards
+            if (filteredRooms.length === 0) {
+                $('#roomAvailabilityContent').html(`
+                    <div class="no-results">
+                        <div class="no-results-icon">🔍</div>
+                        <h3>No Rooms Match Your Filters</h3>
+                        <p>Try adjusting your search or filter criteria.</p>
+                        <button onclick="resetFilters()" style="margin-top: 1rem; padding: 0.5rem 1rem; background: #10b981; color: white; border: none; border-radius: 8px; cursor: pointer;">Reset Filters</button>
+                    </div>
+                `);
+                return;
+            }
+
+            let html = '';
+            filteredRooms.forEach(room => {
+                const roomCode = room.kod_ruang || 'N/A';
+                const roomName = room.nama_ruang || room.nama_ruang_singkatan || 'Unknown';
+                const capacity = room.kapasiti || 'N/A';
+                const roomTypeInfo = getRoomType(roomName);
+                const analysis = analyzeRoomSchedule(roomCode, currentTimeInfo);
+
+                const statusClass = analysis.status === 'available' ? 'room-card-available' : 'room-card-occupied';
+
+                html += `
+                    <div class="room-card ${statusClass}">
+                        <div class="room-header">
+                            <div class="room-title">
+                                <div class="room-code">${roomCode}</div>
+                                <div class="room-name">${roomName}</div>
+                            </div>
+                            <div class="room-status-badge ${analysis.status}">
+                                ${analysis.status === 'available' ? '✓' : '⊗'}
                             </div>
                         </div>
-                    `;
-                });
+
+                        <div class="room-meta">
+                            <span class="room-type-badge ${roomTypeInfo.type}">
+                                ${roomTypeInfo.icon} ${roomTypeInfo.label}
+                            </span>
+                            <span class="room-capacity">👥 ${capacity}</span>
+                        </div>
+
+                        <div class="room-status">
+                            ${analysis.currentClass ? `
+                                <div class="current-class">
+                                    <strong>📚 ${analysis.currentClass.subject}</strong>
+                                    <div class="class-detail">${analysis.currentClass.subjectName}</div>
+                                    <div class="class-time">Until ${analysis.currentClass.endTime} (${analysis.currentClass.minutesLeft}m left)</div>
+                                    <div class="class-section">Section: ${analysis.currentClass.section}</div>
+                                    <div class="class-lecturer">👨‍🏫 ${analysis.currentClass.lecturer}</div>
+                                    <div class="class-enrolled">👥 ${analysis.currentClass.enrolled} students</div>
+                                </div>
+                            ` : analysis.nextClass ? `
+                                <div class="next-class">
+                                    <strong>Available Now</strong>
+                                    <div class="next-class-info">
+                                        Next: ${analysis.nextClass.subject} at ${analysis.nextClass.time}
+                                    </div>
+                                    <div class="time-until">In ${analysis.nextClass.minutesUntil} minutes</div>
+                                    <div class="next-lecturer">👨‍🏫 ${analysis.nextClass.lecturer}</div>
+                                </div>
+                            ` : `
+                                <div class="all-clear">
+                                    <strong>${analysis.reason}</strong>
+                                </div>
+                            `}
+                        </div>
+
+                        ${analysis.todayClasses.length > 0 ? `
+                            <div class="today-schedule">
+                                <div class="schedule-header">Today's Schedule:</div>
+                                <div class="schedule-list">
+                                    ${analysis.todayClasses.map(cls => `
+                                        <div class="schedule-item">
+                                            <span class="schedule-time">${cls.time}</span>
+                                            <span class="schedule-subject">${cls.subject}</span>
+                                            <span class="schedule-lecturer" style="font-size: 0.85em; color: #64748b;">👨‍🏫 ${cls.lecturer}</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
+
+            $('#roomAvailabilityContent').html(html);
+        }
+
+        // ==========================================
+        // MAIN INITIALIZATION
+        // ==========================================
+        async function initRoomAvailability() {
+            try {
+                console.log('🚀 Starting initialization...');
+                
+                // Fetch rooms and all subject schedules
+                const [rooms, scheduleMap] = await Promise.all([
+                    fetchAllRooms(),
+                    fetchAllSubjectSchedules()
+                ]);
+
+                console.log(`✅ Loaded ${rooms.length} rooms`);
+                console.log(`✅ Loaded schedules for ${Object.keys(scheduleMap).length} rooms`);
+
+                cachedRooms = rooms;
+                allRoomSchedules = scheduleMap;
+
+                const currentTimeInfo = getCurrentTimeInfo();
+                
+                // Analyze and render chart
+                const hourlyData = analyzeDailySchedule(rooms, currentTimeInfo);
+                renderUtilizationChart(hourlyData, currentTimeInfo);
+                
+                // Render rooms
+                renderRooms(rooms, currentTimeInfo);
+
+                // Update every 30 minutes (1800000 milliseconds)
+                if (updateInterval) clearInterval(updateInterval);
+                updateInterval = setInterval(() => {
+                    const updatedTimeInfo = getCurrentTimeInfo();
+                    const updatedHourlyData = analyzeDailySchedule(cachedRooms, updatedTimeInfo);
+                    renderUtilizationChart(updatedHourlyData, updatedTimeInfo);
+                    renderRooms(cachedRooms, updatedTimeInfo);
+                }, 1800000);
+
+            } catch (err) {
+                console.error("Error initializing:", err);
+                $('#roomAvailabilityContent').html(`
+                    <div class="error-state">
+                        <div class="error-icon">❌</div>
+                        <h3>Error Loading Data</h3>
+                        <p>Failed to load room data. Please refresh the page.</p>
+                        <p style="color: #64748b; font-size: 0.9rem; margin-top: 0.5rem;">${err.message}</p>
+                    </div>
+                `);
             }
+        }
+
+        // ==========================================
+        // EVENT LISTENERS
+        // ==========================================
+        $(document).ready(function() {
+            // Search input
+            $('#searchInput').on('input', function() {
+                $('#clearSearch').toggle($(this).val().length > 0);
+                const currentTimeInfo = getCurrentTimeInfo();
+                renderRooms(cachedRooms, currentTimeInfo);
+            });
+
+            // Clear search
+            $('#clearSearch').on('click', function() {
+                $('#searchInput').val('');
+                $(this).hide();
+                const currentTimeInfo = getCurrentTimeInfo();
+                renderRooms(cachedRooms, currentTimeInfo);
+            });
+
+            // Filter checkboxes
+            $('.filter-type, .filter-status').on('change', function() {
+                const currentTimeInfo = getCurrentTimeInfo();
+                renderRooms(cachedRooms, currentTimeInfo);
+            });
+
+            // Initialize
+            setTimeout(initRoomAvailability, 10);
+        });
+
+        // ==========================================
+        // RESET FILTERS FUNCTION
+        // ==========================================
+        window.resetFilters = function() {
+            // Clear search
+            $('#searchInput').val('');
+            $('#clearSearch').hide();
             
-            $("#roomResults").html(resultsHTML);
-        }, 1000);
-    }
-
-    function selectRoom(roomCode) {
-        // Auto-fill booking form with selected room
-        $("#bookingCourse").focus();
-        alert(`Room ${roomCode} selected. Please complete the booking form.`);
-        
-        // In a real system, you would store the selected room
-        sessionStorage.setItem('selectedRoom', roomCode);
-    }
-
-    function submitBookingRequest() {
-        const course = $("#bookingCourse").val();
-        const purpose = $("#bookingPurpose").val();
-        const date = $("#bookingDate").val();
-        const startTime = $("#bookingStart").val();
-        const endTime = $("#bookingEnd").val();
-        const notes = $("#bookingNotes").val();
-        
-        if (!course) {
-            alert("Please select a course");
-            return;
-        }
-        
-        if (!date || !startTime || !endTime) {
-            alert("Please provide date and time");
-            return;
-        }
-        
-        const bookingDetails = {
-            course,
-            purpose,
-            date,
-            startTime,
-            endTime,
-            notes,
-            timestamp: new Date().toISOString()
+            // Check all filter checkboxes
+            $('.filter-type, .filter-status').prop('checked', true);
+            
+            // Re-render
+            const currentTimeInfo = getCurrentTimeInfo();
+            renderRooms(cachedRooms, currentTimeInfo);
         };
-        
-        // In a real system, send to backend
-        console.log("Booking request:", bookingDetails);
-        
-        alert(`✅ Booking request submitted for ${course} on ${date} (${startTime}-${endTime})\n\nStatus: Pending approval from Academic Office.`);
-        
-        // Clear form
-        $("#bookingCourse").val("");
-        $("#bookingNotes").val("");
-        
-        // Add to "My Bookings"
-        const newBooking = `
-            <div class="w3-panel w3-border w3-round w3-small">
-                <p><strong>${course} - Room TBD</strong></p>
-                <p>${date}, ${startTime}-${endTime}</p>
-                <p><span class="w3-tag w3-yellow">PENDING</span></p>
-            </div>
-        `;
-        
-        $("#myBookings").prepend(newBooking);
-    }
 
-    // Load initial data
-    $(document).ready(function() {
-        // Set default search to current day/time
-        const now = new Date();
-        const currentDay = now.getDay();
-        
-        // Map to TTMS day codes (Monday=2)
-        if (currentDay >= 1 && currentDay <= 5) {
-            $("#searchDay").val(currentDay + 1);
-        }
-        
-        // Set default time to next hour
-        const currentHour = now.getHours();
-        let defaultTimeSlot = 1;
-        
-        if (currentHour >= 8 && currentHour < 17) {
-            defaultTimeSlot = currentHour - 7;
-        }
-        
-        if (defaultTimeSlot >= 1 && defaultTimeSlot <= 10) {
-            $("#searchTime").val(defaultTimeSlot);
-        }
-    });
-</script>
+    })();
+    </script>
+</body>
+</html>

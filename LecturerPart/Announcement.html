@@ -1,323 +1,628 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Lecturer Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="Styles/dashboardStyle.css">
+    <script src="../JS/Authenticate.js"></script>
+</head>
+<body class="w3-container">
+
 <div class="dashboard-container">
     <!-- Welcome Header -->
-    <div class="welcome-header" style="background: linear-gradient(135deg, #3f51b5 0%, #673ab7 100%);">
-        <h2>👨‍🏫 Welcome to Your Teaching Dashboard</h2>
+    <div class="welcome-header">
+        <h2>🎉 Welcome to Your Lecturer Dashboard</h2>
         <p class="welcome-subtitle" id="currentDateTime">Loading...</p>
     </div>
 
-    <!-- Quick Stats -->
-    <div class="dashboard-grid">
-        <!-- Teaching Load Card -->
-        <div class="lecturer-card">
-            <div class="card-header">
-                <span class="card-icon" style="color: #3f51b5;">📚</span>
-                <h3 class="card-title">Teaching Load</h3>
-            </div>
-            <div class="stats-grid">
-                <div class="stat-item">
-                    <h2 class="stat-value" id="coursesCount">0</h2>
-                    <p class="stat-label">Courses</p>
-                </div>
-                <div class="stat-item">
-                    <h2 class="stat-value" id="sectionsCount">0</h2>
-                    <p class="stat-label">Sections</p>
-                </div>
-                <div class="stat-item">
-                    <h2 class="stat-value" id="weeklyHours">0</h2>
-                    <p class="stat-label">Weekly Hours</p>
-                </div>
-                <div class="stat-item">
-                    <h2 class="stat-value" id="studentsCount">0</h2>
-                    <p class="stat-label">Students</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Upcoming Classes -->
-        <div class="lecturer-card">
-            <div class="card-header">
-                <span class="card-icon" style="color: #2196f3;">⏰</span>
-                <h3 class="card-title">Today's Schedule</h3>
-            </div>
-            <div id="todaysClasses">
-                <div class="loading" style="text-align:center; padding:20px;">
-                    <div class="loading-spinner"></div>
-                    <p>Loading today's schedule...</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Quick Actions -->
-        <div class="lecturer-card">
-            <div class="card-header">
-                <span class="card-icon" style="color: #673ab7;">⚡</span>
-                <h3 class="card-title">Quick Actions</h3>
-            </div>
-            <div class="w3-padding">
-                <button class="w3-button w3-blue w3-block w3-margin-bottom" onclick="loadContent('LecturerPart/Attendance.html')">
-                    ✅ Take Attendance
-                </button>
-                <button class="w3-button w3-purple w3-block w3-margin-bottom" onclick="loadContent('LecturerPart/Grades.html')">
-                    📝 Record Grades
-                </button>
-                <button class="w3-button w3-green w3-block w3-margin-bottom" onclick="loadContent('LecturerPart/RoomAvailability.html')">
-                    🏫 Book Room
-                </button>
-                <button class="w3-button w3-orange w3-block" onclick="loadContent('LecturerPart/TimetableClash/timetableClashLect.html')">
-                    ⚠️ Check Clashes
-                </button>
-            </div>
-        </div>
+    <!-- Loading State -->
+    <div class="loading-state" id="loadingState">
+        <div class="loading-spinner"></div>
+        <p class="loading-text">Loading your dashboard...</p>
     </div>
 
-    <!-- Notifications Section -->
-    <div class="classes-section">
-        <div class="section-header" style="background: linear-gradient(135deg, #2196f3 0%, #03a9f4 100%);">
-            <h3 class="section-title">
-                <span>🔔</span>
-                <span>Recent Notifications</span>
-            </h3>
-        </div>
+    <!-- Dashboard Content (Hidden until loaded) -->
+    <div id="dashboardContent" style="display: none;">
         
-        <div id="notificationsList">
-            <div class="class-card urgent-alert">
-                <div class="w3-row">
-                    <div class="w3-col m1 w3-center">
-                        <span class="w3-tag w3-red">URGENT</span>
-                    </div>
-                    <div class="w3-col m9">
-                        <strong>Timetable Change: SECV3104 Section 01</strong><br>
-                        <small>Room changed from MPK3 to MPK5 for Monday sessions</small>
-                    </div>
-                    <div class="w3-col m2 w3-right-align">
-                        <small>2 hours ago</small>
+        <!-- Top Stats Grid -->
+        <div class="dashboard-grid">
+            <!-- User Profile Card -->
+            <div class="dashboard-card">
+                <div style="text-align: center;">
+                    <div class="profile-avatar" id="profileAvatar">👤</div>
+                    <div class="profile-info">
+                        <h3 class="profile-name" id="userName">Loading...</h3>
+                        <p class="profile-id">📋 <span id="userMatric">Loading...</span></p>
+                        <p class="profile-session">📅 <span id="userSession">Loading...</span></p>
                     </div>
                 </div>
             </div>
-            
-            <div class="class-card">
-                <div class="w3-row">
-                    <div class="w3-col m1 w3-center">
-                        <span class="w3-tag w3-blue">INFO</span>
-                    </div>
-                    <div class="w3-col m9">
-                        <strong>New Student Added to SECJ1013</strong><br>
-                        <small>A24CS0123 - Ahmad Bin Ali added to Section 02</small>
-                    </div>
-                    <div class="w3-col m2 w3-right-align">
-                        <small>Yesterday</small>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="class-card">
-                <div class="w3-row">
-                    <div class="w3-col m1 w3-center">
-                        <span class="w3-tag w3-green">REMINDER</span>
-                    </div>
-                    <div class="w3-col m9">
-                        <strong>Grade Submission Deadline</strong><br>
-                        <small>Final grades for SECV3104 due by Friday, 5:00 PM</small>
-                    </div>
-                    <div class="w3-col m2 w3-right-align">
-                        <small>3 days ago</small>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- Workload Overview Chart -->
-    <div class="classes-section w3-margin-top">
-        <div class="section-header" style="background: linear-gradient(135deg, #673ab7 0%, #9c27b0 100%);">
-            <h3 class="section-title">
-                <span>📊</span>
-                <span>Weekly Workload Distribution</span>
-            </h3>
-        </div>
-        
-        <div id="workloadChart" style="width:100%; height:300px; padding:20px;">
-            <div class="w3-center w3-padding-24">
-                <div class="loading-spinner"></div>
-                <p>Loading workload visualization...</p>
+            <!-- Today's Stats Card -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <span class="card-icon">📊</span>
+                    <h3 class="card-title">Today's Summary</h3>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <h2 class="stat-value" id="totalClassesToday">0</h2>
+                        <p class="stat-label">Classes Today</p>
+                    </div>
+                    <div class="stat-item">
+                        <h2 class="stat-value" id="hoursToday">0</h2>
+                        <p class="stat-label">Hours</p>
+                    </div>
+                    <div class="stat-item">
+                        <h2 class="stat-value" id="nextClassTime">--:--</h2>
+                        <p class="stat-label">Next Class</p>
+                    </div>
+                    <div class="stat-item">
+                        <h2 class="stat-value" id="freeTimeToday">0</h2>
+                        <p class="stat-label">Free Hours</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Semester Stats Card -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <span class="card-icon">📚</span>
+                    <h3 class="card-title">Semester Overview</h3>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <h2 class="stat-value" id="totalCourses">0</h2>
+                        <p class="stat-label">Courses</p>
+                    </div>
+                    <div class="stat-item">
+                        <h2 class="stat-value" id="totalCredits">0</h2>
+                        <p class="stat-label">Credit Hours</p>
+                    </div>
+                    <div class="stat-item">
+                        <h2 class="stat-value" id="weeklyHours">0</h2>
+                        <p class="stat-label">Weekly Hours</p>
+                    </div>
+                    <div class="stat-item">
+                        <h2 class="stat-value" id="avgDaily">0</h2>
+                        <p class="stat-label">Avg Daily</p>
+                    </div>
+                </div>
             </div>
         </div>
+
+        <!-- Today's Classes Section -->
+        <div class="classes-section">
+            <div class="section-header">
+                <h3 class="section-title">
+                    <span>📅</span>
+                    <span>Today's Schedule</span>
+                </h3>
+                <div class="current-day-badge" id="currentDayBadge">Loading...</div>
+            </div>
+
+            <!-- Next Class Alert (shown only if there's an upcoming class) -->
+            <div class="next-class-alert" id="nextClassAlert" style="display: none;">
+                <div class="alert-icon">⏰</div>
+                <div class="alert-text">
+                    <p class="alert-title">Next Class Coming Up!</p>
+                    <p class="alert-detail" id="nextClassDetail">Loading...</p>
+                </div>
+            </div>
+
+            <!-- Classes List Container -->
+            <div id="classesContainer">
+                <!-- Classes will be dynamically inserted here -->
+            </div>
+        </div>
+
     </div>
 </div>
 
-<script src="../JS/Authenticate.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <script>
-    $(document).ready(function() {
-        // Update date/time
-        function updateDateTime() {
-            const now = new Date();
-            const options = { 
-                weekday: 'long', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            };
-            $("#currentDateTime").text(now.toLocaleDateString('en-US', options));
-        }
-        updateDateTime();
-        setInterval(updateDateTime, 60000);
-        
-        // Load lecturer data
-        loadLecturerData();
-        
-        function loadLecturerData() {
-            const lecturerId = window.parent.userSession.login_name;
-            
-            if (!lecturerId) {
-                console.error("Lecturer ID not found");
-                return;
-            }
-            
-            // Fetch courses taught by lecturer
-            fetch(`http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pensyarah_subjek&no_pekerja=${lecturerId}`)
-                .then(res => res.json())
-                .then(courses => {
-                    if (Array.isArray(courses)) {
-                        // Filter current semester courses
-                        const currentSesi = window.parent.currentSesi;
-                        const currentSemester = window.parent.currentSemester;
-                        
-                        const currentCourses = courses.filter(course => 
-                            course.sesi === currentSesi && course.semester == currentSemester
-                        );
-                        
-                        updateTeachingStats(currentCourses);
-                        loadTodaysSchedule(currentCourses);
-                        drawWorkloadChart(currentCourses);
-                    }
-                })
-                .catch(err => {
-                    console.error("Error loading lecturer data:", err);
-                    $("#todaysClasses").html('<div class="w3-panel w3-yellow">Error loading teaching data</div>');
-                });
-        }
-        
-        function updateTeachingStats(courses) {
-            $("#coursesCount").text(courses.length);
-            
-            // Calculate total sections and estimate students
-            let totalSections = 0;
-            let totalStudents = 0;
-            let totalHours = 0;
-            
-            courses.forEach(course => {
-                totalSections += parseInt(course.bil_seksyen) || 1;
-                totalStudents += parseInt(course.bil_pelajar) || 0;
-                totalHours += parseInt(course.bil_jam) || 3; // Assume 3 hours per course
+$(document).ready(function() {
+    
+    // ==========================================
+    // CONSTANTS & CONFIGURATIONS
+    // ==========================================
+    const BASE_URL = "http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=";
+    
+    const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    
+    // JavaScript getDay() → API hari code
+    const DAY_CODE_MAP = {
+        0: null,    // Sunday (no classes)
+        1: 2,       // Monday → API code 2
+        2: 3,       // Tuesday → API code 3
+        3: 4,       // Wednesday → API code 4
+        4: 5,       // Thursday → API code 5
+        5: 6,       // Friday → API code 6
+        6: null     // Saturday (no classes)
+    };
+    
+   const TIME_SLOTS = {
+        1: { start: "07:00", end: "08:00" },
+        2: { start: "08:00", end: "09:00" },
+        3: { start: "09:00", end: "10:00" },
+        4: { start: "10:00", end: "11:00" },
+        5: { start: "11:00", end: "12:00" },
+        6: { start: "12:00", end: "13:00" }, // Break
+        7: { start: "13:00", end: "14:00" },
+        8: { start: "14:00", end: "15:00" },
+        9: { start: "15:00", end: "16:00" },
+        10: { start: "16:00", end: "17:00" }
+    };
+
+    // ==========================================
+    // USER SESSION & CONTEXT
+    // ==========================================
+    const userSession = JSON.parse(localStorage.getItem("TTMSFC_userSession"));
+    
+    if (!userSession) {
+        window.location.replace("Login.html");
+        return;
+    }
+
+    const matric = userSession.login_name;
+    const fullName = userSession.full_name;
+    const sessionId = userSession.session_id; // ✅ Get session_id from new login
+    
+    let currentSesi = window.parent.currentSesi;
+    let currentSemester = window.parent.currentSemester;
+
+    console.log("📋 User Session Info:");
+    console.log("  - Matric:", matric);
+    console.log("  - Name:", fullName);
+    console.log("  - Session ID:", sessionId);
+
+    // ==========================================
+    // UPDATE CURRENT DATE/TIME
+    // ==========================================
+    function updateDateTime() {
+        const now = new Date();
+        const options = { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        };
+        $("#currentDateTime").text(now.toLocaleDateString('en-US', options));
+        $("#currentDayBadge").text(DAY_NAMES[now.getDay()]);
+    }
+    
+    updateDateTime();
+    setInterval(updateDateTime, 60000); // Update every minute
+
+    // ==========================================
+    // DISPLAY USER INFO
+    // ==========================================
+    $("#userName").text(fullName);
+    $("#userMatric").text(matric);
+    
+    // Generate avatar initials
+    const initials = fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+    $("#profileAvatar").text(initials);
+
+    // ==========================================
+    // MAIN INITIALIZATION
+    // ==========================================
+    function initDashboard() {
+        if (!currentSesi || !currentSemester) {
+            console.warn("Session/Semester not available, fetching...");
+            fetchCurrentSession().then(() => {
+                startLoadingData();
             });
+        } else {
+            $("#userSession").text(`${currentSesi} - Semester ${currentSemester}`);
+            startLoadingData();
+        }
+    }
+
+    function fetchCurrentSession() {
+        return fetch(BASE_URL + "sesisemester")
+            .then(res => res.json())
+            .then(sessemList => {
+                const active = sessemList.find(s => s.sesi_semester_id) || sessemList[0];
+                currentSesi = active.sesi;
+                currentSemester = active.semester;
+                $("#userSession").text(`${currentSesi} - Semester ${currentSemester}`);
+            })
+            .catch(err => {
+                console.error("Error fetching session:", err);
+                $("#userSession").text("Error loading session");
+            });
+    }
+
+    function startLoadingData() {
+        fetchStudentData(matric, currentSesi, currentSemester);
+    }
+
+    // ==========================================
+    // FETCH STUDENT SUBJECTS & TIMETABLE
+    // ==========================================
+    function fetchStudentData(matric, sesi, semester) {
+        const url = `${BASE_URL}pelajar_subjek&no_matrik=${matric}`;
+
+        fetch(url)
+            .then(res => res.json())
+            .then(subjects => {
+                const currentSubjects = subjects.filter(s => 
+                    s.sesi === sesi && s.semester == semester
+                );
+
+                if (currentSubjects.length === 0) {
+                    $("#loadingState").html('<div class="no-classes"><div class="no-classes-icon">📚</div><p class="no-classes-text">No subjects registered for this semester</p></div>');
+                    return;
+                }
+
+                // Update semester stats
+                $("#totalCourses").text(currentSubjects.length);
+                
+                // Calculate total credit hours (assuming 3 credits per course as default)
+                const totalCredits = currentSubjects.length * 3;
+                $("#totalCredits").text(totalCredits);
+
+                // Fetch timetable for all subjects
+                let allTimetableSlots = [];
+                let promises = currentSubjects.map(subj => 
+                    fetchSubjectTimetableWithLecturer(subj).then(slots => {
+                        allTimetableSlots = allTimetableSlots.concat(slots.map(slot => ({
+                            ...slot,
+                            subject: subj
+                        })));
+                    })
+                );
+
+                Promise.all(promises).then(() => {
+                    processTimetableData(allTimetableSlots);
+                    displayTodaysClasses(allTimetableSlots);
+                    
+                    $("#loadingState").hide();
+                    $("#dashboardContent").show();
+                });
+            })
+            .catch(err => {
+                console.error("Error fetching subjects:", err);
+                $("#loadingState").html('<div class="no-classes"><div class="no-classes-icon">❌</div><p class="no-classes-text">Error loading data. Please refresh.</p></div>');
+            });
+    }
+
+    function fetchSubjectTimetable(subject) {
+        const url = `${BASE_URL}jadual_subjek&sesi=${subject.sesi}&semester=${subject.semester}&kod_subjek=${subject.kod_subjek}&seksyen=${subject.seksyen}`;
+
+        return fetch(url)
+            .then(res => res.json())
+            .then(times => {
+                console.log(`📚 Timetable for ${subject.kod_subjek}:`, times);
+                return Array.isArray(times) ? times : [];
+            })
+            .catch(err => {
+                console.error(`Error fetching timetable for ${subject.kod_subjek}:`, err);
+                return [];
+            });
+    }
+
+    // ==========================================
+    // FETCH SUBJECT LECTURER INFO
+    // ==========================================
+    async function fetchSubjectLecturer(kodSubjek, sesi, semester, seksyen) {
+        try {
+            let url = `${BASE_URL}subjek_pensyarah&kod_subjek=${kodSubjek}`;
             
-            $("#sectionsCount").text(totalSections);
-            $("#studentsCount").text(totalStudents);
-            $("#weeklyHours").text(totalHours);
+            // Add optional parameters if available
+            if (sesi && semester && seksyen) {
+                url += `&sesi=${sesi}&semester=${semester}&seksyen=${seksyen}`;
+            }
+            
+            console.log(`👨‍🏫 Fetching lecturer for ${kodSubjek}:`, url);
+            
+            const response = await fetch(url);
+            const data = await response.json();
+            
+            console.log(`   Lecturer data:`, data);
+            
+            if (Array.isArray(data) && data.length > 0) {
+                // Return the lecturer info from the first result
+                const lecturerInfo = data[0];
+                return {
+                    kod_pekerja: lecturerInfo.no_pekerja || lecturerInfo.kod_pekerja,
+                    nama: lecturerInfo.nama_pensyarah || lecturerInfo.nama || null
+                };
+            }
+        } catch (err) {
+            console.error(`Error fetching lecturer for ${kodSubjek}:`, err);
+        }
+        return null;
+    }
+
+    // ==========================================
+    // FETCH TIMETABLE WITH LECTURER INFO
+    // ==========================================
+    async function fetchSubjectTimetableWithLecturer(subject) {
+        // First get the timetable slots
+        const slots = await fetchSubjectTimetable(subject);
+        
+        // Then fetch the lecturer info for this subject
+        const lecturerInfo = await fetchSubjectLecturer(
+            subject.kod_subjek, 
+            subject.sesi, 
+            subject.semester, 
+            subject.seksyen
+        );
+        
+        // Attach lecturer info to each slot
+        return slots.map(slot => ({
+            ...slot,
+            lecturerInfo: lecturerInfo
+        }));
+    }
+
+
+
+    // ==========================================
+    // PROCESS TIMETABLE DATA FOR STATS
+    // ==========================================
+    function processTimetableData(allSlots) {
+        // Calculate weekly hours
+        const uniqueSlots = new Set();
+        allSlots.forEach(slot => {
+            const key = `${slot.hari}-${slot.masa}-${slot.subject.kod_subjek}`;
+            uniqueSlots.add(key);
+        });
+        
+        const weeklyHours = uniqueSlots.size;
+        $("#weeklyHours").text(weeklyHours);
+        
+        // Calculate average daily hours
+        const avgDaily = (weeklyHours / 5).toFixed(1);
+        $("#avgDaily").text(avgDaily);
+    }
+
+    // ==========================================
+    // GET LECTURER NAME FROM SLOT
+    // ==========================================
+    function getLecturerName(classSlot) {
+        // First check if we have lecturerInfo attached from our fetch
+        if (classSlot.lecturerInfo && classSlot.lecturerInfo.nama) {
+            console.log('  ✅ Using lecturerInfo.nama:', classSlot.lecturerInfo.nama);
+            return classSlot.lecturerInfo.nama;
         }
         
-        function loadTodaysSchedule(courses) {
-            const now = new Date();
-            const currentDay = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
+        // Fallback: Try pensyarah object (in case it exists)
+        if (classSlot.pensyarah) {
+            if (classSlot.pensyarah.nama_pensyarah) {
+                return classSlot.pensyarah.nama_pensyarah;
+            }
+            if (classSlot.pensyarah.nama) {
+                return classSlot.pensyarah.nama;
+            }
+        }
+        
+        // Try direct field
+        if (classSlot.nama_pensyarah) {
+            return classSlot.nama_pensyarah;
+        }
+        
+        // Return code if available
+        if (classSlot.lecturerInfo && classSlot.lecturerInfo.kod_pekerja) {
+            return classSlot.lecturerInfo.kod_pekerja;
+        }
+        
+        if (classSlot.kod_pensyarah) {
+            return classSlot.kod_pensyarah;
+        }
+        
+        return 'TBA';
+    }
+
+    // ==========================================
+    // DISPLAY TODAY'S CLASSES
+    // ==========================================
+    async function displayTodaysClasses(allSlots) {
+        const now = new Date();
+        const currentDay = now.getDay();
+        const currentHour = now.getHours();
+        const currentMinute = now.getMinutes();
+        const currentTimeInMinutes = currentHour * 60 + currentMinute;
+        
+        // Get API day code for today
+        const apiDayCode = DAY_CODE_MAP[currentDay];
+        
+        console.log("🔍 DEBUG - Day Mapping:");
+        console.log("JavaScript getDay():", currentDay);
+        console.log("Day Name:", DAY_NAMES[currentDay]);
+        console.log("API Day Code:", apiDayCode);
+        
+        if (!apiDayCode) {
+            // Weekend
+            $("#classesContainer").html(`
+                <div class="no-classes">
+                    <div class="no-classes-icon">🎉</div>
+                    <p class="no-classes-text">No classes today - Enjoy your weekend!</p>
+                </div>
+            `);
+            $("#totalClassesToday").text("0");
+            $("#hoursToday").text("0");
+            $("#nextClassTime").text("--:--");
+            $("#freeTimeToday").text("10");
+            return;
+        }
+
+        // Filter today's classes
+        const todaysClasses = allSlots.filter(slot => slot.hari === apiDayCode);
+        
+        console.log("🔍 All slots:", allSlots.length);
+        console.log("🔍 Today's classes found:", todaysClasses.length);
+        todaysClasses.forEach(c => {
+            console.log(`  - ${c.subject.kod_subjek} at masa=${c.masa}, hari=${c.hari}`, c);
+        });
+        
+        if (todaysClasses.length === 0) {
+            $("#classesContainer").html(`
+                <div class="no-classes">
+                    <div class="no-classes-icon">☀️</div>
+                    <p class="no-classes-text">No classes scheduled for today</p>
+                </div>
+            `);
+            $("#totalClassesToday").text("0");
+            $("#hoursToday").text("0");
+            $("#nextClassTime").text("--:--");
+            $("#freeTimeToday").text("10");
+            return;
+        }
+
+        // Sort classes by time
+        todaysClasses.sort((a, b) => a.masa - b.masa);
+
+        // Count unique classes and slots
+        const uniqueClasses = new Set();
+        todaysClasses.forEach(c => {
+            const classKey = `${c.subject.kod_subjek}-${c.subject.seksyen}`;
+            uniqueClasses.add(classKey);
+        });
+
+        const uniqueClassSlots = new Set(todaysClasses.map(c => c.masa));
+        
+        $("#totalClassesToday").text(uniqueClasses.size);
+        $("#hoursToday").text(uniqueClassSlots.size);
+        $("#freeTimeToday").text(10 - uniqueClassSlots.size);
+
+        // Find current and next class
+        let currentClass = null;
+        let nextClass = null;
+
+        todaysClasses.forEach(classSlot => {
+            const timeSlot = TIME_SLOTS[classSlot.masa];
+            if (!timeSlot) return;
+
+            const [startHour, startMin] = timeSlot.start.split(':').map(Number);
+            const [endHour, endMin] = timeSlot.end.split(':').map(Number);
+            const startTime = startHour * 60 + startMin;
+            const endTime = endHour * 60 + endMin;
+
+            if (currentTimeInMinutes >= startTime && currentTimeInMinutes < endTime) {
+                currentClass = classSlot;
+            } else if (currentTimeInMinutes < startTime && !nextClass) {
+                nextClass = classSlot;
+            }
+        });
+
+        // Update next class info
+        if (nextClass) {
+            const nextTimeSlot = TIME_SLOTS[nextClass.masa];
+            const lecturerName = getLecturerName(nextClass);
+            $("#nextClassTime").text(nextTimeSlot.start);
+            $("#nextClassDetail").html(`
+                <strong>${nextClass.subject.kod_subjek}</strong> with 
+                <strong>${lecturerName}</strong> at 
+                <strong>${nextTimeSlot.start}</strong> in 
+                <strong>${nextClass.ruang.nama_ruang_singkatan || nextClass.ruang.kod_ruang || 'TBA'}</strong>
+            `);
+            $("#nextClassAlert").show();
+        } else if (currentClass) {
+            $("#nextClassTime").text("Now");
+        } else {
+            $("#nextClassTime").text("Done");
+        }
+
+        // Render class cards - Group consecutive slots of same class
+        let classesHTML = '';
+        let processedClasses = new Set();
+
+        todaysClasses.forEach((classSlot) => {
+            const classKey = `${classSlot.subject.kod_subjek}-${classSlot.subject.seksyen}`;
             
-            // Map JavaScript day to TTMS day codes (2=Monday, 6=Friday)
-            const dayMap = {
-                1: 2, // Monday
-                2: 3, // Tuesday
-                3: 4, // Wednesday
-                4: 5, // Thursday
-                5: 6  // Friday
-            };
-            
-            const todayCode = dayMap[currentDay];
-            
-            if (!todayCode) {
-                $("#todaysClasses").html(`
-                    <div class="w3-center w3-padding-24">
-                        <div class="w3-xxlarge">🎉</div>
-                        <h4>No Classes Today</h4>
-                        <p>Enjoy your day off!</p>
-                    </div>
-                `);
+            // Skip if we've already processed this class
+            if (processedClasses.has(classKey)) {
                 return;
             }
             
-            // For demo, show sample schedule
-            const sampleSchedule = [
-                { time: "10:00 - 12:00", course: "SECV3104", section: "01", room: "MPK5", title: "Application Development" },
-                { time: "14:00 - 16:00", course: "SECJ1013", section: "02", room: "BK4", title: "Programming Techniques" }
-            ];
+            processedClasses.add(classKey);
             
-            let scheduleHTML = '';
+            // Find all consecutive slots for this class
+            const sameClassSlots = todaysClasses.filter(slot => 
+                slot.subject.kod_subjek === classSlot.subject.kod_subjek &&
+                slot.subject.seksyen === classSlot.subject.seksyen
+            );
             
-            if (sampleSchedule.length === 0) {
-                scheduleHTML = `
-                    <div class="w3-center w3-padding-16">
-                        <p class="w3-text-grey">No classes scheduled for today</p>
-                    </div>
-                `;
-            } else {
-                sampleSchedule.forEach(cls => {
-                    scheduleHTML += `
-                        <div class="teaching-schedule">
-                            <div class="w3-row">
-                                <div class="w3-col m3">
-                                    <strong>${cls.time}</strong>
-                                </div>
-                                <div class="w3-col m6">
-                                    <strong>${cls.course}</strong> - ${cls.title}<br>
-                                    <small>Section ${cls.section}</small>
-                                </div>
-                                <div class="w3-col m3 w3-right-align">
-                                    <span class="workload-badge">${cls.room}</span>
+            // Get time range
+            const firstSlot = sameClassSlots[0];
+            const lastSlot = sameClassSlots[sameClassSlots.length - 1];
+            const startTime = TIME_SLOTS[firstSlot.masa];
+            const endTime = TIME_SLOTS[lastSlot.masa];
+            
+            if (!startTime || !endTime) return;
+
+            const room = classSlot.ruang.nama_ruang_singkatan || classSlot.ruang.kod_ruang || 'TBA';
+            const lecturer = getLecturerName(classSlot);
+
+            // Determine if this is current or next class
+            let cardClass = 'class-card';
+            const [startHour, startMin] = startTime.start.split(':').map(Number);
+            const [endHour, endMin] = endTime.end.split(':').map(Number);
+            const classStartTime = startHour * 60 + startMin;
+            const classEndTime = endHour * 60 + endMin;
+            
+            if (currentTimeInMinutes >= classStartTime && currentTimeInMinutes < classEndTime) {
+                cardClass += ' current-class';
+            } else if (currentTimeInMinutes < classStartTime && classSlot === nextClass) {
+                cardClass += ' upcoming-class';
+            }
+
+            // Calculate duration
+            const duration = sameClassSlots.length;
+            const durationText = duration > 1 ? ` (${duration} hours)` : '';
+
+            classesHTML += `
+                <div class="${cardClass}">
+                    <span class="class-time">⏰ ${startTime.start} - ${endTime.end}${durationText}</span>
+                    <div class="class-info">
+                        <div class="class-detail">
+                            <span class="detail-icon">📚</span>
+                            <div class="detail-content">
+                                <div class="detail-label">Subject</div>
+                                <div class="detail-value">${classSlot.subject.kod_subjek} - ${classSlot.subject.nama_subjek}</div>
+                            </div>
+                        </div>
+                        <div class="class-detail">
+                            <span class="detail-icon">👨‍🏫</span>
+                            <div class="detail-content">
+                                <div class="detail-label">Lecturer</div>
+                                <div class="detail-value">${lecturer}</div>
+                            </div>
+                        </div>
+                        <div class="class-detail">
+                            <span class="detail-icon">📍</span>
+                            <div class="detail-content">
+                                <div class="detail-label">Room</div>
+                                <div class="detail-value">
+                                    <span class="room-badge">${room}</span>
                                 </div>
                             </div>
                         </div>
-                    `;
-                });
-            }
-            
-            $("#todaysClasses").html(scheduleHTML);
-        }
-        
-        function drawWorkloadChart(courses) {
-            // Use Google Charts or simple HTML chart
-            const chartData = [
-                ['Day', 'Teaching Hours'],
-                ['Monday', 4],
-                ['Tuesday', 6],
-                ['Wednesday', 3],
-                ['Thursday', 5],
-                ['Friday', 2]
-            ];
-            
-            let chartHTML = `
-                <div class="w3-row w3-center">
-            `;
-            
-            chartData.forEach((day, index) => {
-                if (index === 0) return; // Skip header
-                
-                const hours = day[1];
-                const height = hours * 30;
-                const color = hours > 4 ? '#ff5722' : (hours > 2 ? '#ff9800' : '#4caf50');
-                
-                chartHTML += `
-                    <div class="w3-col" style="padding:10px;">
-                        <div style="height:${height}px; background:${color}; width:60px; margin:0 auto; border-radius:5px 5px 0 0;"></div>
-                        <div style="margin-top:10px;">
-                            <strong>${day[0].substring(0,3)}</strong><br>
-                            <small>${hours} hrs</small>
+                        <div class="class-detail">
+                            <span class="detail-icon">🏷️</span>
+                            <div class="detail-content">
+                                <div class="detail-label">Section</div>
+                                <div class="detail-value">${classSlot.subject.seksyen}</div>
+                            </div>
                         </div>
                     </div>
-                `;
-            });
-            
-            chartHTML += `</div>`;
-            
-            $("#workloadChart").html(chartHTML);
-        }
-    });
+                </div>
+            `;
+        });
+
+        $("#classesContainer").html(classesHTML);
+    }
+
+    // Start the dashboard
+    initDashboard();
+});
 </script>
+</body>
+</html>
